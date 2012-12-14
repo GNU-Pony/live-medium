@@ -1,5 +1,6 @@
 Step 0:  export usb device file, excluding /dev/ to DEVICE
-Step 1:  run `./make\ packages`
-Step 2:  run `./make\ kernel`
-Step 3:  run `./make\ usb`
+Step 1:  run `./make\ memtest`
+Step 2:  run `./make\ packages`
+Step 3:  run `./make\ kernel`
+Step 4:  run `./make\ usb`
 

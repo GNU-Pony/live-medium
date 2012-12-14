@@ -1,0 +1,7 @@
+wget 'http://www.memtest.org/download/4.20/memtest86+-4.20.tar.gz'
+tar --gzip --get < memtest86+-4.20.tar.gz
+cd memtest86+-4.20
+make
+cp memtest.bin ..
+cd ..
+
