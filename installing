@@ -1,0 +1,4 @@
+Step 1:  run `./make\ packages`
+Step 2:  run `./make\ kernel`
+Step 3:  run `./make\ usb`
+

@@ -1,0 +1,42 @@
+KERNEL=linux-3.7
+KERNEL_FILE=vmlinux
+
+dd if=/dev/zero of=/dev/${DEVICE} bs=512 count=1
+
+fdisk /dev/${DEVICE} <<.
+o
+n
+p
+1
+
+
+a
+1
+w
+.
+
+mkfs --type ext2 -L GNU_PONY /dev/${DEVICE}1
+
+mount /dev/${DEVICE}1 /mnt
+
+extlinux --install /mnt
+
+dd if=/usr/lib/syslinux/mbr.bin of=/dev/${DEVICE}
+
+mkdir /mnt/syslinux
+mkdir /mnt/memtest86+
+
+cp /usr/lib/syslinux/{*.{c32,com,0},memdisk} /mnt/syslinux
+cp ./memtest.bin /mnt/memtest86+
+cp ./syslinux.cfg /mnt/syslinux
+cp ./splash.png /mnt/syslinux
+
+cp ./${KERNEL}/${KERNEL_FILE} /mnt
+
+make -C coreutils-8.20 DESTDIR=/mnt install
+make -C glibc-build install_root=/mnt install
+make -C util-linux-2.22 DESTDIR=/mnt install
+make -C kbd-1.12 DESTDIR=/mnt install
+
+umount /mnt
+

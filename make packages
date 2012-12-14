@@ -1,0 +1,37 @@
+wget http://ftp.gnu.org/gnu/coreutils/coreutils-8.20.tar.xz
+tar --xz --get < coreutils-8.20.tar.xz
+cd coreutils-8.20
+./configure
+make
+make DESTDIR=/mnt install
+cd ..
+
+
+wget http://ftp.gnu.org/gnu/libc/glibc-2.16.0.tar.xz
+tar --xz --get < glibc-2.16.0.tar.xz
+mkdir -p glibc-build
+cd glibc-build
+../glibc-2.16.0/configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/libexec --with-headers=/usr/include
+make
+make install_root=/mnt install
+cd ..
+
+
+wget http://www.kernel.org/pub/linux/utils/util-linux/v2.22/util-linux-2.22.tar.xz
+tar --xz --get < util-linux-2.22.tar.xz
+cd util-linux-2.22
+./autogen.sh
+./configure
+make
+make DESTDIR=/mnt install
+cd ..
+
+
+wget http://www.kernel.org/pub/linux/utils/kbd/kbd-1.12.tar.gz
+tar --gzip --get < kbd-1.12.tar.gz
+cd kbd-1.12
+./configure
+make
+make DESTDIR=/mnt install
+cd ..
+
