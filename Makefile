@@ -1,4 +1,5 @@
-ARCH = i386  ## Fallback, select by running make with ARCH=yourarch
+ARCH = i386  ## Fallback, select by running make with ARCH=yourarch and KARCH=yourkernelarch if it is different
+KARCH = $(ARCH)
 
 GNU_PONY_INITRAM = ../initram
 
@@ -81,7 +82,7 @@ usb-init: memtest validate-device
 	cp ./memtest.bin "$(MNT)/memtest86+"
 	cp ./syslinux.cfg "$(MNT)/syslinux"
 	cp ./splash.png "$(MNT)/syslinux"
-	cp "./$(KERNEL)/arch/$(ARCH)/boot/bzImage" "$(MNT)/vmlinuz-linux"
+	cp "./$(KERNEL)/arch/$(KARCH)/boot/bzImage" "$(MNT)/vmlinuz-linux"
 	mkdir -p "$(MNT)/usr/src/$(KERNEL)"
 	cp "./$(KERNEL)/vmlinux" "$(MNT)/usr/src/$(KERNEL)/vmlinux"
 	cp initramfs-linux "$(MNT)"
