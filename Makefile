@@ -42,10 +42,10 @@ linux-$(KERNEL_VERSION)/vmlinux: initramfs
 	make -C "linux-$(KERNEL_VERSION)"
 
 cpiolist:
+	make -C "$(GNU_PONY_INITRAM)"
 	ln -s "$(GNU_PONY_INITRAM)/cpiolist" cpiolist
 
 initramfs: cpiolist
-	make -C "$(GNU_PONY_INITRAM)"
 	"linux-$(KERNEL_VERSION)/usr/gen_init_cpio" cpiolist | gzip -9 > initramfs-linux
 
 
