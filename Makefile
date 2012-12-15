@@ -1,3 +1,5 @@
+GNU_PONY_INITRAM = ../initram
+
 KERNEL_VERSION = 3.7
 KERNEL_VERSION_CAT = 3.0
 KERNEL = linux-$(KERNEL_VERSION)
@@ -27,16 +29,22 @@ linux-$(KERNEL_VERSION).tar.bz2:
 	wget 'http://www.kernel.org/pub/linux/kernel/v$(KERNEL_VERSION_CAT)/linux-$(KERNEL_VERSION).tar.bz2'
 
 linux-$(KERNEL_VERSION):
-	tar --get --bzip2 < linux-$(KERNEL_VERSION).tar.bz2
+	tar --get --bzip2 < "linux-$(KERNEL_VERSION).tar.bz2"
 
 linux-$(KERNEL_VERSION)/.config:
-	if [ ! -f linux-$(KERNEL_VERSION)/.config ]; then \
-	    cp kernel.config linux-$(KERNEL_VERSION)/.config
+	if [ ! -f "linux-$(KERNEL_VERSION)/.config" ]; then \
+	    cp kernel.config "linux-$(KERNEL_VERSION)/.config"; \
 	fi
-	make -C linux-$(KERNEL_VERSION) menuconfig
+	make -C "linux-$(KERNEL_VERSION)" menuconfig
 
-linux-$(KERNEL_VERSION)/vmlinux:
-	make -C linux-$(KERNEL_VERSION)
+linux-$(KERNEL_VERSION)/vmlinux: initramfs
+	make -C "linux-$(KERNEL_VERSION)"
+
+initramfs: cpiolist
+	make -C "$(GNU_PONY_INITRAM)"
+
+cpiolist:
+	ln -s "$(GNU_PONY_INITRAM)/cpiolist" cpiolist
 
 
 memtest:

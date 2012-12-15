@@ -6,6 +6,7 @@
 *.bak
 
 /memtest.bin
+/cpiolist
 
 /memtest86+-*
 /memtest86+-*/
