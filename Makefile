@@ -1,6 +1,6 @@
-KERNEL_VERSON = 3.7
-KERNEL_VERSON_CAT = 3.0
-KERNEL = linux-$(KERNEL_VERSON)
+KERNEL_VERSION = 3.7
+KERNEL_VERSION_CAT = 3.0
+KERNEL = linux-$(KERNEL_VERSION)
 
 MEMTEST_VERSION = 4.20
 
@@ -20,23 +20,23 @@ validate-device:
 
 kernel: linux-$(KERNEL_VERSION).tar.bz2 \
 	linux-$(KERNEL_VERSION) \
-	linux-$(KERNEL_VERSON)/.config \
-	linux-$(KERNEL_VERSON)/$(KERNEL_FILE)
+	linux-$(KERNEL_VERSION)/.config \
+	linux-$(KERNEL_VERSION)/$(KERNEL_FILE)
 
-linux-$(KERNEL_VERSON).tar.bz2:
+linux-$(KERNEL_VERSION).tar.bz2:
 	wget 'http://www.kernel.org/pub/linux/kernel/v$(KERNEL_VERSION_CAT)/linux-$(KERNEL_VERSION).tar.bz2'
 
-linux-$(KERNEL_VERSON):
-	tar --get --bzip2 < linux-$(KERNEL_VERSON).tar.bz2
+linux-$(KERNEL_VERSION):
+	tar --get --bzip2 < linux-$(KERNEL_VERSION).tar.bz2
 
-linux-$(KERNEL_VERSON)/.config:
-	if [ ! -f linux-$(KERNEL_VERSON)/.config ]; then \
-	    cp kernel.config linux-$(KERNEL_VERSON)/.config
+linux-$(KERNEL_VERSION)/.config:
+	if [ ! -f linux-$(KERNEL_VERSION)/.config ]; then \
+	    cp kernel.config linux-$(KERNEL_VERSION)/.config
 	fi
-	make -C linux-$(KERNEL_VERSON) menuconfig
+	make -C linux-$(KERNEL_VERSION) menuconfig
 
-linux-$(KERNEL_VERSON)/vmlinux:
-	make -C linux-$(KERNEL_VERSON)
+linux-$(KERNEL_VERSION)/vmlinux:
+	make -C linux-$(KERNEL_VERSION)
 
 
 memtest:
