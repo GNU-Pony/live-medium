@@ -1,0 +1,129 @@
+KERNEL_VERSON = 3.7
+KERNEL_VERSON_CAT = 3.0
+KERNEL = linux-$(KERNEL_VERSON)
+
+MEMTEST_VERSION = 4.20
+
+KERNEL_FILE = vmlinux
+USB_LABEL = GNU_PONY
+USB_FS = ext2
+MNT = /mnt
+MBR = /usr/lib/syslinux/mbr.bin
+
+
+all: kernel usb-init packages
+
+
+validate-device:
+	([ -f /dev/$(DEVICE) ] && echo DEVICE ok) || (echo no DEVICE ; exit 1)
+
+
+kernel: linux-$(KERNEL_VERSION).tar.bz2 \
+	linux-$(KERNEL_VERSION) \
+	linux-$(KERNEL_VERSON)/.config \
+	linux-$(KERNEL_VERSON)/$(KERNEL_FILE)
+
+linux-$(KERNEL_VERSON).tar.bz2:
+	wget 'http://www.kernel.org/pub/linux/kernel/v$(KERNEL_VERSION_CAT)/linux-$(KERNEL_VERSION).tar.bz2'
+
+linux-$(KERNEL_VERSON):
+	tar --get --bzip2 < linux-$(KERNEL_VERSON).tar.bz2
+
+linux-$(KERNEL_VERSON)/.config:
+	if [ ! -f linux-$(KERNEL_VERSON)/.config ]; then \
+	    cp kernel.config linux-$(KERNEL_VERSON)/.config
+	fi
+	make -C linux-$(KERNEL_VERSON) menuconfig
+
+linux-$(KERNEL_VERSON)/vmlinux:
+	make -C linux-$(KERNEL_VERSON)
+
+
+memtest:
+	wget "http://www.memtest.org/download/$(MEMTEST_VERSION)/memtest86+-$(MEMTEST_VERSION).tar.gz"
+	tar --gzip --get < memtest86+-"$(MEMTEST_VERSION)".tar.gz
+	make -C memtest86+-"$(MEMTEST_VERSION)"
+	cp memtest86+-"$(MEMTEST_VERSION)"/memtest.bin .
+
+
+usb-init: memtest validate-device
+	dd if=/dev/zero of="/dev/$(DEVICE)" bs=512 count=1
+
+	fdisk "/dev/$(DEVICE)" <<.\
+	o\
+	n\
+	p\
+	1\
+	\
+	\
+	a\
+	1\
+	w\
+	.
+
+	mkfs --type "$(USB_FS)" -L "$(USB_LABEL)" "/dev/$(DEVICE)1"
+	mount "/dev/$(DEVICE)1" "$(MNT)"
+	extlinux --install "$(MNT)"
+	dd if="$(MBR)" of="/dev/$(DEVICE)"
+	mkdir "$(MNT)/syslinux"
+	mkdir "$(MNT)/memtest86+"
+	cp /usr/lib/syslinux/{*.{c32,com,0},memdisk} "$(MNT)/syslinux"
+	cp ./memtest.bin "$(MNT)/memtest86+"
+	cp ./syslinux.cfg "$(MNT)/syslinux"
+	cp ./splash.png "$(MNT)/syslinux"
+	cp "./$(KERNEL)/$(KERNEL_FILE)" "$(MNT)"
+	umount "$(MNT)"
+
+
+packages: coreutils glibc util-linux kbd
+
+
+coreutils:
+	wget "http://ftp.gnu.org/gnu/coreutils/coreutils-8.20.tar.xz"
+	tar --xz --get < coreutils-8.20.tar.xz
+	cd coreutils-8.20 && \
+	./configure && \
+	make && \
+	mount "/dev/$(DEVICE)1" "$(MNT)" && \
+	make DESTDIR="$(MNT)" install && \
+	umount "$(MNT)" && \
+	cd ..
+
+glibc:
+	wget "http://ftp.gnu.org/gnu/libc/glibc-2.16.0.tar.xz"
+	tar --xz --get < glibc-2.16.0.tar.xz
+	mkdir -p glibc-build
+	cd glibc-build && \
+	../glibc-2.16.0/configure --prefix="/usr" \
+		--libdir="/usr/lib" \
+		--libexecdir="/usr/libexec" \
+		--with-headers="/usr/include" && \
+	make && \
+	mount "/dev/$(DEVICE)1" "$(MNT)" && \
+	make install_root="$(MNT)" install && \
+	umount "$(MNT)" && \
+	cd ..
+
+util-linux:
+	wget "http://www.kernel.org/pub/linux/utils/util-linux/v2.22/util-linux-2.22.tar.xz"
+	tar --xz --get < util-linux-2.22.tar.xz
+	cd util-linux-2.22 && \
+	./autogen.sh && \
+	./configure && \
+	make && \
+	mount "/dev/$(DEVICE)1" "$(MNT)" && \
+	make DESTDIR="$(MNT)" install && \
+	umount "$(MNT)" && \
+	cd ..
+
+kbd:
+	wget "http://www.kernel.org/pub/linux/utils/kbd/kbd-1.12.tar.gz"
+	tar --gzip --get < kbd-1.12.tar.gz
+	cd kbd-1.12 && \
+	./configure && \
+	make && \
+	mount "/dev/$(DEVICE)1" "$(MNT)" && \
+	make DESTDIR="$(MNT)" install && \
+	umount "$(MNT)" && \
+	cd ..
+
