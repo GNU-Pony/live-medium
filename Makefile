@@ -15,7 +15,7 @@ all: kernel usb-init packages
 
 
 validate-device:
-	([ -f /dev/$(DEVICE) ] && echo DEVICE ok) || (echo no DEVICE ; exit 1)
+	([ -f /dev/$(DEVICE) ] && echo DEVICE ok) || (echo -e '\e[1;31mno DEVICE\e[m' ; exit 1)
 
 
 kernel: linux-$(KERNEL_VERSION).tar.bz2 \
