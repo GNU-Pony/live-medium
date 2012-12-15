@@ -1,3 +1,5 @@
+ARCH = i386  ## Fallback, select by running make with ARCH=yourarch
+
 GNU_PONY_INITRAM = ../initram
 
 KERNEL_VERSION = 3.7
@@ -6,7 +8,6 @@ KERNEL = linux-$(KERNEL_VERSION)
 
 MEMTEST_VERSION = 4.20
 
-KERNEL_FILE = vmlinux
 USB_LABEL = GNU_PONY
 USB_FS = ext2
 MNT = /mnt
@@ -40,11 +41,12 @@ linux-$(KERNEL_VERSION)/.config:
 linux-$(KERNEL_VERSION)/vmlinux: initramfs
 	make -C "linux-$(KERNEL_VERSION)"
 
-initramfs: cpiolist
-	make -C "$(GNU_PONY_INITRAM)"
-
 cpiolist:
 	ln -s "$(GNU_PONY_INITRAM)/cpiolist" cpiolist
+
+initramfs: cpiolist
+	make -C "$(GNU_PONY_INITRAM)"
+	"linux-$(KERNEL_VERSION)/usr/gen_init_cpio" cpiolist | gzip -9 > initramfs-linux
 
 
 memtest:
@@ -79,7 +81,10 @@ usb-init: memtest validate-device
 	cp ./memtest.bin "$(MNT)/memtest86+"
 	cp ./syslinux.cfg "$(MNT)/syslinux"
 	cp ./splash.png "$(MNT)/syslinux"
-	cp "./$(KERNEL)/$(KERNEL_FILE)" "$(MNT)"
+	cp "./$(KERNEL)/arch/$(ARCH)/boot/bzImage" "$(MNT)/vmlinuz-linux"
+	mkdir -p "$(MNT)/usr/src/$(KERNEL)"
+	cp "./$(KERNEL)/vmlinux" "$(MNT)/usr/src/$(KERNEL)/vmlinux"
+	cp initramfs-linux "$(MNT)"
 	umount "$(MNT)"
 
 

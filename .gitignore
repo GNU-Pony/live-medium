@@ -7,6 +7,7 @@
 
 /memtest.bin
 /cpiolist
+/initramfs-linux
 
 /memtest86+-*
 /memtest86+-*/
