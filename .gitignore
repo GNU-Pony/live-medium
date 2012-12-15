@@ -7,6 +7,8 @@
 
 /memtest.bin
 
+/memtest86+-*
+/memtest86+-*/
 /coreutils-*
 /coreutils-*/
 /glibc-*
