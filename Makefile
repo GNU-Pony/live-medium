@@ -3,9 +3,10 @@ KARCH = $(ARCH)
 
 GNU_PONY_INITRAM = ../initram
 
-KERNEL_VERSION = 3.7
+KERNEL_VERSION = 3.7.1
 KERNEL_VERSION_CAT = 3.0
 KERNEL = linux-$(KERNEL_VERSION)
+KERNEL_MIRROR = https://ftp.kernel.org/pub/linux
 
 MEMTEST_VERSION = 4.20
 
@@ -15,46 +16,50 @@ MNT = /mnt
 MBR = /usr/lib/syslinux/mbr.bin
 
 
-all: kernel usb-init packages
+all: kernel initramfs-linux usb-init #packages
 
 
 validate-device:
-	([ -f /dev/$(DEVICE) ] && echo DEVICE ok) || (echo -e '\e[1;31mno DEVICE\e[m' ; exit 1)
+	([ -f "/dev/$(DEVICE)" ] && echo 'DEVICE ok') || (echo -e '\e[1;31mno DEVICE\e[m' ; exit 1)
 
 
-kernel: linux-$(KERNEL_VERSION).tar.bz2 \
-	linux-$(KERNEL_VERSION) \
-	linux-$(KERNEL_VERSION)/.config \
-	linux-$(KERNEL_VERSION)/$(KERNEL_FILE)
+kernel: $(KERNEL)/.config \
+	$(KERNEL)/vmlinux
 
-linux-$(KERNEL_VERSION).tar.bz2:
-	wget 'http://www.kernel.org/pub/linux/kernel/v$(KERNEL_VERSION_CAT)/linux-$(KERNEL_VERSION).tar.bz2'
+$(KERNEL).tar.xz:
+	wget '$(KERNEL_MIRROR)/kernel/v$(KERNEL_VERSION_CAT)/$(KERNEL).tar.xz'
 
-linux-$(KERNEL_VERSION):
-	tar --get --bzip2 < "linux-$(KERNEL_VERSION).tar.bz2"
+$(KERNEL): $(KERNEL).tar.xz
+	tar --get --xz < "$(KERNEL).tar.xz"
 
-linux-$(KERNEL_VERSION)/.config:
-	if [ ! -f "linux-$(KERNEL_VERSION)/.config" ]; then \
-	    cp kernel.config "linux-$(KERNEL_VERSION)/.config"; \
+$(KERNEL)/.config: $(KERNEL)
+	if [ ! -f "$(KERNEL)/.config" ]; then \
+	    cp kernel.config "$(KERNEL)/.config"; \
 	fi
-	make -C "linux-$(KERNEL_VERSION)" menuconfig
+	make -C "$(KERNEL)" menuconfig
 
-linux-$(KERNEL_VERSION)/vmlinux: initramfs
-	make -C "linux-$(KERNEL_VERSION)"
+$(KERNEL)/vmlinux: initramfs
+	make -C "$(KERNEL)"
 
 cpiolist:
-	ln -s "$(GNU_PONY_INITRAM)/cpiolist" cpiolist
+	if [ ! -L "cpiolist" ]; then \
+	    ln -s "$(GNU_PONY_INITRAM)/cpiolist" cpiolist; \
+	fi
 
 initramfs: cpiolist
-	make -C "$(GNU_PONY_INITRAM)"
-	"linux-$(KERNEL_VERSION)/usr/gen_init_cpio" cpiolist | gzip -9 > initramfs-linux
+	make -C "$(GNU_PONY_INITRAM)" KERNEL_SOURCE=$$(cd $(KERNEL) ; pwd)
 
+initramfs-linux: initramfs
+	make -B update-init
+
+update-init:
+	"linux-$(KERNEL_VERSION)/usr/gen_init_cpio" cpiolist | xz -e9 > initramfs-linux
 
 memtest:
 	wget "http://www.memtest.org/download/$(MEMTEST_VERSION)/memtest86+-$(MEMTEST_VERSION).tar.gz"
-	tar --gzip --get < memtest86+-"$(MEMTEST_VERSION)".tar.gz
-	make -C memtest86+-"$(MEMTEST_VERSION)"
-	cp memtest86+-"$(MEMTEST_VERSION)"/memtest.bin .
+	tar --gzip --get < "memtest86+-$(MEMTEST_VERSION).tar.gz"
+	make -C "memtest86+-$(MEMTEST_VERSION)"
+	cp "memtest86+-$(MEMTEST_VERSION)/memtest.bin" .
 
 
 usb-init: memtest validate-device
@@ -72,7 +77,7 @@ usb-init: memtest validate-device
 	w\
 	.
 
-	mkfs --type "$(USB_FS)" -L "$(USB_LABEL)" "/dev/$(DEVICE)1"
+	mkfs -t "$(USB_FS)" -L "$(USB_LABEL)" "/dev/$(DEVICE)1"
 	mount "/dev/$(DEVICE)1" "$(MNT)"
 	extlinux --install "$(MNT)"
 	dd if="$(MBR)" of="/dev/$(DEVICE)"
@@ -140,4 +145,12 @@ kbd:
 	make DESTDIR="$(MNT)" install && \
 	umount "$(MNT)" && \
 	cd ..
+
+
+.PHONY: clean
+clean:
+	yes | rm -r linux-* memtest86+-* coreutils-* glibc-* \
+	            util-linux-* kbd-* cpiolist *.bin \
+	    || exit 0
+	sudo make -C "$(GNU_PONY_INITRAM)" clean
 
