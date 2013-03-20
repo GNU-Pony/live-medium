@@ -3,7 +3,7 @@ KARCH = $(ARCH)
 
 GNU_PONY_INITRAM = ../initram
 
-KERNEL_VERSION = 3.7.1
+KERNEL_VERSION = 3.8.3
 KERNEL_VERSION_CAT = 3.0
 KERNEL = linux-$(KERNEL_VERSION)
 KERNEL_MIRROR = https://ftp.kernel.org/pub/linux
@@ -13,25 +13,32 @@ KERNEL_CONFIG = kernel.mini.config
 
 MEMTEST_VERSION = 4.20
 
-COREUTILS_VERSION = 8.20
-GLIBC_VERSION = 2.16.0
-UTIL_LINUX_VERSION = 2.22
-KBD_VERSION = 1.12
+COREUTILS_VERSION = 8.21
+GLIBC_VERSION = 2.17
+UTIL_LINUX_VERSION = 2.22.2
+KBD_VERSION = 1.15.5
 SYSVINIT_VERSION = 2.88
+PAM_VERSION = 1.1.6
 
 COREUTILS = coreutils-$(COREUTILS_VERSION)
 GLIBC = glibc-$(GLIBC_VERSION)
 UTIL_LINUX = util-linux-$(UTIL_LINUX_VERSION)
 KBD = kbd-$(KBD_VERSION)
 SYSVINIT = sysvinit-$(SYSVINIT_VERSION)dsf
+PAM = Linux-PAM-$(PAM_VERSION)
 
 USB_LABEL = GNU_PONY
 USB_FS = ext2
 MNT = /mnt
 MBR = /usr/lib/syslinux/mbr.bin
 
+MORE_PACKAGE = acl attr bash bzip2 ca-certificates coreutils cracklib cronie cryptsetup curl db dbus device-mapper dhcpcd diffutils dirmngr e2fsprogs expat file filesystem findutils gawk gcc-libs-multilib lib32-gcc-libs gdbm gettext glib2 glibc gmp gnupg gpgme grep groff gzip heirloom-mailx hwids iana-etc inetutils iproute2 iptables iputils jfsutils kbd keyutils kmod krb5 less libarchive libassuan libcap libffi libgcrypt libgpg-error libgssglue libksba libldap libnl libpcap libpipeline libsasl libssh2 libtirpc libusbx licenses linux linux-api-headers linux-firmware logrotate lvm2 lzo2 man-db man-pages mdadm mkinitcpio mkinitcpio-busybox nano ncurses netcfg openssl pacman pacman-mirrorlist pam pambase pciutils pcmciautils pcre perl pinentry popt ppp procps-ng psmisc pth readline reiserfsprogs run-parts sed shadow sysfsutils syslinux systemd initscripts-fork sysvinit sysvinit-tools tar texinfo tzdata usbutils util-linux vi which xfsprogs xz zlib
 
-all: validate-non-root kernel usb-init filesystem logs packages chown
+
+temp-default: validate-non-root filesystem more-packages logs chown
+
+all: validate-non-root kernel usb-init filesystem packages logs chown
+packages: coreutils glibc util-linux kbd sysvinit pam more-packages
 
 
 validate-non-root:
@@ -202,9 +209,6 @@ logs:
 	chmod 600 "$(MNT)"/var/log/btmp
 
 
-packages: coreutils glibc util-linux kbd sysvinit
-
-
 
 coreutils:
 	[ -f "$(COREUTILS).tar.xz" ] || \
@@ -220,22 +224,64 @@ coreutils:
 	cd ..
 
 glibc:
+	export CFLAGS="-march=x86-64 -mtune=generic -O2 -pipe --param=ssp-buffer-size=4" && \
+	export LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro" && \
 	[ -f "$(GLIBC).tar.xz" ] || \
 	wget "http://ftp.gnu.org/gnu/libc/$(GLIBC).tar.xz"
 	[ -d "$(GLIBC)" ] || \
 	tar --xz --get < "$(GLIBC).tar.xz"
-	mkdir -p "glibc-build"
+	[ ! -d "glibc-build" ] || rm -r "glibc-build"
+	mkdir "glibc-build"
+	cp glibc-2.17-sync-with-linux37.patch "$(GLIBC)"
+	cd "$(GLIBC)" && patch -p1 -i glibc-2.17-sync-with-linux37.patch && cd ..
 	cd "glibc-build" && \
+	unset LD_LIBRARY_PATH && \
+	echo "slibdir=/usr/lib" >> configparms && \
 	"../$(GLIBC)/configure" \
 	        --prefix="/usr" \
 		--libdir="/usr/lib" \
 		--libexecdir="/usr/libexec" \
-		--with-headers="/usr/include" && \
+		--with-headers="/usr/include" \
+	        --enable-add-ons=nptl,libidn \
+	        --enable-obsolete-rpc \
+	        --enable-kernel=2.6.32 \
+	        --enable-bind-now --disable-profile \
+	        --enable-stackguard-randomization \
+	        --enable-multi-arch && \
+	echo "build-programs=no" >> configparms && \
 	make && \
+	sed -i "/build-programs=/s#no#yes#" configparms && \
+	echo "CC += -fstack-protector -D_FORTIFY_SOURCE=2" >> configparms && \
+	echo "CXX += -fstack-protector -D_FORTIFY_SOURCE=2" >> configparms && \
+	make && \
+	sed -i '2,4d' configparms && \
+	install -dm755 $(MNT)/etc && \
+	touch $(MNT)/etc/ld.so.conf && \
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
 	make install_root="$(MNT)" install && \
-	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	rm -f "$(MNT)"/etc/ld.so.{cache,conf}
+	install -dm755 "$(MNT)"/usr/lib/{locale,systemd/system,tmpfiles.d}
+	install -m644 "$(GLIBC)"/nscd/nscd.conf "$(MNT)"/etc/nscd.conf
+	install -m644 nscd.service "$(MNT)"/usr/lib/systemd/system
+	install -m644 nscd.tmpfiles "$(MNT)"/usr/lib/tmpfiles.d/nscd.conf
+	install -m644 "$(GLIBC)"/posix/gai.conf "$(MNT)"/etc/gai.conf
+	install -m755 locale-gen "$(MNT)"/usr/bin
+	([ "$$(realpath "$(MNT)/sbin")" = "$$(realpath "$(MNT)/usr/bin")" ] || \
+	        ln -s ../../sbin/ldconfig "$(MNT)"/usr/bin/ldconfig)
+	strip --strip-all \
+	        "$(MNT)"/sbin/{ldconfig,sln} \
+	        "$(MNT)"/usr/bin/{gencat,getconf,getent,iconv,locale,localedef} \
+	        "$(MNT)"/usr/bin/{makedb,pcprofiledump,pldd,rpcgen,sprof} \
+	        "$(MNT)"/usr/sbin/{iconvconfig,nscd}
+	strip --strip-debug "$(MNT)"/usr/lib/*.a
+	strip --strip-unneeded \
+	        "$(MNT)"/usr/lib/{libanl,libBrokenLocale,libcidn,libcrypt}-*.so \
+	        "$(MNT)"/usr/lib/libnss_{compat,db,dns,files,hesiod,nis,nisplus}-*.so \
+	        "$(MNT)"/usr/lib/{libdl,libm,libnsl,libresolv,librt,libutil}-*.so \
+	        "$(MNT)"/usr/lib/{libmemusage,libpcprofile,libSegFault}.so \
+	        "$(MNT)"/usr/lib/{audit,gconv}/*.so
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)")
 
 util-linux:
 	[ -f "$(UTIL_LINUX).tar.xz" ] || \
@@ -299,10 +345,31 @@ sysvinit:
 	cd ..
 # removed files are provided by util-linux, except for the corrected (made safer) link
 
+pam:
+	[ -f "$(PAM).tar.bz2" ] || \
+	wget "https://fedorahosted.org/releases/l/i/linux-pam/$(PAM).tar.bz2"
+	[ -d "$(PAM)" ] || \
+	tar --bzip2 --get < "$(PAM).tar.bz2"
+	cd "$(PAM)" && \
+	./configure --libdir=/usr/lib && \
+	sed -i 's_mkdir -p $$(namespaceddir)_mkdir -p $$(DESTDIR)$$(namespaceddir)_g' \
+	    modules/pam_namespace/Makefile && \
+	make && \
+	make DESTDIR="$(MNT)" SCONFIGDIR=/etc/security install
+
+
+# TODO : copying files installed with Arch Linux's pacman while no installation script has been made
+more-packages:
+	sudo pacman -Ql $(MORE_PACKAGE) | \
+	        cut -d ' ' -f 2 | grep    '/$$' | while read f; do sudo mkdir -p "$(MNT)$$f"; done
+	sudo pacman -Ql $(MORE_PACKAGE) | \
+	        cut -d ' ' -f 2 | grep -v '/$$' | while read f; do sudo cp "$$f" "$(MNT)$$f"; done
+	cd "$(MNT)" && sudo tar --create * > "../morefiles.tar" && cd ..
+
 
 chown:
 	find "$(MNT)" | while read file; do \
-	    echo 'chmod root:root '"$$file"; \
+	    echo 'chown root:root '"$$file"; \
 	    sudo chown "root:root" "$$file"; \
 	done
 	sudo chmod 755 "$(MNT)"
