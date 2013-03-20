@@ -34,7 +34,12 @@ MBR = /usr/lib/syslinux/mbr.bin
 BOOT_SPLASH = ./boot/splash.png
 BOOT_CONFIG = ./boot/syslinux.cfg
 
-MORE_PACKAGE = acl attr bash bzip2 ca-certificates coreutils cracklib cronie cryptsetup curl db dbus device-mapper dhcpcd diffutils dirmngr e2fsprogs expat file filesystem findutils gawk gcc-libs-multilib lib32-gcc-libs gdbm gettext glib2 glibc gmp gnupg gpgme grep groff gzip heirloom-mailx hwids iana-etc inetutils iproute2 iptables iputils jfsutils kbd keyutils kmod krb5 less libarchive libassuan libcap libffi libgcrypt libgpg-error libgssglue libksba libldap libnl libpcap libpipeline libsasl libssh2 libtirpc libusbx licenses linux linux-api-headers linux-firmware logrotate lvm2 lzo2 man-db man-pages mdadm mkinitcpio mkinitcpio-busybox nano ncurses netcfg openssl pacman pacman-mirrorlist pam pambase pciutils pcmciautils pcre perl pinentry popt ppp procps-ng psmisc pth readline reiserfsprogs run-parts sed shadow sysfsutils syslinux systemd initscripts-fork sysvinit sysvinit-tools tar texinfo tzdata usbutils util-linux vi which xfsprogs xz zlib
+# jfsutils mkinitcpio mkinitcpio-busybox pacman pacman-mirrorlist reiserfsprogs vi xfsprogs licenses
+# dirmngr gnupg gpgme libassuan pinentry
+# man-db man-pages groff mdadm syslinux lvm2 iptables libpipeline
+# ca-certificates cronie run-parts diffutils libksba heirloom-mailx pth
+# libarchive lzo2 logrotate pambase pciutils pcmciautils ppp procps-ng psmisc usbutils
+MORE_PACKAGE = acl attr bash bzip2 coreutils cracklib cryptsetup curl db dbus device-mapper dhcpcd e2fsprogs expat file filesystem findutils gawk gcc-libs-multilib lib32-gcc-libs gdbm gettext glib2 glibc gmp grep gzip hwids iana-etc inetutils iproute2 iputils kbd kmod less libcap libffi libgcrypt libgpg-error libgssglue libnl libpcap libsasl libssh2 libtirpc libusbx linux linux-api-headers linux-firmware nano ncurses netcfg openssl pam pcre perl popt readline sed shadow sysfsutils systemd initscripts-fork sysvinit sysvinit-tools tar texinfo tzdata util-linux which xz zlib openssh openntpd dnssec-anchors ldns krb5 libldap keyutils 
 
 
 temp-default: validate-non-root filesystem more-packages logs chown
@@ -395,3 +400,4 @@ clean:
 	            util-linux-* kbd-* sysvinit-* cpiolist *.bin \
 	    || exit 0
 	sudo make -C "$(GNU_PONY_INITRAM)" clean
+
