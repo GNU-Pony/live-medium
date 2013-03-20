@@ -7,7 +7,7 @@ KERNEL_VERSION = 3.8.3
 KERNEL_VERSION_CAT = 3.0
 KERNEL = linux-$(KERNEL_VERSION)
 KERNEL_MIRROR = https://ftp.kernel.org/pub/linux
-KERNEL_CONFIG = kernel.mini.config
+KERNEL_CONFIG = kernelconf/kernel.mini.config
 # kernel.mini.config
 # kernel.config
 
@@ -31,6 +31,8 @@ USB_LABEL = GNU_PONY
 USB_FS = ext2
 MNT = /mnt
 MBR = /usr/lib/syslinux/mbr.bin
+BOOT_SPLASH = ./boot/splash.png
+BOOT_CONFIG = ./boot/syslinux.cfg
 
 MORE_PACKAGE = acl attr bash bzip2 ca-certificates coreutils cracklib cronie cryptsetup curl db dbus device-mapper dhcpcd diffutils dirmngr e2fsprogs expat file filesystem findutils gawk gcc-libs-multilib lib32-gcc-libs gdbm gettext glib2 glibc gmp gnupg gpgme grep groff gzip heirloom-mailx hwids iana-etc inetutils iproute2 iptables iputils jfsutils kbd keyutils kmod krb5 less libarchive libassuan libcap libffi libgcrypt libgpg-error libgssglue libksba libldap libnl libpcap libpipeline libsasl libssh2 libtirpc libusbx licenses linux linux-api-headers linux-firmware logrotate lvm2 lzo2 man-db man-pages mdadm mkinitcpio mkinitcpio-busybox nano ncurses netcfg openssl pacman pacman-mirrorlist pam pambase pciutils pcmciautils pcre perl pinentry popt ppp procps-ng psmisc pth readline reiserfsprogs run-parts sed shadow sysfsutils syslinux systemd initscripts-fork sysvinit sysvinit-tools tar texinfo tzdata usbutils util-linux vi which xfsprogs xz zlib
 
@@ -114,8 +116,8 @@ usb-init: memtest.bin validate-device
 	mkdir -p "$(MNT)/memtest86+"
 	cp /usr/lib/syslinux/{*.{c32,com,0},memdisk} "$(MNT)/syslinux"
 	cp ./memtest.bin "$(MNT)/memtest86+"
-	cp ./syslinux.cfg "$(MNT)/syslinux"
-	cp ./splash.png "$(MNT)/syslinux"
+	cp "$(BOOT_CONFIG)" "$(MNT)/syslinux/syslinux.cfg"
+	cp "$(BOOT_SPLASH)" "$(MNT)/syslinux/splash.png"
 	cp "$$(realpath "./$(KERNEL)/arch/$(KARCH)/boot/bzImage")" "$(MNT)/vmlinuz-linux"
 	mkdir -p "$(MNT)/usr/src/$(KERNEL)"
 	cp "./$(KERNEL)/vmlinux" "$(MNT)/usr/src/$(KERNEL)/vmlinux"
