@@ -40,7 +40,7 @@ BOOT_CONFIG = ./boot/syslinux.cfg
 
 MORE_PACKAGE = filesystem
 MORE_PACKAGE += gcc-libs-multilib lib32-gcc-libs initscripts-fork linux linux-api-headers linux-firmware
-MORE_PACKAGE += cryptsetup curl dbus device-mapper dhcpcd filesystem iana-etc inetutils iputils perl shadow systemd tzdata openssh openntpd dnssec-anchors krb5 libldap
+MORE_PACKAGE += cryptsetup curl dbus device-mapper dhcpcd iana-etc inetutils iputils perl shadow systemd tzdata openssh openntpd dnssec-anchors krb5 libldap
 MORE_PACKAGE += libtirpc
 
 
@@ -1194,7 +1194,7 @@ readline:
 
 # GPL2
 kmod:
-	[ -f "kmod-12.tar.gz" ] || \
+	[ -f "kmod-12.tar.xz" ] || \
 	wget "ftp://ftp.kernel.org/pub/linux/utils/kernel/kmod/kmod-12.tar.xz"
 	[ -d "kmod-12" ] || \
 	tar --xz --get < "kmod-12.tar.xz"
