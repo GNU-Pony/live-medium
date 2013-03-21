@@ -1,5 +1,6 @@
 ARCH = x86_64
 KARCH = $(ARCH)
+CHOST = $(ARCH)-unknown-linux-gnu
 
 SYSVINIT_SIMPLIFY_WRITELOG = y
 SYSVINIT_ANSI = n
@@ -39,9 +40,10 @@ BOOT_CONFIG = ./boot/syslinux.cfg
 
 
 MORE_PACKAGE = filesystem
-MORE_PACKAGE += gcc-libs-multilib lib32-gcc-libs initscripts-fork linux linux-api-headers linux-firmware
-MORE_PACKAGE += cryptsetup curl dbus device-mapper dhcpcd iana-etc inetutils iputils perl shadow systemd tzdata openssh openntpd dnssec-anchors krb5 libldap
-MORE_PACKAGE += libtirpc
+MORE_PACKAGE += linux linux-api-headers linux-firmware
+MORE_PACKAGE += device-mapper inetutils shadow systemd tzdata openntpd dnssec-anchors libldap
+MORE_PACKAGE += glibc util-linux kbd pam
+MORE_PACKAGE += libtirpc  gcc-libs-multilib lib32-gcc-libs  initscripts-fork
 
 
 temp-default: validate-non-root filesystem more-packages working logs chown-usb
@@ -50,10 +52,10 @@ all: validate-non-root kernel usb-init filesystem packages logs chown-usb
 packages: glibc util-linux kbd pam new working more-packages
 
 new:
-not-compiling: libtirpc
+not-compiling: libtirpc gcc-libs initscripts-fork
 not-running: 
 
-working: acl attr cracklib expat file hwids less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash
+working: acl attr cracklib expat file hwids less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash curl iana-etc cryptsetup dbus dhcpcd libedit openssh perl krb5 iputils
 
 
 validate-non-root:
@@ -402,7 +404,7 @@ attr:
 
 # GPL
 cracklib:
-	[ -f "cracklib-2.8.22.src.tar.gz" ] || \
+	[ -f "cracklib-2.8.22.tar.gz" ] || \
 	wget "http://downloads.sourceforge.net/sourceforge/cracklib/cracklib-2.8.22.tar.gz"
 	[ -d "cracklib-2.8.22" ] || \
 	tar --gzip --get < "cracklib-2.8.22.tar.gz"
@@ -536,7 +538,7 @@ libssh2:
 
 # LGPL
 libusbx:
-	[ -f "libusbx-1.0.14.tar.gz" ] || \
+	[ -f "libusbx-1.0.14.tar.bz2" ] || \
 	wget "http://downloads.sourceforge.net/libusbx/libusbx-1.0.14.tar.bz2"
 	[ -d "libusbx-1.0.14" ] || \
 	tar --bzip2 --get < "libusbx-1.0.14.tar.bz2"
@@ -707,10 +709,10 @@ ldns:
 
 # GPL2, LGPL2.1
 keyutils:
-	[ -f "keyutils-1.5.5.tar.gz" ] || \
+	[ -f "keyutils-1.5.5.tar.bz2" ] || \
 	wget "http://people.redhat.com/~dhowells/keyutils/keyutils-1.5.5.tar.bz2"
 	[ -d "keyutils-1.5.5" ] || \
-	tar --bzip --get < "keyutils-1.5.5.tar.bz2"
+	tar --bzip2 --get < "keyutils-1.5.5.tar.bz2"
 	cd "keyutils-1.5.5" && \
 	make CFLAGS="-O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2" \
 	        LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro" && \
@@ -739,7 +741,7 @@ which:
 
 # GPL3
 tar:
-	[ -f "tar-1.26.tar.gz" ] || \
+	[ -f "tar-1.26.tar.xz" ] || \
 	wget "ftp://ftp.gnu.org/gnu/tar/tar-1.26.tar.xz"
 	[ -d "tar-1.26" ] || \
 	tar --xz --get < "tar-1.26.tar.xz"
@@ -873,7 +875,7 @@ gmp:
 	[ -d "gmp-5.1.1" ] || \
 	tar --xz --get < "gmp-5.1.1.tar.xz"
 	cd "gmp-5.1.1" && \
-	./configure --build=x86_64-unknown-linux-gnu --prefix=/usr --enable-cxx && \
+	./configure --build=$(CHOST) --prefix=/usr --enable-cxx && \
 	make && \
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
 	sudo make DESTDIR="$(MNT)" install && \
@@ -897,7 +899,7 @@ libffi:
 
 # LGPL
 libgcrypt:
-	[ -f "libgcrypt-1.5.1.tar.gz" ] || \
+	[ -f "libgcrypt-1.5.1.tar.bz2" ] || \
 	wget "ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.5.1.tar.bz2"
 	[ -d "libgcrypt-1.5.1" ] || \
 	tar --bzip2 --get < "libgcrypt-1.5.1.tar.bz2"
@@ -1269,7 +1271,7 @@ bash:
 	cd ..
 
 # custom (permissive free)
-# splitpackages: libsasl, cyrus-sasl, cyrus-sasl-gssapi, cyrus-sasl-ldap
+# split packages: libsasl, cyrus-sasl, cyrus-sasl-gssapi, cyrus-sasl-ldap
 libsasl:
 	[ -f "cyrus-sasl-2.1.23.tar.gz" ] || \
 	wget "ftp://ftp.andrew.cmu.edu/pub/cyrus-mail/cyrus-sasl-2.1.23.tar.gz"
@@ -1348,4 +1350,341 @@ libsasl:
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ../..
 
+# GPL, LGPL, FDL, custom (free exception)
+# split packages: gcc-libs
+gcc-libs:
+	[ -f "gcc-4.7.2.tar.bz2" ] || \
+	wget "ftp://gcc.gnu.org/pub/gcc/releases/gcc-4.7.2/gcc-4.7.2.tar.bz2"
+	[ -d "gcc-4.7.2" ] || \
+	tar --bzip2 --get < "gcc-4.7.2.tar.bz2"
+	cd "gcc-4.7.2" && \
+	sed -i 's/install_to_$$(INSTALL_DEST) //' libiberty/Makefile.in && \
+	sed -i 's_\./fixinc\.sh_-c true_' gcc/Makefile.in && \
+	([ ! "$(ARCH)" = "x86_64" ] || sed -i '/m64=/s/lib64/lib/' gcc/config/i386/t-linux64) && \
+	patch -p1 -i ../patches/gcc-4.7.1-libgo-write.patch && \
+	echo 4.7.2 > gcc/BASE-VER && \
+	export CFLAGS=" -O2 -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2" && \
+	export CXXFLAGS=" -O2 -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2" && \
+	mkdir -p ../gcc-build && cd ../gcc-build && \
+	../gcc-4.7.2/configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/libexec \
+	        --mandir=/usr/share/man --infodir=/usr/share/info \
+	        --enable-languages=c,c++,ada,fortran,go,lto,objc,obj-c++ \
+	        --enable-shared --enable-threads=posix --with-system-zlib --enable-__cxa_atexit \
+	        --disable-libunwind-exceptions --enable-clocale=gnu --disable-libstdcxx-pch \
+	        --enable-libstdcxx-time --enable-gnu-unique-object --enable-linker-build-id \
+	        --with-ppl --enable-cloog-backend=isl --disable-ppl-version-check \
+	        --disable-cloog-version-check --enable-lto --enable-gold --enable-ld=default \
+	        --enable-plugin --with-plugin-ld=ld.gold --with-linker-hash-style=gnu --disable-multilib \
+	        --disable-libssp --disable-build-with-cxx --disable-build-poststage1-with-cxx \
+	        --enable-checking=release && \
+	make && \
+	cd $(CHOST)/libstdc++-v3 && \
+	make doc-man-doxygen && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	cd ../../gcc-build && \
+	sudo make -j1 -C $(CHOST)/libgcc DESTDIR="$(MNT)" install-shared && \
+	for lib in libmudflap libgomp libstdc++-v3/src libitm; do \
+	    sudo make -j1 -C $(CHOST)/$lib DESTDIR="$(MNT)" install-toolexeclibLTLIBRARIES; \
+	done && \
+	sudo make -j1 -C $(CHOST)/libstdc++-v3/po DESTDIR="$(MNT)" install && \
+	sudo make -j1 -C $(CHOST)/libgomp DESTDIR="$(MNT)" install-info && \
+	sudo make -j1 -C $(CHOST)/libitm DESTDIR="$(MNT)" install-info && \
+	sudo make -j1 DESTDIR="$(MNT)" install-target-libquadmath && \
+	sudo make -j1 DESTDIR="$(MNT)" install-target-libgfortran && \
+	sudo make -j1 DESTDIR="$(MNT)" install-target-libobjc && \
+	sudo rm -r "$(MNT)"/usr/lib/{gcc/,libgfortran.spec} && \
+	sudo find "$(MNT)" -name *.a -delete && \
+	sudo install -Dm644 ${_basedir}/COPYING.RUNTIME \
+	        "$(MNT)"/usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL2
+initscripts-fork:
+	[ -f "initscripts-fork-2012.12.1.tar.bz2" ] || \
+	wget "https://bitbucket.org/TZ86/initscripts-fork/get/2012.12.1.tar.bz2" \
+	    -O "initscripts-fork-2012.12.1.tar.bz2"
+	[ -d "initscripts-fork-2012.12.1" ] || \
+	(tar --bzip2 --get < "initscripts-fork-2012.12.1.tar.bz2" && \
+	    mv TZ86-initscripts-fork-* "initscripts-fork-2012.12.1") && \
+	cd "initscripts-fork-2012.12.1" && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# MIT
+curl:
+	[ -f "curl-7.29.0.tar.gz" ] || \
+	wget "http://curl.haxx.se/download/curl-7.29.0.tar.gz"
+	[ -d "curl-7.29.0" ] || \
+	tar --gzip --get < "curl-7.29.0.tar.gz"
+	cd "curl-7.29.0" && \
+	curlbuild=curlbuild-"$$(( 8 * $$(cpp <<<'__SIZEOF_POINTER__' | sed '/^#/d') ))".h && \
+	patch -Np1 < ../patches/0001-Fix-NULL-pointer-reference-when-closing-an-unused-mu.patch && \
+	./configure --prefix=/usr --mandir=/usr/share/man --disable-dependency-tracking \
+	        --disable-ldap --disable-ldaps --enable-ipv6 --enable-manual --enable-versioned-symbols \
+	        --enable-threaded-resolver --without-libidn --with-random=/dev/urandom \
+	        --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo install -Dm644 COPYING "$(MNT)"/usr/share/licenses/curl/COPYING && \
+	sudo install -Dm644 docs/libcurl/libcurl.m4 "$(MNT)"/usr/share/aclocal/libcurl.m4 && \
+	sudo mv "$(MNT)"/usr/include/curl/curlbuild.h "$(MNT)"/usr/include/curl/$$curlbuild && \
+	sudo install -m644 ../patches/curlbuild.h "$(MNT)"/usr/include/curl/curlbuild.h && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# custom (free, GPL-incompatible)
+iana-etc:
+	[ -f "iana-etc-2.30.tar.bz2" ] || \
+	wget "http://sethwklein.net/iana-etc-2.30.tar.bz2"
+	[ -d "iana-etc-2.30" ] || \
+	tar --bzip2 --get < "iana-etc-2.30.tar.bz2"
+	cd "iana-etc-2.30" && \
+	patch -p1 -i ../patches/iana-etc-newer.patch && \
+	make get && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo install -Dm644 COPYING "$(MNT)"/usr/share/licenses/iana-etc/LICENSE && \
+	sudo install -Dm644 port-numbers.iana "$(MNT)"/usr/share/iana-etc/port-numbers.iana && \
+	sudo install -Dm644 protocol-numbers.iana "$(MNT)"/usr/share/iana-etc/protocol-numbers.iana && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL
+cryptsetup:
+	[ -f "cryptsetup-1.6.0.tar.bz2" ] || \
+	wget "http://cryptsetup.googlecode.com/files/cryptsetup-1.6.0.tar.bz2"
+	[ -d "cryptsetup-1.6.0" ] || \
+	tar --bzip2 --get < "cryptsetup-1.6.0.tar.bz2"
+	cd "cryptsetup-1.6.0" && \
+	./configure --prefix=/usr --disable-static --enable-cryptsetup-reencrypt && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL, custom (free)
+dbus:
+	[ -f "dbus-1.6.8.tar.gz" ] || \
+	wget "http://dbus.freedesktop.org/releases/dbus/dbus-1.6.8.tar.gz"
+	[ -d "dbus-1.6.8" ] || \
+	tar --gzip --get < "dbus-1.6.8.tar.gz"
+	cd "dbus-1.6.8" && \
+	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libexecdir=/usr/lib/dbus-1.0 \
+	        --with-dbus-user=dbus --with-system-pid-file=/run/dbus/pid \
+	        --with-system-socket=/run/dbus/system_bus_socket --with-console-auth-dir=/run/console/ \
+	        --enable-inotify --disable-dnotify --disable-verbose-mode --disable-static \
+	        --disable-tests --disable-asserts --with-systemdsystemunitdir=/usr/lib/systemd/system \
+	        --enable-systemd && \
+	patch -p1 < ../patches/systemd-user-session.patch && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	([ ! -d "$(MNT)"/var/run ] || sudo mv "$(MNT)"/var/run "$(MNT)"/var/run--dbus ) && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo rm -rf "$(MNT)"/var/run && \
+	([ ! -d "$(MNT)"/var/run--dbus ] || sudo mv "$(MNT)"/var/run--dbus "$(MNT)"/var/run ) && \
+	sudo install -Dm755 ../confs/dbus "$(MNT)"/etc/rc.d/dbus && \
+	sudo install -Dm755 ../confs/30-dbus "$(MNT)"/etc/X11/xinit/xinitrc.d/30-dbus && \
+	sudo install -Dm644 COPYING "$(MNT)"/usr/share/licenses/dbus/COPYING && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# BSD
+dhcpcd:
+	[ -f "dhcpcd-5.6.7.tar.bz2" ] || \
+	wget "http://roy.marples.name/downloads/dhcpcd/dhcpcd-5.6.7.tar.bz2"
+	[ -d "dhcpcd-5.6.7" ] || \
+	tar --bzip2 --get < "dhcpcd-5.6.7.tar.bz2"
+	cd "dhcpcd-5.6.7" && \
+	./configure --libexecdir=/usr/lib/dhcpcd --dbdir=/var/lib/dhcpcd --rundir=/run && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo mkdir -p "$(MNT)"/usr/sbin && \
+	sudo ln -sf /sbin/dhcpcd "$(MNT)"/usr/sbin/dhcpcd && \
+	sudo install -D -m644 ../confs/dhcpcd.conf.d "$(MNT)"/etc/conf.d/dhcpcd && \
+	sudo mkdir -p "$(MNT)"/usr/share/licenses/dhcpcd && \
+	sudo sh -c \
+	  'awk '\''{if(FNR<27)print $0}'\'' ./configure.h >> "$(MNT)"/usr/share/licenses/dhcpcd/LICENSE' && \
+	sudo sh -c 'echo noipv4ll >> "$(MNT)"/etc/dhcpcd.conf' && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# BSD
+# TODO: libedit is in critical need of patch of non-ASCII character support
+libedit:
+	[ -f "libedit-20120601-3.0.tar.gz" ] || \
+	wget "http://www.thrysoee.dk/editline/libedit-20120601-3.0.tar.gz"
+	[ -d "libedit-20120601-3.0" ] || \
+	tar --gzip --get < "libedit-20120601-3.0.tar.gz"
+	cd "libedit-20120601-3.0" && \
+	./configure --prefix=/usr --enable-widec --enable-static=no && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make prefix="$(MNT)"/usr install && \
+	sudo install -Dm644 COPYING "$(MNT)"/usr/share/licenses/libedit/LICENSE && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# BSD
+openssh:
+	[ -f "openssh-6.1p1.tar.gz" ] || \
+	wget "ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-6.1p1.tar.gz"
+	[ -d "openssh-6.1p1" ] || \
+	tar --gzip --get < "openssh-6.1p1.tar.gz"
+	cd "openssh-6.1p1" && \
+	./configure --prefix=/usr --libexecdir=/usr/lib/ssh --sysconfdir=/etc/ssh --with-ldns \
+	        --with-libedit --with-ssl-engine --with-pam --with-privsep-user=nobody \
+	        --with-kerberos5=/usr --with-xauth=/usr/bin/xauth --with-mantype=man \
+	        --with-md5-passwords --with-pid-dir=/run && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo rm "$(MNT)"/usr/share/man/man1/slogin.1 && \
+	sudo ln -sf ssh.1.gz "$(MNT)"/usr/share/man/man1/slogin.1.gz && \
+	sudo install -Dm644 LICENCE "$(MNT)"/usr/share/licenses/openssh/LICENCE && \
+	sudo install -Dm755 ../confs/sshd.close-sessions "$(MNT)"/etc/rc.d/functions.d/sshd-close-sessions && \
+	sudo install -Dm644 ../confs/sshd.confd "$(MNT)"/etc/conf.d/sshd && \
+	sudo install -Dm644 ../confs/sshd.pam "$(MNT)"/etc/pam.d/sshd && \
+	sudo install -Dm755 ../confs/sshd "$(MNT)"/etc/rc.d/sshd && \
+	sudo install -Dm755 contrib/findssl.sh "$(MNT)"/usr/bin/findssl.sh && \
+	sudo install -Dm755 contrib/ssh-copy-id "$(MNT)"/usr/bin/ssh-copy-id && \
+	sudo install -Dm644 contrib/ssh-copy-id.1 "$(MNT)"/usr/share/man/man1/ssh-copy-id.1 && \
+	sudo sed -e '/^#ChallengeResponseAuthentication yes$$/c ChallengeResponseAuthentication no' \
+	         -e '/^#PrintMotd yes$$/c PrintMotd no # pam does that' \
+	         -e '/^#UsePAM no$$/c UsePAM yes' \
+	         -i "$(MNT)"/etc/ssh/sshd_config && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL. PerlArtistic
+perl:
+	[ -f "perl-5.16.3.tar.bz2" ] || \
+	wget "http://www.cpan.org/src/5.0/perl-5.16.3.tar.bz2"
+	[ -d "perl-5.16.3" ] || \
+	tar --bzip2 --get < "perl-5.16.3.tar.bz2"
+	cd "perl-5.16.3" && \
+	patch -i ../patches/cgi-cr-escaping.diff -p1 && \
+	if [ "$(ARCH)" = "x86_64" ]; then \
+	    ARCHOPTS="-Dcccdlflags='-fPIC'"; \
+	else \
+	    ARCHOPTS=""; \
+	fi && \
+	CFLAGS="-O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2" && \
+	LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro" && \
+	./Configure -des -Dusethreads -Duseshrplib -Doptimize="$${CFLAGS}" \
+	        -Dprefix=/usr -Dvendorprefix=/usr -Dprivlib=/usr/share/perl5/core_perl \
+	        -Darchlib=/usr/lib/perl5/core_perl -Dsitelib=/usr/share/perl5/site_perl \
+	        -Dsitearch=/usr/lib/perl5/site_perl -Dvendorlib=/usr/share/perl5/vendor_perl \
+	        -Dvendorarch=/usr/lib/perl5/vendor_perl -Dscriptdir=/usr/bin/core_perl \
+	        -Dsitescript=/usr/bin/site_perl -Dvendorscript=/usr/bin/vendor_perl \
+	        -Dinc_version_list=none -Dman1ext=1perl -Dman3ext=3perl $${ARCHOPTS} \
+	        -Dlddlflags="-shared $${LDFLAGS}" -Dldflags="$${LDFLAGS}" && \
+	make && \
+	mkdir -p ../perl-build && \
+	pkgdir="$$(cd ../perl-build && pwd)" && \
+	make DESTDIR="$$pkgdir" install && \
+	sed -e '/^man1ext=/ s/1perl/1p/' -e '/^man3ext=/ s/3perl/3pm/' \
+	    -e "/^cf_email=/ s/'.*'/''/" \
+	    -e "/^perladmin=/ s/'.*'/''/" \
+	    -i $${pkgdir}/usr/lib/perl5/core_perl/Config_heavy.pl && \
+	sed -e '/(makepl_arg =>/   s/""/"INSTALLDIRS=site"/' \
+	    -e '/(mbuildpl_arg =>/ s/""/"installdirs=site"/' \
+	    -i $${pkgdir}/usr/share/perl5/core_perl/CPAN/FirstTime.pm && \
+	sed -e "/{'makemakerflags'}/ s/'';/'INSTALLDIRS=site';/" \
+	    -e "/{'buildflags'}/     s/'';/'installdirs=site';/" \
+	    -i $${pkgdir}/usr/share/perl5/core_perl/CPANPLUS/Config.pm && \
+	install -D -m755 ../confs/perlbin.sh $${pkgdir}/etc/profile.d/perlbin.sh && \
+	install -D -m755 ../confs/perlbin.csh $${pkgdir}/etc/profile.d/perlbin.csh && \
+	mv $${pkgdir}/usr/bin/perl5.16.3 $${pkgdir}/usr/bin/perl && \
+	ln -sf c2ph $${pkgdir}/usr/bin/core_perl/pstruct && \
+	ln -sf s2p $${pkgdir}/usr/bin/core_perl/psed && \
+	rm -f $${pkgdir}/usr/share/perl5/core_perl/*.pod && \
+	for d in $${pkgdir}/usr/share/perl5/core_perl/*; do \
+	    if [ -d $$d -a $$(basename $$d) != "pod" ]; then \
+	        find $$d -name *.pod -delete; \
+	    fi; \
+	done && \
+	find $${pkgdir}/usr/lib -name *.pod -delete && \
+	find $${pkgdir} -name .packlist -delete && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo cp -r "$${pkgdir}"/* "$(MNT)" && \
+	sudo rm -r "$${pkgdir}"/* && \
+	(sudo rmdir "$${pkgdir}" || \
+	    (sudo cp -r "$${pkgdir}"/.* "$(MNT)" && sudo rm -r "$${pkgdir}")) && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# custom (permissive free)
+krb5:
+	[ -f "krb5-1.11.1-signed.tar" ] || \
+	wget "http://web.mit.edu/kerberos/dist/krb5/1.11/krb5-1.11.1-signed.tar"
+	[ -f "krb5-1.11.1.tar.gz" ] || \
+	tar --get < "krb5-1.11.1-signed.tar"
+	[ -d "krb5-1.11.1" ] || \
+	tar --gzip --get < "krb5-1.11.1.tar.gz"
+	cd "krb5-1.11.1/src" && \
+	sed -i s_\''"$$LDFLAG S"'\'__g krb5-config.in && \
+	sed -i "/KRB5ROOT=/s/\/local//" util/ac_check_krb5.m4 && \
+	flags="-O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2" && \
+	export CFLAGS="$$flags -fPIC -fno-strict-aliasing -fstack-protector-all" && \
+	export CPPFLAGS="$$flags -I/usr/include/et" && \
+	./configure --prefix=/usr --sysconfdir=/etc --mandir=/usr/share/man \
+	        --localstatedir=/var/lib --enable-shared --with-system-et \
+	        --with-system-ss --disable-rpath --without-tcl --enable-dns-for-realm \
+	        --with-ldap --without-system-verto && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" EXAMPLEDIR=/usr/share/doc/krb5/examples install && \
+	sudo install -m 644 plugins/kdb/ldap/libkdb_ldap/kerberos.{ldif,schema} \
+	        "$(MNT)"/usr/share/doc/krb5/examples && \
+	sudo install -dm 755 "$(MNT)"/var/lib/krb5kdc && \
+	sudo install -pm 644 config-files/kdc.conf "$(MNT)"/var/lib/krb5kdc/kdc.conf && \
+	sudo install -dm 755 "$(MNT)"/etc && \
+	sudo install -pm 644 config-files/krb5.conf "$(MNT)"/etc/krb5.conf && \
+	sudo install -dm 755 "$(MNT)"/etc/rc.d && \
+	sudo install -m 755 ../../confs/krb5-{kdc,kadmind,kpropd} "$(MNT)"/etc/rc.d && \
+	sudo install -dm 755 "$(MNT)"/usr/share/aclocal && \
+	sudo install -m 644 util/ac_check_krb5.m4 "$(MNT)"/usr/share/aclocal && \
+	sudo install -Dm644 ../NOTICE "$(MNT)"/usr/share/licenses/krb5/LICENSE && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ../..
+
+# GPL, BSD
+# makedependency: opensp, docbook2x
+iputils:
+	[ -f "iputils-s20121221.tar.bz2" ] || \
+	wget "http://www.skbuff.net/iputils/iputils-s20121221.tar.bz2"
+	[ -d "iputils-s20121221" ] || \
+	tar --bzip2 --get < "iputils-s20121221.tar.bz2"
+	cd "iputils-s20121221" && \
+	ccoptopt="-O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2" && \
+	make USE_GNUTLS=no CCOPTOPT="$$ccoptopt" && \
+	cd doc && \
+	for file in *.sgml; do \
+	    xf=$${file/.sgml/.xml} && \
+	    (osx -xlower -xno-nl-in-tag $$file > $$xf || true) && \
+	    sed -i "s_<refname>\(.*\), \(.*\)</refname>_<refname>\1</refname>, <refname>\2</refname>_g" $$xf && \
+	    docbook2man $$xf; \
+	done && \
+	cd .. && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo install -dm755 "$(MNT)"/usr/{bin,sbin} "$(MNT)"/bin && \
+	sudo install -m755 arping clockdiff rarpd rdisc tftpd tracepath tracepath6 "$(MNT)"/usr/sbin/ && \
+	sudo install -m755 ping{,6} "$(MNT)"/usr/bin/ && \
+	sudo ln -sf /usr/bin/ping{,6}  "$(MNT)"/bin/ && \
+	sudo install -dm755 "$(MNT)"/usr/share/man/man8 && \
+	sudo install -m644 doc/{arping,clockdiff,ping,rarpd,rdisc,tftpd,tracepath}.8 \
+	        "$(MNT)"/usr/share/man/man8/ && \
+	sudo ln -sf ping.8.gz  "$(MNT)"/usr/share/man/man8/ping6.8.gz && \
+	sudo ln -sf tracepath.8.gz "$(MNT)"/usr/share/man/man8/tracepath6.8.gz && \
+	sudo install -dm755 "$(MNT)"/etc/xinetd.d/ && \
+	sudo install -m644 ../confs/tftp.xinetd "$(MNT)"/etc/xinetd.d/tftp && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
 
