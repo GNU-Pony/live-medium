@@ -40,19 +40,20 @@ BOOT_CONFIG = ./boot/syslinux.cfg
 
 MORE_PACKAGE = filesystem
 MORE_PACKAGE += gcc-libs-multilib lib32-gcc-libs initscripts-fork linux linux-api-headers linux-firmware
-MORE_PACKAGE += bash cryptsetup curl dbus device-mapper dhcpcd e2fsprogs filesystem iana-etc inetutils iputils kmod libgssglue libpcap libsasl perl readline shadow systemd tzdata openssh openntpd dnssec-anchors krb5 libldap
+MORE_PACKAGE += cryptsetup curl dbus device-mapper dhcpcd filesystem iana-etc inetutils iputils perl shadow systemd tzdata openssh openntpd dnssec-anchors krb5 libldap
 MORE_PACKAGE += libtirpc
 
 
 temp-default: validate-non-root filesystem more-packages working logs chown-usb
 all: validate-non-root kernel usb-init filesystem packages logs chown-usb
 
-packages: glibc util-linux kbd pam working more-packages
+packages: glibc util-linux kbd pam new working more-packages
 
+new:
 not-compiling: libtirpc
 not-running: 
 
-working: acl attr cracklib expat file hwids less libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit
+working: acl attr cracklib expat file hwids less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash
 
 
 validate-non-root:
@@ -1150,4 +1151,201 @@ libpcap:
 	sudo install -D -m644 LICENSE "$(MNT)"/usr/share/licenses/libpcap/LICENSE && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+
+# BSD
+libgssglue:
+	[ -f "libgssglue-0.4.tar.gz" ] || \
+	wget "http://www.citi.umich.edu/projects/nfsv4/linux/libgssglue/libgssglue-0.4.tar.gz"
+	[ -d "libgssglue-0.4" ] || \
+	tar --gzip --get < "libgssglue-0.4.tar.gz"
+	cd "libgssglue-0.4" && \
+	./configure --prefix=/usr && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)/" install && \
+	sudo install -Dm644 ../confs/gssapi_mech.conf "$(MNT)"/etc/gssapi_mech.conf && \
+	sudo install -Dm644 COPYING "$(MNT)"/usr/share/licenses/libgssglue/COPYING && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL
+readline:
+	[ -f "readline-6.2.tar.gz" ] || \
+	wget "http://ftp.gnu.org/gnu/readline/readline-6.2.tar.gz"
+	[ -d "readline-6.2" ] || \
+	tar --gzip --get < "readline-6.2.tar.gz"
+	[ -f "readline62-001" ] || wget "http://ftp.gnu.org/gnu/readline/readline-6.2-patches/readline62-001"
+	[ -f "readline62-002" ] || wget "http://ftp.gnu.org/gnu/readline/readline-6.2-patches/readline62-002"
+	[ -f "readline62-003" ] || wget "http://ftp.gnu.org/gnu/readline/readline-6.2-patches/readline62-003"
+	[ -f "readline62-004" ] || wget "http://ftp.gnu.org/gnu/readline/readline-6.2-patches/readline62-004"
+	cd "readline-6.2" && \
+	patch -Np0 -i ../readline62-001 && \
+	patch -Np0 -i ../readline62-002 && \
+	patch -Np0 -i ../readline62-003 && \
+	patch -Np0 -i ../readline62-004 && \
+	sed -i 's_-Wl,-rpath,$$(libdir) __g' support/shobj-conf && \
+	./configure --prefix=/usr && \
+	make CFLAGS=-fPIC SHLIB_LIBS=-lncurses && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)/" install && \
+	sudo install -Dm644 ../confs/inputrc "$(MNT)"/etc/inputrc && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL2
+kmod:
+	[ -f "kmod-12.tar.gz" ] || \
+	wget "ftp://ftp.kernel.org/pub/linux/utils/kernel/kmod/kmod-12.tar.xz"
+	[ -d "kmod-12" ] || \
+	tar --xz --get < "kmod-12.tar.xz"
+	cd "kmod-12" && \
+	./configure --sysconfdir=/etc --enable-gtk-doc --with-zlib && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)/" install && \
+	sudo install -dm755 "$(MNT)"/{etc,usr/lib}/{depmod,modprobe}.d "$(MNT)/sbin" && \
+	sudo ln -sf ../usr/bin/kmod "$(MNT)/sbin/modprobe" && \
+	sudo ln -sf ../usr/bin/kmod "$(MNT)/sbin/depmod" && \
+	for tool in {ins,ls,rm}mod modinfo; do \
+	    sudo ln -sf kmod "$(MNT)/usr/bin/$$tool"; \
+	done && \
+	sudo install -Dm644 "../confs/depmod-search.conf" "$(MNT)/usr/lib/depmod.d/search.conf" && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL, LGPL, MIT
+e2fsprogs:
+	[ -f "e2fsprogs-1.42.7.tar.gz" ] || \
+	wget "http://downloads.sourceforge.net/sourceforge/e2fsprogs/e2fsprogs-1.42.7.tar.gz"
+	[ -d "e2fsprogs-1.42.7" ] || \
+	tar --gzip --get < "e2fsprogs-1.42.7.tar.gz"
+	cd "e2fsprogs-1.42.7" && \
+	sed -i '/init\.d/s|^|#|' misc/Makefile.in && \
+	./configure --prefix=/usr --with-root-prefix="" --libdir=/usr/lib \
+	        --enable-elf-shlibs --disable-fsck --disable-uuidd \
+	        --disable-libuuid --disable-libblkid && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install install-libs && \
+	sudo sed -i -e 's/^AWK=.*/AWK=awk/' "$(MNT)/usr/bin/compile_et" && \
+	sudo sed -i -e 's#^SS_DIR=.*#SS_DIR="/usr/share/ss"#' "$(MNT)/usr/bin/mk_cmds" && \
+	sudo sed -i -e 's#^ET_DIR=.*#ET_DIR="/usr/share/et"#' "$(MNT)/usr/bin/compile_et" && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL
+bash:
+	[ -f "bash-4.2.tar.gz" ] || \
+	wget "http://ftp.gnu.org/gnu/bash/bash-4.2.tar.gz"
+	[ -d "bash-4.2" ] || \
+	tar --gzip --get < "bash-4.2.tar.gz"
+	for (( p=1; p<=45; p++ )); do \
+	    [ -f "bash42-$$(printf "%03d" $$p)" ] || \
+                wget "http://ftp.gnu.org/gnu/bash/bash-4.2-patches/bash42-$$(printf "%03d" $$p)"; \
+	done && \
+	cd "bash-4.2" && \
+	for (( p=1; p<=45; p++ )); do \
+	    patch -Np0 -i "../bash42-$$(printf "%03d" $$p)"; \
+	done && \
+	bashconfig=(-DDEFAULT_PATH_VALUE=\'\"/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin\"\' \
+	        -DSTANDARD_UTILS_PATH=\'\"/usr/bin:/bin:/usr/sbin:/sbin\"\' \
+	        -DSYS_BASHRC=\'\"/etc/bash.bashrc\"\' \
+	        -DSYS_BASH_LOGOUT=\'\"/etc/bash.bash_logout\"\') && \
+	./configure --prefix=/usr --with-curses --enable-readline \
+	        --without-bash-malloc --with-installed-readline && \
+	make CFLAGS="${bashconfig[@]}" && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo install -dm755  "$(MNT)"/bin && \
+	sudo ln -sf ../usr/bin/bash "$(MNT)"/bin/bash && \
+	sudo ln -sf ../usr/bin/bash "$(MNT)"/bin/sh && \
+	sudo mkdir -p "$(MNT)"/etc/skel/ && \
+	sudo install -m644 ../confs/system.bashrc "$(MNT)"/etc/bash.bashrc && \
+	sudo install -m644 ../confs/system.bash_logout "$(MNT)"/etc/bash.bash_logout && \
+	sudo install -m644 ../confs/user.bashrc "$(MNT)"/etc/skel/.bashrc && \
+	sudo install -m644 ../confs/user.bash_profile "$(MNT)"/etc/skel/.bash_profile && \
+	sudo install -m644 ../confs/user.bash_logout "$(MNT)"/etc/skel/.bash_logout && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# custom (permissive free)
+# splitpackages: libsasl, cyrus-sasl, cyrus-sasl-gssapi, cyrus-sasl-ldap
+libsasl:
+	[ -f "cyrus-sasl-2.1.23.tar.gz" ] || \
+	wget "ftp://ftp.andrew.cmu.edu/pub/cyrus-mail/cyrus-sasl-2.1.23.tar.gz"
+	[ -d "cyrus-sasl-2.1.23" ] || \
+	tar --gzip --get < "cyrus-sasl-2.1.23.tar.gz"
+	cd "cyrus-sasl-2.1.23" && \
+	patch -Np1 -i ../patches/cyrus-sasl-2.1.19-checkpw.c.patch && \
+	patch -Np1 -i ../patches/cyrus-sasl-2.1.22-crypt.patch && \
+	patch -Np1 -i ../patches/cyrus-sasl-2.1.22-qa.patch && \
+	patch -Np1 -i ../patches/cyrus-sasl-2.1.22-automake-1.10.patch && \
+	patch -Np0 -i ../patches/cyrus-sasl-2.1.23-authd-fix.patch && \
+	patch -Np1 -i ../patches/0003_saslauthd_mdoc.patch && \
+	patch -Np1 -i ../patches/0010_maintainer_mode.patch && \
+	patch -Np1 -i ../patches/0011_saslauthd_ac_prog_libtool.patch && \
+	patch -Np1 -i ../patches/0012_xopen_crypt_prototype.patch && \
+	patch -Np1 -i ../patches/0016_pid_file_lock_creation_mask.patch && \
+	patch -Np1 -i ../patches/0018_auth_rimap_quotes.patch && \
+	patch -Np1 -i ../patches/0019_ldap_deprecated.patch && \
+	patch -Np1 -i ../patches/0022_gcc4.4_preprocessor_syntax.patch && \
+	patch -Np1 -i ../patches/0025_ld_as_needed.patch && \
+	patch -Np1 -i ../patches/0026_drop_krb5support_dependency.patch && \
+	patch -Np1 -i ../patches/0027_db5_support.patch && \
+	patch -Np1 -i ../patches/0030-dont_use_la_files_for_opening_plugins.patch && \
+	rm -f config/config.guess config/config.sub && \
+	rm -f config/ltconfig config/ltmain.sh config/libtool.m4 && \
+	rm -fr autom4te.cache && \
+	libtoolize -c && \
+	aclocal -I config -I cmulocal && \
+	automake -a -c && \
+	autoheader && \
+	autoconf && \
+	cd saslauthd && \
+	rm -f config/config.guess config/config.sub  && \
+	rm -f config/ltconfig config/ltmain.sh config/libtool.m4 && \
+	rm -fr autom4te.cache && \
+	libtoolize -c && \
+	aclocal -I config -I ../cmulocal -I ../config && \
+	automake -a -c && \
+	autoheader && \
+	autoconf && \
+	cd .. && \
+	./configure --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --disable-static \
+	        --enable-shared --enable-alwaystrue --enable-checkapop --enable-cram --enable-digest \
+	        --disable-otp --disable-srp --disable-srp-setpass --disable-krb4 --enable-gssapi \
+	        --enable-auth-sasldb --enable-plain --enable-anon --enable-login --enable-ntlm \
+	        --disable-passdss --enable-sql --enable-ldapdb --disable-macos-framework --with-pam \
+	        --with-saslauthd=/var/run/saslauthd --with-ldap \
+	        --with-configdir=/etc/sasl2:/etc/sasl:/usr/lib/sasl2 \
+	        --sysconfdir=/etc --with-devrandom=/dev/urandom && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	for dir in include lib sasldb plugins utils; do \
+	    cd $$dir && if sudo make DESTDIR="$(MNT)" install; then cd ..; else exit 1; fi; \
+	done && \
+	sudo rm -f "$(MNT)"/usr/lib/sasl2/libsql.so* && \
+	sudo rm -f "$(MNT)"/usr/lib/sasl2/libgssapiv2.so* && \
+	sudo rm -f "$(MNT)"/usr/lib/sasl2/libldapdb.so* && \
+	sudo install -m755 -d "$(MNT)"/usr/share/licenses/libsasl && \
+	sudo install -m644 COPYING "$(MNT)"/usr/share/licenses/libsasl/ && \
+	cd saslauthd && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo install -m755 -d "$(MNT)"/etc/rc.d && \
+	sudo install -m755 -d "$(MNT)"/etc/conf.d && \
+	sudo install -m755 ../../saslauthd "$(MNT)"/etc/rc.d/ && \
+	sudo install -m644 ../../saslauthd.conf.d "$(MNT)"/etc/conf.d/saslauthd && \
+	sudo mkdir -p "$(MNT)"/usr/share/licenses/cyrus-sasl && \
+	sudo ln -sf ../libsasl/COPYING "$(MNT)"/usr/share/licenses/cyrus-sasl/COPYING && \
+	cd ../plugins && \
+	sudo cp -a .libs/libgssapiv2.so* "$(MNT)"/usr/lib/sasl2/ && \
+	sudo mkdir -p "$(MNT)"/usr/share/licenses/cyrus-sasl-gssapi && \
+	sudo ln -sf ../libsasl/COPYING "$(MNT)"/usr/share/licenses/cyrus-sasl-gssapi/COPYING && \
+	sudo mkdir -p "$(MNT)"/usr/lib/sasl2 && \
+	sudo cp -a .libs/libldapdb.so* "$(MNT)"/usr/lib/sasl2/ && \
+	sudo mkdir -p "$(MNT)"/usr/share/licenses/cyrus-sasl-ldap && \
+	sudo ln -sf ../COPYING "$(MNT)"/usr/share/licenses/cyrus-sasl-ldap/COPYING && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ../..
+
 
