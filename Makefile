@@ -1333,8 +1333,8 @@ libsasl:
 	sudo make DESTDIR="$(MNT)" install && \
 	sudo install -m755 -d "$(MNT)"/etc/rc.d && \
 	sudo install -m755 -d "$(MNT)"/etc/conf.d && \
-	sudo install -m755 ../../saslauthd "$(MNT)"/etc/rc.d/ && \
-	sudo install -m644 ../../saslauthd.conf.d "$(MNT)"/etc/conf.d/saslauthd && \
+	sudo install -m755 ../../confs/saslauthd "$(MNT)"/etc/rc.d/ && \
+	sudo install -m644 ../../confs/saslauthd.conf.d "$(MNT)"/etc/conf.d/saslauthd && \
 	sudo mkdir -p "$(MNT)"/usr/share/licenses/cyrus-sasl && \
 	sudo ln -sf ../libsasl/COPYING "$(MNT)"/usr/share/licenses/cyrus-sasl/COPYING && \
 	cd ../plugins && \
