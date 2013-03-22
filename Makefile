@@ -31,17 +31,22 @@ MBR = /usr/lib/syslinux/mbr.bin
 BOOT_SPLASH = ./boot/splash.png
 BOOT_CONFIG = ./boot/syslinux.cfg
 
+CLEAN_DIR =
 
 ARCH_PACKAGE = filesystem linux linux-api-headers linux-firmware
 
 
-temp-default: validate-non-root filesystem packages logs chown-usb
+temp-default: validate-non-root filesystem packages logs chown-usb tar-usb
 all: validate-non-root kernel usb-init filesystem packages logs chown-usb
 
-packages: arch-packages working
-
-working: initscripts-fork shadow acl attr cracklib expat file hwids less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash curl iana-etc cryptsetup dbus dhcpcd libedit openssh perl krb5 iputils openntpd inetutils libldap device-mapper systemd kbd util-linux tzdata dnssec-anchors libtirpc glibc pam pam_unix gcc-libs
-
+packages: arch-packages initscripts-fork shadow acl attr cracklib expat file hwids \
+	  less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz \
+	  ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi \
+	  libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 \
+	  texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash \
+	  curl iana-etc cryptsetup dbus dhcpcd libedit openssh perl krb5 iputils \
+	  openntpd inetutils libldap device-mapper systemd kbd util-linux tzdata \
+	  dnssec-anchors libtirpc glibc pam pam_unix gcc-libs
 
 validate-non-root:
 	[ ! "$$UID" = 0 ]
@@ -203,16 +208,22 @@ filesystem:
 	mkdir -p "$(MNT)"/var/tmp
 	chmod 1777 "$(MNT)"/var/tmp
 
-
 logs:
 	touch "$(MNT)"/var/log/{btmp,wtmp,lastlog}
 	chmod 644 "$(MNT)"/var/log/lastlog
 	chmod 644 "$(MNT)"/var/log/wtmp
 	chmod 600 "$(MNT)"/var/log/btmp
 
+chown-usb:
+	find "$(MNT)" | while read file; do \
+	    echo 'chown root:root '"$$file"; \
+	    sudo chown "root:root" "$$file"; \
+	done
+	sudo chmod 755 "$(MNT)"
+	sudo chgrp utmp "$(MNT)"/var/log/lastlog
 
 
-# TODO : copying files installed with Arch Linux's pacman while no installation script has been made
+# This is used to copy files via Arch Linux's pacman, so that package inclusion testing can be done easier
 arch-packages:
 	sudo pacman -Ql $(ARCH_PACKAGE) | \
 	        cut -d ' ' -f 2 | grep    '/$$' | while read f; do \
@@ -226,36 +237,23 @@ arch-packages:
 	                sudo cp "$$f" "$(MNT)$$f"; \
 	        done
 
-
-chown-usb:
-	find "$(MNT)" | while read file; do \
-	    echo 'chown root:root '"$$file"; \
-	    sudo chown "root:root" "$$file"; \
-	done
-	sudo chmod 755 "$(MNT)"
-	sudo chgrp utmp "$(MNT)"/var/log/lastlog
-
-
+# Create a tar with all files
 tar-usb:
 	[ "$(DEVICELESS)" = "y" ]
 	cd "$(MNT)" && \
-	sudo tar --create $$(find .) > ../live-usb-files.tar
+	sudo tar --create > ../live-usb-files.tar \
+	    $$(find . | sed -e 's_^\./__' | cut -d / -f 1 | uniq | sort | uniq)
 
+# Create a cpio with all files
 cpio-usb:
 	[ "$(DEVICELESS)" = "y" ]
 	cd "$(MNT)" && \
-	find . | sudo cpio --create > ../live-usb-files.cpio
-
-
-.PHONY: clean
-clean:
-	yes | rm -r linux-* memtest86+-* coreutils-* glibc-* \
-	            util-linux-* kbd-* sysvinit-* cpiolist *.bin \
-	    || exit 0
-	sudo make -C "$(GNU_PONY_INITRAM)" clean
+	find . | sed -e 's_^\./__' | cut -d / -f 1 | uniq | sort | uniq | \
+	    sudo cpio --create > ../live-usb-files.cpio
 
 
 # LGPL
+CLEAN_DIR += "acl-2.2.51"
 acl:
 	[ -f "acl-2.2.51.src.tar.gz" ] || \
 	wget "http://download.savannah.gnu.org/releases/acl/acl-2.2.51.src.tar.gz"
@@ -271,6 +269,7 @@ acl:
 	cd ..
 
 # LGPL
+CLEAN_DIR += "attr-2.4.46"
 attr:
 	[ -f "attr-2.4.46.src.tar.gz" ] || \
 	wget "http://download.savannah.gnu.org/releases/attr/attr-2.4.46.src.tar.gz"
@@ -288,6 +287,7 @@ attr:
 	cd ..
 
 # GPL
+CLEAN_DIR += "cracklib-2.8.22"
 cracklib:
 	[ -f "cracklib-2.8.22.tar.gz" ] || \
 	wget "http://downloads.sourceforge.net/sourceforge/cracklib/cracklib-2.8.22.tar.gz"
@@ -305,6 +305,7 @@ cracklib:
 	cd ..
 
 # custom (permissive free)
+CLEAN_DIR += "expat-2.1.0"
 expat:
 	[ -f "expat-2.1.0.tar.gz" ] || \
 	wget "http://downloads.sourceforge.net/sourceforge/expat/expat-2.1.0.tar.gz"
@@ -320,6 +321,7 @@ expat:
 	cd ..
 
 # custom (permissive free)
+CLEAN_DIR += "file-5.13"
 file:
 	[ -f "file-5.13.tar.gz" ] || \
 	wget "ftp://ftp.astron.com/pub/file/file-5.13.tar.gz"
@@ -335,6 +337,7 @@ file:
 	cd ..
 
 # GPL2
+CLEAN_DIR += "gentoo-hwids"*
 hwids:
 	[ -f "hwids-20130228.tar.gz" ] || \
 	wget "https://github.com/gentoo/hwids/tarball/hwids-20130228" -O "hwids-20130228.tar.gz"
@@ -349,6 +352,7 @@ hwids:
 	cd ..
 
 # GPL3
+CLEAN_DIR += "less-451"
 less:
 	[ -f "less-451.tar.gz" ] || \
 	wget "http://www.greenwoodsoftware.com/less/less-451.tar.gz"
@@ -363,6 +367,7 @@ less:
 	cd ..
 
 # GPL2
+CLEAN_DIR += "libcap-2.22"
 libcap:
 	[ -f "libcap-2.22.tar.gz" ] || \
 	wget "ftp://ftp.archlinux.org/other/libcap/libcap-2.22.tar.gz"
@@ -379,6 +384,7 @@ libcap:
 	cd ..
 
 # LGPL
+CLEAN_DIR += "libgpg-error-1.11"
 libgpg-error:
 	[ -f "libgpg-error-1.11.tar.gz" ] || \
 	wget "ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-1.11.tar.gz"
@@ -393,6 +399,7 @@ libgpg-error:
 	cd ..
 
 # GPL
+CLEAN_DIR += "libnl-3.2.21"
 libnl:
 	[ -f "libnl-3.2.21.tar.gz" ] || \
 	wget "http://www.infradead.org/~tgr/libnl/files/libnl-3.2.21.tar.gz"
@@ -407,6 +414,7 @@ libnl:
 	cd ..
 
 # BSD
+CLEAN_DIR += "libssh2-1.4.3"
 libssh2:
 	[ -f "libssh2-1.4.3.tar.gz" ] || \
 	wget "http://www.libssh2.org/download/libssh2-1.4.3.tar.gz"
@@ -422,6 +430,7 @@ libssh2:
 	cd ..
 
 # LGPL
+CLEAN_DIR += "libusbx-1.0.14"
 libusbx:
 	[ -f "libusbx-1.0.14.tar.bz2" ] || \
 	wget "http://downloads.sourceforge.net/libusbx/libusbx-1.0.14.tar.bz2"
@@ -436,6 +445,7 @@ libusbx:
 	cd ..
 
 # MIT
+CLEAN_DIR += "ncurses-5.9"
 ncurses:
 	[ -f "ncurses-5.9.tar.gz" ] || \
 	wget "ftp://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz"
@@ -480,6 +490,7 @@ ncurses:
 	cd ..
 
 # BSD
+CLEAN_DIR += "netcfg-3.0"
 netcfg:
 	[ -f "netcfg-3.0.tar.xz" ] || \
 	wget "ftp://ftp.archlinux.org/other/netcfg/netcfg-3.0.tar.xz"
@@ -496,6 +507,7 @@ netcfg:
 	cd ..
 
 # BSD
+CLEAN_DIR += "pcre-8.32"
 pcre:
 	[ -f "pcre-8.32.tar.bz2" ] || \
 	wget "ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.32.tar.bz2"
@@ -512,6 +524,7 @@ pcre:
 	cd ..
 
 # custom (permissive free)
+CLEAN_DIR += "popt-1.16"
 popt:
 	[ -f "popt-1.16.tar.gz" ] || \
 	wget "http://rpm5.org/files/popt/popt-1.16.tar.gz"
@@ -527,6 +540,7 @@ popt:
 	cd ..
 
 # GPL, LGPL
+CLEAN_DIR += "sysfsutils-2.1.0"
 sysfsutils:
 	[ -f "sysfsutils-2.1.0.tar.gz" ] || \
 	wget "http://downloads.sourceforge.net/sourceforge/linux-diag/sysfsutils-2.1.0.tar.gz"
@@ -542,6 +556,7 @@ sysfsutils:
 	cd ..
 
 # public domain, LGPL2+, GPL2+, GPL3+, custom (all premissive)
+CLEAN_DIR += "xz-5.0.4"
 xz:
 	[ -f "xz-5.0.4.tar.gz" ] || \
 	wget "http://tukaani.org/xz/xz-5.0.4.tar.gz"
@@ -561,6 +576,7 @@ xz:
 	cd ..
 
 # custom (all premissive free)
+CLEAN_DIR += "zlib-1.2.7"
 zlib:
 	[ -f "zlib-1.2.7.tar.gz" ] || \
 	wget "http://zlib.net/current/zlib-1.2.7.tar.gz"
@@ -577,6 +593,7 @@ zlib:
 	cd ..
 
 # BSD
+CLEAN_DIR += "ldns-1.6.16"
 ldns:
 	[ -f "ldns-1.6.16.tar.gz" ] || \
 	wget "http://www.nlnetlabs.nl/downloads/ldns/ldns-1.6.16.tar.gz"
@@ -593,6 +610,7 @@ ldns:
 	cd ..
 
 # GPL2, LGPL2.1
+CLEAN_DIR += "keyutils-1.5.5"
 keyutils:
 	[ -f "keyutils-1.5.5.tar.bz2" ] || \
 	wget "http://people.redhat.com/~dhowells/keyutils/keyutils-1.5.5.tar.bz2"
@@ -611,6 +629,7 @@ keyutils:
 	cd ..
 
 # GPL3
+CLEAN_DIR += "which-2.20"
 which:
 	[ -f "which-2.20.tar.gz" ] || \
 	wget "http://www.xs4all.nl/~carlo17/which/which-2.20.tar.gz"
@@ -625,6 +644,7 @@ which:
 	cd ..
 
 # GPL3
+CLEAN_DIR += "tar-1.26"
 tar:
 	[ -f "tar-1.26.tar.xz" ] || \
 	wget "ftp://ftp.gnu.org/gnu/tar/tar-1.26.tar.xz"
@@ -640,6 +660,7 @@ tar:
 	cd ..
 
 # GPL3
+CLEAN_DIR += "sed-4.2.2"
 sed:
 	[ -f "sed-4.2.2.tar.gz" ] || \
 	wget "ftp://ftp.gnu.org/pub/gnu/sed/sed-4.2.2.tar.gz"
@@ -656,6 +677,7 @@ sed:
 	cd ..
 
 # GPL
+CLEAN_DIR += "nano-2.2.6"
 nano:
 	[ -f "nano-2.2.6.tar.gz" ] || \
 	wget "http://www.nano-editor.org/dist/v2.2/nano-2.2.6.tar.gz"
@@ -674,6 +696,7 @@ nano:
 
 # GPL3
 COREUTILS = coreutils-$(COREUTILS_VERSION)
+CLEAN_DIR += "$(COREUTILS)"
 coreutils:
 	[ -f "$(COREUTILS).tar.xz" ] || \
 	wget "http://ftp.gnu.org/gnu/coreutils/$(COREUTILS).tar.xz"
@@ -693,6 +716,7 @@ coreutils:
 	cd ..
 
 # custom (permissive free)
+CLEAN_DIR += "db-5.3.21"
 db:
 	[ -f "db-5.3.21.tar.gz" ] || \
 	wget "http://download.oracle.com/berkeley-db/db-5.3.21.tar.gz"
@@ -710,6 +734,7 @@ db:
 	cd ../..
 
 # GPL3
+CLEAN_DIR += "findutils-4.4.2"
 findutils:
 	[ -f "findutils-4.4.2.tar.gz" ] || \
 	wget "ftp://ftp.gnu.org/pub/gnu/findutils/findutils-4.4.2.tar.gz"
@@ -725,6 +750,7 @@ findutils:
 	cd ..
 
 # GPL
+CLEAN_DIR += "gawk-4.0.2"
 gawk:
 	[ -f "gawk-4.0.2.tar.gz" ] || \
 	wget "ftp://ftp.gnu.org/pub/gnu/gawk/gawk-4.0.2.tar.gz"
@@ -742,6 +768,7 @@ gawk:
 	cd ..
 
 # GPL
+CLEAN_DIR += "gettext-0.18.2.1"
 gettext:
 	[ -f "gettext-0.18.2.1.tar.gz" ] || \
 	wget "ftp://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.2.1.tar.gz"
@@ -756,6 +783,7 @@ gettext:
 	cd ..
 
 # LGPL3
+CLEAN_DIR += "gmp-5.1.1"
 gmp:
 	[ -f "gmp-5.1.1.tar.xz" ] || \
 	wget "ftp://ftp.gmplib.org/pub/gmp-5.1.1/gmp-5.1.1.tar.xz"
@@ -770,6 +798,7 @@ gmp:
 	cd ..
 
 # MIT
+CLEAN_DIR += "libffi-3.0.12"
 libffi:
 	[ -f "libffi-3.0.12.tar.gz" ] || \
 	wget "ftp://sourceware.org/pub/libffi/libffi-3.0.12.tar.gz"
@@ -785,6 +814,7 @@ libffi:
 	cd ..
 
 # LGPL
+CLEAN_DIR += "libgcrypt-1.5.1"
 libgcrypt:
 	[ -f "libgcrypt-1.5.1.tar.bz2" ] || \
 	wget "ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.5.1.tar.bz2"
@@ -799,6 +829,7 @@ libgcrypt:
 	cd ..
 
 # custom (permissive free)
+CLEAN_DIR += "bzip2-1.0.6"
 bzip2:
 	[ -f "bzip2-1.0.6.tar.gz" ] || \
 	wget "http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz"
@@ -830,6 +861,7 @@ bzip2:
 	cd ..
 
 # GPL
+CLEAN_DIR += "gdbm-1.10"
 gdbm:
 	[ -f "gdbm-1.10.tar.gz" ] || \
 	wget "ftp://ftp.gnu.org/gnu/gdbm/gdbm-1.10.tar.gz"
@@ -851,6 +883,7 @@ gdbm:
 	cd ..
 
 # LGPL
+CLEAN_DIR += "glib-2.34.3"
 glib2:
 	[ -f "glib-2.34.3.tar.xz" ] || \
 	wget "http://ftp.gnome.org/pub/GNOME/sources/glib/2.34/glib-2.34.3.tar.xz"
@@ -869,6 +902,7 @@ glib2:
 	cd ..
 
 # GPL3
+CLEAN_DIR += "grep-2.14"
 grep:
 	[ -f "grep-2.14.tar.xz" ] || \
 	wget "ftp://ftp.gnu.org/gnu/grep/grep-2.14.tar.xz"
@@ -883,6 +917,7 @@ grep:
 	cd ..
 
 # GPL3
+CLEAN_DIR += "gzip-1.5"
 gzip:
 	[ -f "gzip-1.5.tar.xz" ] || \
 	wget "ftp://ftp.gnu.org/pub/gnu/gzip/gzip-1.5.tar.xz"
@@ -898,6 +933,7 @@ gzip:
 	cd ..
 
 # GPL2
+CLEAN_DIR += "iproute2-3.8.0"
 iproute2:
 	[ -f "iproute2-3.8.0.tar.xz" ] || \
 	wget "http://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-3.8.0.tar.xz"
@@ -918,6 +954,7 @@ iproute2:
 	cd ..
 
 # GPL3
+CLEAN_DIR += "texinfo-5.1"
 texinfo:
 	[ -f "texinfo-5.1.tar.xz" ] || \
 	wget "ftp://ftp.gnu.org/pub/gnu/texinfo/texinfo-5.1.tar.xz"
@@ -934,6 +971,7 @@ texinfo:
 # GPL
 # removed files are provided by util-linux, except for the corrected (made safer) link
 SYSVINIT = sysvinit-$(SYSVINIT_VERSION)dsf
+CLEAN_DIR += "$(SYSVINIT)"
 sysvinit:
 	[ -f "$(SYSVINIT).tar.bz2" ] || \
 	wget "http://download.savannah.gnu.org/releases/sysvinit/$(SYSVINIT).tar.bz2"
@@ -973,6 +1011,7 @@ sysvinit:
 	cd ..
 
 # BSD
+CLEAN_DIR += "openssl-1.0.1e"
 openssl:
 	[ -f "openssl-1.0.1e.tar.gz" ] || \
 	wget "https://www.openssl.org/source/openssl-1.0.1e.tar.gz"
@@ -1001,6 +1040,7 @@ openssl:
 	cd ..
 
 # BSD
+CLEAN_DIR += "libtirpc-0.2.2"
 libtirpc:
 	[ -f "libtirpc-0.2.2.tar.bz2" ] || \
 	wget "http://downloads.sourceforge.net/sourceforge/libtirpc/libtirpc-0.2.2.tar.bz2"
@@ -1020,6 +1060,7 @@ libtirpc:
 	cd ..
 
 # BSD
+CLEAN_DIR += "libpcap-1.3.0"
 libpcap:
 	[ -f "libpcap-1.3.0.tar.gz" ] || \
 	wget "http://www.tcpdump.org/release/libpcap-1.3.0.tar.gz"
@@ -1041,6 +1082,7 @@ libpcap:
 	cd ..
 
 # BSD
+CLEAN_DIR += "libgssglue-0.4"
 libgssglue:
 	[ -f "libgssglue-0.4.tar.gz" ] || \
 	wget "http://www.citi.umich.edu/projects/nfsv4/linux/libgssglue/libgssglue-0.4.tar.gz"
@@ -1057,6 +1099,7 @@ libgssglue:
 	cd ..
 
 # GPL
+CLEAN_DIR += "readline-6.2"
 readline:
 	[ -f "readline-6.2.tar.gz" ] || \
 	wget "http://ftp.gnu.org/gnu/readline/readline-6.2.tar.gz"
@@ -1081,6 +1124,7 @@ readline:
 	cd ..
 
 # GPL2
+CLEAN_DIR += "kmod-12"
 kmod:
 	[ -f "kmod-12.tar.xz" ] || \
 	wget "ftp://ftp.kernel.org/pub/linux/utils/kernel/kmod/kmod-12.tar.xz"
@@ -1102,6 +1146,7 @@ kmod:
 	cd ..
 
 # GPL, LGPL, MIT
+CLEAN_DIR += "e2fsprogs-1.42.7"
 e2fsprogs:
 	[ -f "e2fsprogs-1.42.7.tar.gz" ] || \
 	wget "http://downloads.sourceforge.net/sourceforge/e2fsprogs/e2fsprogs-1.42.7.tar.gz"
@@ -1122,6 +1167,7 @@ e2fsprogs:
 	cd ..
 
 # GPL
+CLEAN_DIR += "bash-4.2"
 bash:
 	[ -f "bash-4.2.tar.gz" ] || \
 	wget "http://ftp.gnu.org/gnu/bash/bash-4.2.tar.gz"
@@ -1158,6 +1204,7 @@ bash:
 
 # custom (permissive free)
 # split packages: libsasl, cyrus-sasl, cyrus-sasl-gssapi, cyrus-sasl-ldap
+CLEAN_DIR += "cyrus-sasl-2.1.23"
 libsasl:
 	[ -f "cyrus-sasl-2.1.23.tar.gz" ] || \
 	wget "ftp://ftp.andrew.cmu.edu/pub/cyrus-mail/cyrus-sasl-2.1.23.tar.gz"
@@ -1238,6 +1285,7 @@ libsasl:
 
 # GPL, LGPL, FDL, custom (free exception)
 # split packages: gcc-libs
+CLEAN_DIR += "gcc-4.7.2" "gcc-build"
 gcc-libs:
 	[ -f "gcc-4.7.2.tar.bz2" ] || \
 	wget "ftp://gcc.gnu.org/pub/gcc/releases/gcc-4.7.2/gcc-4.7.2.tar.bz2"
@@ -1299,6 +1347,7 @@ gcc-libs:
 	cd ..
 
 # GPL2
+CLEAN_DIR += "initscripts-fork-2012.12.1"
 initscripts-fork:
 	[ -f "initscripts-fork-2012.12.1.tar.bz2" ] || \
 	wget "https://bitbucket.org/TZ86/initscripts-fork/get/2012.12.1.tar.bz2" \
@@ -1314,6 +1363,7 @@ initscripts-fork:
 	cd ..
 
 # MIT
+CLEAN_DIR += "curl-7.29.0"
 curl:
 	[ -f "curl-7.29.0.tar.gz" ] || \
 	wget "http://curl.haxx.se/download/curl-7.29.0.tar.gz"
@@ -1337,6 +1387,7 @@ curl:
 	cd ..
 
 # custom (free, GPL-incompatible)
+CLEAN_DIR += "iana-etc-2.30"
 iana-etc:
 	[ -f "iana-etc-2.30.tar.bz2" ] || \
 	wget "http://sethwklein.net/iana-etc-2.30.tar.bz2"
@@ -1355,6 +1406,7 @@ iana-etc:
 	cd ..
 
 # GPL
+CLEAN_DIR += "cryptsetup-1.6.0"
 cryptsetup:
 	[ -f "cryptsetup-1.6.0.tar.bz2" ] || \
 	wget "http://cryptsetup.googlecode.com/files/cryptsetup-1.6.0.tar.bz2"
@@ -1369,6 +1421,7 @@ cryptsetup:
 	cd ..
 
 # GPL, custom (free)
+CLEAN_DIR += "dbus-1.6.8"
 dbus:
 	[ -f "dbus-1.6.8.tar.gz" ] || \
 	wget "http://dbus.freedesktop.org/releases/dbus/dbus-1.6.8.tar.gz"
@@ -1395,6 +1448,7 @@ dbus:
 	cd ..
 
 # BSD
+CLEAN_DIR += "dhcpcd-5.6.7"
 dhcpcd:
 	[ -f "dhcpcd-5.6.7.tar.bz2" ] || \
 	wget "http://roy.marples.name/downloads/dhcpcd/dhcpcd-5.6.7.tar.bz2"
@@ -1417,6 +1471,7 @@ dhcpcd:
 
 # BSD
 # TODO: libedit is in critical need of patch of non-ASCII character support
+CLEAN_DIR += "libedit-20120601-3.0"
 libedit:
 	[ -f "libedit-20120601-3.0.tar.gz" ] || \
 	wget "http://www.thrysoee.dk/editline/libedit-20120601-3.0.tar.gz"
@@ -1432,6 +1487,7 @@ libedit:
 	cd ..
 
 # BSD
+CLEAN_DIR += "openssh-6.1p1"
 openssh:
 	[ -f "openssh-6.1p1.tar.gz" ] || \
 	wget "ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-6.1p1.tar.gz"
@@ -1463,6 +1519,7 @@ openssh:
 	cd ..
 
 # GPL. PerlArtistic
+CLEAN_DIR += "perl-5.16.3" "perl-build"
 perl:
 	[ -f "perl-5.16.3.tar.bz2" ] || \
 	wget "http://www.cpan.org/src/5.0/perl-5.16.3.tar.bz2"
@@ -1521,6 +1578,7 @@ perl:
 	cd ..
 
 # custom (permissive free)
+CLEAN_DIR += "krb5-1.11.1"
 krb5:
 	[ -f "krb5-1.11.1-signed.tar" ] || \
 	wget "http://web.mit.edu/kerberos/dist/krb5/1.11/krb5-1.11.1-signed.tar"
@@ -1557,6 +1615,7 @@ krb5:
 
 # GPL, BSD
 # makedependency: opensp, docbook2x
+CLEAN_DIR += "iputils-s20121221"
 iputils:
 	[ -f "iputils-s20121221.tar.bz2" ] || \
 	wget "http://www.skbuff.net/iputils/iputils-s20121221.tar.bz2"
@@ -1589,6 +1648,7 @@ iputils:
 	cd ..
 
 # BSD
+CLEAN_DIR += "openntpd-3.9p1"
 openntpd:
 	[ -f "openntpd-3.9p1.tar.gz" ] || \
 	wget "ftp://ftp.openbsd.org/pub/OpenBSD/OpenNTPD/openntpd-3.9p1.tar.gz"
@@ -1612,6 +1672,7 @@ openntpd:
 	cd ..
 
 # GPL3
+CLEAN_DIR += "inetutils-1.9.1"
 inetutils:
 	[ -f "inetutils-1.9.1.tar.gz" ] || \
 	wget "http://ftp.gnu.org/gnu/inetutils/inetutils-1.9.1.tar.gz"
@@ -1641,6 +1702,7 @@ inetutils:
 	cd ..
 
 # custom (permissive free)
+CLEAN_DIR += "openldap-2.4.34"
 libldap:
 	[ -f "openldap-2.4.34.tgz" ] || \
 	wget "ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-2.4.34.tgz"
@@ -1675,6 +1737,7 @@ libldap:
 
 # GPL2, LGPL2.1
 # make dependencies: systemd
+CLEAN_DIR += "LVM2-2.02.98"
 device-mapper:
 	[ -f "LVM2-2.02.98.tar.gz" ] || \
 	wget "ftp://sources.redhat.com/pub/lvm2/LVM2.2.02.98.tgz" -O LVM2-2.02.98.tar.gz
@@ -1698,6 +1761,7 @@ device-mapper:
 # split packages: systemd
 # make dependencies: cryptsetup docbook-xsl gobject-introspection gperf gtk-doc intltool
 #                    libmicrohttpd libxslt linux-api-headers python quota-tools xz
+CLEAN_DIR += "systemd-198"
 systemd:
 	[ -f "systemd-198.tar.xz" ] || \
 	wget "http://www.freedesktop.org/software/systemd/systemd-198.tar.xz"
@@ -1731,6 +1795,7 @@ systemd:
 
 # GPL
 KBD = kbd-$(KBD_VERSION)
+CLEAN_DIR += "$(KBD)"
 kbd:
 	[ -f "$(KBD).tar.gz" ] || \
 	wget "ftp://ftp.altlinux.org/pub/people/legion/kbd/$(KBD).tar.gz"
@@ -1753,6 +1818,7 @@ kbd:
 
 # GPL, LGPL
 GLIBC = glibc-$(GLIBC_VERSION)
+CLEAN_DIR += "$(GLIBC)" "glibc-build"
 glibc:
 	export CFLAGS="-O2 -pipe --param=ssp-buffer-size=4" && \
 	export LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro" && \
@@ -1806,6 +1872,7 @@ glibc:
 # GPL2
 # make dependencies: flex w3m docbook-xml>=4.4 docbook-xsl
 PAM = Linux-PAM-$(PAM_VERSION)
+CLEAN_DIR += "$(PAM)"
 pam:
 	[ -f "$(PAM).tar.bz2" ] || \
 	wget "https://fedorahosted.org/releases/l/i/linux-pam/$(PAM).tar.bz2"
@@ -1825,6 +1892,7 @@ pam:
 
 # GPL2
 # make dependencies: flex w3m docbook-xml>=4.4 docbook-xsl
+CLEAN_DIR += "pam_unix2-2.9.1"
 pam_unix:
 	[ -f "pam_unix2-2.9.1.tar.bz2" ] || \
 	wget "ftp://ftp.archlinux.org/other/pam_unix2/pam_unix2-2.9.1.tar.bz2"
@@ -1854,6 +1922,7 @@ pam_unix:
 
 # GPL2
 UTIL_LINUX = util-linux-$(UTIL_LINUX_VERSION)
+CLEAN_DIR += "$(UTIL_LINUX)"
 util-linux:
 	V="$(UTIL_LINUX_VERSION)" && V="$${V%.*}" && \
 	([ -f "$(UTIL_LINUX).tar.xz" ] || \
@@ -1879,6 +1948,7 @@ util-linux:
 	cd ..
 
 # BSD
+CLEAN_DIR += "shadow-4.1.5.1"
 shadow:
 	[ -f "shadow-4.1.5.1.tar.bz2" ] || \
 	wget "http://pkg-shadow.alioth.debian.org/releases/shadow-4.1.5.1.tar.bz2"
@@ -1921,6 +1991,7 @@ shadow:
 # note: it is still common for servers to encounter fatal problems on leapseconds,
 #       if you are running a server my may consider freezing this package so no
 #       upcoming leapseconds are registrered on the local leapseconds register.
+CLEAN_DIR += "tzdata2013b"
 tzdata:
 	[ -f "tzdata2013b.tar.gz" ] || \
 	wget "http://www.iana.org/time-zones/repository/releases/tzdata2013b.tar.gz" -O tzdata-2013b.tar.gz
@@ -1939,6 +2010,7 @@ tzdata:
 	cd ..
 
 # public domain (copyrightable inelligible)
+CLEAN_DIR += "dnssec-anchors-build"
 dnssec-anchors:
 	mkdir -p dnssec-anchors-build
 	cd dnssec-anchors-build && \
@@ -1960,4 +2032,35 @@ dnssec-anchors:
 	        "$(MNT)"/usr/share/licenses/dnssec-anchors/LICENSE && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+
+
+
+.PHONY: clean
+clean:
+	sudo rm -r $(CLEAN_DIR) cpiolist *.bin || true
+	sudo make -C "$(GNU_PONY_INITRAM)" clean || true
+
+.PHONY: clean-download
+clean-download:
+	rm -r *.{tar{,.gz,.bz2,.xz},tgz} || true
+	rm -r {bash,readline}??-??? || true
+
+.PHONY: clean-mnt
+clean-mnt:
+	if [ "$(DEVICELESS)" = "y" ] && [ ! "$(MNT)" = "" ]; then \
+	    sudo rm -r "$(MNT)" && mkdir "$(MNT)"; \
+	elif [ "$(DEVICELESS)" = "" ] && [ ! "$(MNT)" = "" ]; then \
+	    cd "$(MNT)" && for f in $$(echo * .*); do \
+	        if [ ! "$$f" = "." ] && [ ! "$$f" = ".." ] && \
+	           [ ! "$$f" = "lost+found" ] ; then \
+	               sudo rm -r "$$f"; \
+	    fi; done; \
+	fi
+
+
+.PHONY: clean-mostly
+clean-mostly: clean clean-mnt
+
+.PHONY: clean-all
+clean-all: clean clean-download clean-mnt
 
