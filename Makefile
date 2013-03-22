@@ -41,7 +41,7 @@ BOOT_CONFIG = ./boot/syslinux.cfg
 
 MORE_PACKAGE = filesystem
 MORE_PACKAGE += linux linux-api-headers linux-firmware
-MORE_PACKAGE += device-mapper inetutils shadow systemd tzdata openntpd dnssec-anchors libldap
+MORE_PACKAGE += device-mapper shadow systemd tzdata dnssec-anchors
 MORE_PACKAGE += glibc util-linux kbd pam
 MORE_PACKAGE += libtirpc  gcc-libs-multilib lib32-gcc-libs  initscripts-fork
 
@@ -55,7 +55,7 @@ new:
 not-compiling: libtirpc gcc-libs initscripts-fork
 not-running: 
 
-working: acl attr cracklib expat file hwids less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash curl iana-etc cryptsetup dbus dhcpcd libedit openssh perl krb5 iputils
+working: acl attr cracklib expat file hwids less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash curl iana-etc cryptsetup dbus dhcpcd libedit openssh perl krb5 iputils openntpd inetutils libldap
 
 
 validate-non-root:
@@ -1687,4 +1687,90 @@ iputils:
 	sudo install -m644 ../confs/tftp.xinetd "$(MNT)"/etc/xinetd.d/tftp && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+
+# BSD
+openntpd:
+	[ -f "openntpd-3.9p1.tar.gz" ] || \
+	wget "ftp://ftp.openbsd.org/pub/OpenBSD/OpenNTPD/openntpd-3.9p1.tar.gz"
+	[ -d "openntpd-3.9p1" ] || \
+	tar --gzip --get < "openntpd-3.9p1.tar.gz"
+	cd "openntpd-3.9p1" && \
+	patch -Np1 -i ../patches/linux-adjtimex.patch && \
+	autoreconf -fi && \
+	./configure --prefix=/usr --sysconfdir=/etc --with-privsep-user=ntp \
+	        --with-privsep-path=/run/openntpd/ --with-adjtimex && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo install -Dm755 ../confs/openntpd "$(MNT)"/etc/rc.d/openntpd && \
+	sudo install -Dm644 ../confs/openntpd.conf "$(MNT)"/etc/conf.d/openntpd && \
+	sudo install -Dm644 LICENCE "$(MNT)"/usr/share/licenses/openntpd/LICENCE && \
+	sudo sed -i 's/\*/0.0.0.0/' "$(MNT)"/etc/ntpd.conf && \
+	sudo install -Dm644 ../patches/openntpd.tmpfiles "$(MNT)"/usr/lib/tmpfiles.d/openntpd.conf && \
+	sudo install -dm755 "$(MNT)"/usr/lib/systemd/ntp-units.d && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL3
+inetutils:
+	[ -f "inetutils-1.9.1.tar.gz" ] || \
+	wget "http://ftp.gnu.org/gnu/inetutils/inetutils-1.9.1.tar.gz"
+	[ -d "inetutils-1.9.1" ] || \
+	tar --gzip --get < "inetutils-1.9.1.tar.gz"
+	cd "inetutils-1.9.1" && \
+	sed -i 's#_GL_WARN_ON_USE (gets#//_GL_WARN_ON_USE (gets#' lib/stdio.in.h && \
+	./configure --prefix=/usr --libexec=/usr/sbin --localstatedir=/var --sysconfdir=/etc \
+	        --mandir=/usr/share/man --infodir=/usr/share/info --without-wrap --with-pam \
+	        --enable-ftp --enable-ftpd --enable-telnet --enable-telnetd --enable-talk --enable-talkd \
+	        --enable-rlogin --enable-rlogind --enable-rsh --enable-rshd --enable-rcp --enable-hostname \
+	        --disable-rexec --disable-rexecd --disable-tftp --disable-tftpd --disable-ping \
+	        --disable-ping6 --disable-logger --disable-syslogd --disable-inetd --disable-whois \
+	        --disable-uucpd --disable-ifconfig --disable-traceroute && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo mkdir -p "$(MNT)"/bin && \
+	sudo ln -sf /usr/bin/hostname "$(MNT)"/bin/hostname && \
+	sudo install -D -m755 ../confs/ftpd.rc "$(MNT)"/etc/rc.d/ftpd && \
+	sudo install -D -m644 ../confs/ftpd.conf "$(MNT)"/etc/conf.d/ftpd && \
+	sudo install -D -m644 ../confs/telnet.xinetd "$(MNT)"/etc/xinetd.d/telnet && \
+	sudo install -D -m644 ../confs/talk.xinetd "$(MNT)"/etc/xinetd.d/talk && \
+	sudo install -D -m644 ../confs/rlogin.xinetd "$(MNT)"/etc/xinetd.d/rlogin && \
+	sudo install -D -m644 ../confs/rsh.xinetd "$(MNT)"/etc/xinetd.d/rsh && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# custom (permissive free)
+libldap:
+	[ -f "openldap-2.4.34.tgz" ] || \
+	wget "ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-2.4.34.tgz"
+	[ -d "openldap-2.4.34" ] || \
+	tar --gzip --get < "openldap-2.4.34.tgz"
+	cd "openldap-2.4.34" && \
+	patch -Np1 -i ../patches/ntlm.patch && \
+	sed -i 's#-m 644 $$(LIBRARY)#-m 755 $$(LIBRARY)#' \
+	        libraries/{liblber,libldap,libldap_r}/Makefile.in && \
+	sed -i 's|#define LDAPI_SOCK LDAP_RUNDIR LDAP_DIRSEP "run" LDAP_DIRSEP "ldapi"|#define LDAPI_SOCK LDAP_DIRSEP "run" LDAP_DIRSEP "openldap" LDAP_DIRSEP "ldapi"|' \
+	        include/ldap_defaults.h && \
+	sed -i 's|%LOCALSTATEDIR%/run|/run/openldap|' servers/slapd/slapd.conf && \
+	sed -i 's|-$$(MKDIR) $$(DESTDIR)$$(localstatedir)/run|-$$(MKDIR) $$(DESTDIR)/run/openldap|' \
+	        servers/slapd/Makefile.in && \
+	./configure --prefix=/usr --mandir=/usr/share/man --libexecdir=/usr/lib --sysconfdir=/etc \
+	        --localstatedir=/var/lib/openldap --enable-ipv6 --enable-syslog --enable-local \
+	        --enable-bdb --enable-hdb --enable-crypt --enable-dynamic --with-threads \
+	        --disable-wrappers --without-fetch --enable-spasswd --with-cyrus-sasl \
+	        --enable-overlays=mod --enable-modules=yes && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	for dir in include libraries doc/man/man3 ; do \
+	    cd $${dir} && sudo make DESTDIR="$(MNT)" install && cd ..; \
+	done && cd ../.. && \
+	sudo install -Dm644 doc/man/man5/ldap.conf.5.tmp "$(MNT)"/usr/share/man/man5/ldap.conf.5 && \
+	sudo rm "$(MNT)"/etc/openldap/*.default && \
+	sudo ln -sf liblber.so "$(MNT)"/usr/lib/liblber.so.2 && \
+	sudo ln -sf libldap.so "$(MNT)"/usr/lib/libldap.so.2 && \
+	sudo install -Dm644 LICENSE "$(MNT)"/usr/share/licenses/libldap/LICENSE && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
 
