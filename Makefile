@@ -24,13 +24,6 @@ KBD_VERSION = 1.15.5
 SYSVINIT_VERSION = 2.88
 PAM_VERSION = 1.1.6
 
-COREUTILS = coreutils-$(COREUTILS_VERSION)
-GLIBC = glibc-$(GLIBC_VERSION)
-UTIL_LINUX = util-linux-$(UTIL_LINUX_VERSION)
-KBD = kbd-$(KBD_VERSION)
-SYSVINIT = sysvinit-$(SYSVINIT_VERSION)dsf
-PAM = Linux-PAM-$(PAM_VERSION)
-
 USB_LABEL = GNU_PONY
 USB_FS = ext2
 MNT = /mnt
@@ -40,20 +33,14 @@ BOOT_CONFIG = ./boot/syslinux.cfg
 
 
 ARCH_PACKAGE = filesystem linux linux-api-headers linux-firmware
-ARCH_PACKAGE += libtirpc  gcc-libs-multilib lib32-gcc-libs  glibc  pam
 
 
 temp-default: validate-non-root filesystem packages logs chown-usb
 all: validate-non-root kernel usb-init filesystem packages logs chown-usb
 
-# the order of some packages matters
 packages: arch-packages working
 
-new:
-not-compiling: libtirpc gcc-libs glibc pam
-not-running:
-
-working: initscripts-fork shadow acl attr cracklib expat file hwids less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash curl iana-etc cryptsetup dbus dhcpcd libedit openssh perl krb5 iputils openntpd inetutils libldap device-mapper systemd kbd util-linux tzdata dnssec-anchors
+working: initscripts-fork shadow acl attr cracklib expat file hwids less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash curl iana-etc cryptsetup dbus dhcpcd libedit openssh perl krb5 iputils openntpd inetutils libldap device-mapper systemd kbd util-linux tzdata dnssec-anchors libtirpc glibc pam pam_unix gcc-libs
 
 
 validate-non-root:
@@ -684,7 +671,9 @@ nano:
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
 
+
 # GPL3
+COREUTILS = coreutils-$(COREUTILS_VERSION)
 coreutils:
 	[ -f "$(COREUTILS).tar.xz" ] || \
 	wget "http://ftp.gnu.org/gnu/coreutils/$(COREUTILS).tar.xz"
@@ -944,6 +933,7 @@ texinfo:
 
 # GPL
 # removed files are provided by util-linux, except for the corrected (made safer) link
+SYSVINIT = sysvinit-$(SYSVINIT_VERSION)dsf
 sysvinit:
 	[ -f "$(SYSVINIT).tar.bz2" ] || \
 	wget "http://download.savannah.gnu.org/releases/sysvinit/$(SYSVINIT).tar.bz2"
@@ -1020,9 +1010,7 @@ libtirpc:
 	patch -Np1 -i ../patches/libtirpc-0.2.1-fortify.patch && \
 	patch -Np1 -i ../patches/libtirpc-0.2.3rc1.patch && \
 	patch -Np1 -i ../patches/libtirpc-fix-segfault-0.2.2.patch && \
-	sh autogen.sh && \
-	autoreconf -fisv && \
-	./configure --prefix=/usr --enable-ges && \
+	./configure --prefix=/usr --enable-gss && \
 	make && \
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
 	sudo make DESTDIR="$(MNT)" install && \
@@ -1265,8 +1253,7 @@ gcc-libs:
 	export CXXFLAGS=" -O2 -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2" && \
 	mkdir -p ../gcc-build && cd ../gcc-build && \
 	../gcc-4.7.2/configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/libexec \
-	        --mandir=/usr/share/man --infodir=/usr/share/info \
-	        --enable-languages=c,c++,ada,fortran,go,lto,objc,obj-c++ \
+	         --mandir=/usr/share/man --infodir=/usr/share/info--enable-languages=c,c++,fortran,lto \
 	        --enable-shared --enable-threads=posix --with-system-zlib --enable-__cxa_atexit \
 	        --disable-libunwind-exceptions --enable-clocale=gnu --disable-libstdcxx-pch \
 	        --enable-libstdcxx-time --enable-gnu-unique-object --enable-linker-build-id \
@@ -1275,24 +1262,38 @@ gcc-libs:
 	        --enable-plugin --with-plugin-ld=ld.gold --with-linker-hash-style=gnu --disable-multilib \
 	        --disable-libssp --disable-build-with-cxx --disable-build-poststage1-with-cxx \
 	        --enable-checking=release && \
-	make && \
-	cd $(CHOST)/libstdc++-v3 && \
+	cd ..
+	sed -i 's|@itemx --help|@item --help|g' gcc-4.7.2/gcc/doc/cppopts.texi
+	for t in '-fenable-@var{kind}-@var{pass}' '-fdump-rtl-cprop_hardreg' '-fdump-rtl-csa' \
+	         '-fdump-rtl-dce' '-fdump-rtl-dbr' '-fdump-rtl-into_cfglayout' \
+	         '-fdump-rtl-outof_cfglayout' '-fdump-rtl-pro_and_epilogue'; do \
+	    sed -i "s|@itemx $${t}|@item $${t}|g" gcc-4.7.2/gcc/doc/invoke.texi || exit 1; \
+	done
+	sed -i "s|@tie{KiB}|@tie{}KiB|g" gcc-4.7.2/gcc/doc/invoke.texi
+	sed -i "s|@itemx all.cross|@item all.cross|g" gcc-4.7.2/gcc/doc/sourcebuild.texi
+	sed -i "s|@itemx POINTER_PLUS_EXPR|@item POINTER_PLUS_EXPR|g" gcc-4.7.2/gcc/doc/generic.texi
+	sed -i "s|@itemx PLUS_EXPR|@item PLUS_EXPR|g" gcc-4.7.2/gcc/doc/generic.texi
+	cd gcc-build && make && cd ..
+	cd gcc-build/$(CHOST)/libstdc++-v3 && \
 	make doc-man-doxygen && \
-	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
-	cd ../../gcc-build && \
-	sudo make -j1 -C $(CHOST)/libgcc DESTDIR="$(MNT)" install-shared && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && cd ../..
+	cd gcc-build && \
+	sudo make -j1 -C $(CHOST)/libgcc DESTDIR="$(MNT)" install-shared && cd ..
+	cd gcc-build && \
 	for lib in libmudflap libgomp libstdc++-v3/src libitm; do \
-	    sudo make -j1 -C $(CHOST)/$lib DESTDIR="$(MNT)" install-toolexeclibLTLIBRARIES; \
-	done && \
-	sudo make -j1 -C $(CHOST)/libstdc++-v3/po DESTDIR="$(MNT)" install && \
+	    sudo make -j1 -C $(CHOST)/$$lib DESTDIR="$(MNT)" install-toolexeclibLTLIBRARIES; \
+	done && cd ..
+	cd gcc-build && \
+	sudo make -j1 -C $(CHOST)/libstdc++-v3/po DESTDIR="$(MNT)" install && cd ..
+	cd gcc-build && \
 	sudo make -j1 -C $(CHOST)/libgomp DESTDIR="$(MNT)" install-info && \
-	sudo make -j1 -C $(CHOST)/libitm DESTDIR="$(MNT)" install-info && \
-	sudo make -j1 DESTDIR="$(MNT)" install-target-libquadmath && \
-	sudo make -j1 DESTDIR="$(MNT)" install-target-libgfortran && \
-	sudo make -j1 DESTDIR="$(MNT)" install-target-libobjc && \
+	sudo make -j1 -C $(CHOST)/libitm DESTDIR="$(MNT)" install-info && cd ..
+	cd gcc-build && \
+	sudo make -j1 DESTDIR="$(MNT)" install-target-lib{quadmath,gfortran,objc} && cd ..
+	cd gcc-build && \
 	sudo rm -r "$(MNT)"/usr/lib/{gcc/,libgfortran.spec} && \
 	sudo find "$(MNT)" -name *.a -delete && \
-	sudo install -Dm644 ${_basedir}/COPYING.RUNTIME \
+	sudo install -Dm644 ../gcc-4.7.2/COPYING.RUNTIME \
 	        "$(MNT)"/usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
@@ -1729,6 +1730,7 @@ systemd:
 	cd ..
 
 # GPL
+KBD = kbd-$(KBD_VERSION)
 kbd:
 	[ -f "$(KBD).tar.gz" ] || \
 	wget "ftp://ftp.altlinux.org/pub/people/legion/kbd/$(KBD).tar.gz"
@@ -1750,6 +1752,7 @@ kbd:
 	cd ..
 
 # GPL, LGPL
+GLIBC = glibc-$(GLIBC_VERSION)
 glibc:
 	export CFLAGS="-O2 -pipe --param=ssp-buffer-size=4" && \
 	export LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro" && \
@@ -1774,7 +1777,7 @@ glibc:
 	echo "CXX += -fstack-protector -D_FORTIFY_SOURCE=2" >> configparms && \
 	make && \
 	sed -i '2,4d' configparms && \
-	touch $(MNT)/etc/ld.so.conf && \
+	sudo touch $(MNT)/etc/ld.so.conf && \
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
 	sudo make install_root="$(MNT)" install && \
 	cd ..
@@ -1802,37 +1805,45 @@ glibc:
 
 # GPL2
 # make dependencies: flex w3m docbook-xml>=4.4 docbook-xsl
+PAM = Linux-PAM-$(PAM_VERSION)
 pam:
 	[ -f "$(PAM).tar.bz2" ] || \
 	wget "https://fedorahosted.org/releases/l/i/linux-pam/$(PAM).tar.bz2"
 	[ -d "$(PAM)" ] || \
 	tar --bzip2 --get < "$(PAM).tar.bz2"
-	[ -f "pam_unix2-2.9.1.tar.bz2" ] || \
-	wget "ftp://ftp.archlinux.org/other/pam_unix2/pam_unix2-2.9.1.tar.bz2"
-	[ -d "pam_unix2-2.9.1" ] || \
-	tar --bzip2 --get < "pam_unix2-2.9.1.tar.bz2"
 	cd "$(PAM)" && \
 	./configure --libdir=/usr/lib && \
 	sed -i 's_mkdir -p $$(namespaceddir)_mkdir -p $$(DESTDIR)$$(namespaceddir)_g' \
 	    modules/pam_namespace/Makefile && \
 	make && \
-	cd ../pam_unix2-2.9.1 && \
+	cd ..
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)")
+	cd "$(PAM)" && \
+	sudo make DESTDIR="$(MNT)" SCONFIGDIR=/etc/security install && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL2
+# make dependencies: flex w3m docbook-xml>=4.4 docbook-xsl
+pam_unix:
+	[ -f "pam_unix2-2.9.1.tar.bz2" ] || \
+	wget "ftp://ftp.archlinux.org/other/pam_unix2/pam_unix2-2.9.1.tar.bz2"
+	[ -d "pam_unix2-2.9.1" ] || \
+	tar --bzip2 --get < "pam_unix2-2.9.1.tar.bz2"
+	cd pam_unix2-2.9.1 && \
 	patch -Np1 -i ../patches/pam_unix2-glibc216.patch && \
 	./configure --libdir=/usr/lib && \
 	make && \
-	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
 	cd ..
-	cd "$(PAM)" && \
-	sudo make DESTDIR="$(MNT)" SCONFIGDIR=/etc/security install && \
-	cd ..
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)")
 	cd pam_unix2-2.9.1 && \
 	sudo make DESTDIR="$(MNT)" install && \
 	sudo sed -i 's|# End of file||' "$(MNT)"/etc/security/limits.conf && \
-	sudo sh -c '*               -       rtprio          0 >> $(MNT)/etc/security/limits.conf' && \
-	sudo sh -c '*               -       nice            0 >> $(MNT)/etc/security/limits.conf' && \
-	sudo sh -c '@audio          -       rtprio          65 >> $(MNT)/etc/security/limits.conf' && \
-	sudo sh -c '@audio          -       nice           -10 >> $(MNT)/etc/security/limits.conf' && \
-	sudo sh -c '@audio          -       memlock         40000 >> $(MNT)/etc/security/limits.conf' && \
+	sudo sh -c 'echo "*               -       rtprio          0" >> $(MNT)/etc/security/limits.conf' && \
+	sudo sh -c 'echo "*               -       nice            0" >> $(MNT)/etc/security/limits.conf' && \
+	sudo sh -c 'echo "@audio          -       rtprio          65" >> $(MNT)/etc/security/limits.conf' && \
+	sudo sh -c 'echo "@audio          -       nice           -10" >> $(MNT)/etc/security/limits.conf' && \
+	sudo sh -c 'echo "@audio          -       memlock         40000" >> $(MNT)/etc/security/limits.conf' && \
 	sudo ln -sf pam_unix.so "$(MNT)"/usr/lib/security/pam_unix_acct.so && \
 	sudo ln -sf pam_unix.so "$(MNT)"/usr/lib/security/pam_unix_auth.so && \
 	sudo ln -sf pam_unix.so "$(MNT)"/usr/lib/security/pam_unix_passwd.so && \
@@ -1842,6 +1853,7 @@ pam:
 	cd ..
 
 # GPL2
+UTIL_LINUX = util-linux-$(UTIL_LINUX_VERSION)
 util-linux:
 	V="$(UTIL_LINUX_VERSION)" && V="$${V%.*}" && \
 	([ -f "$(UTIL_LINUX).tar.xz" ] || \
