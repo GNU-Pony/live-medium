@@ -40,21 +40,20 @@ BOOT_CONFIG = ./boot/syslinux.cfg
 
 
 ARCH_PACKAGE = filesystem linux linux-api-headers linux-firmware
-ARCH_PACKAGE += tzdata dnssec-anchors
 ARCH_PACKAGE += libtirpc  gcc-libs-multilib lib32-gcc-libs  glibc  pam
 
 
-temp-default: validate-non-root filesystem arch-packages working logs chown-usb
+temp-default: validate-non-root filesystem packages logs chown-usb
 all: validate-non-root kernel usb-init filesystem packages logs chown-usb
 
 # the order of some packages matters
-packages: arch-packages new working
+packages: arch-packages working
 
 new:
 not-compiling: libtirpc gcc-libs glibc pam
 not-running:
 
-working: initscripts-fork shadow acl attr cracklib expat file hwids less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash curl iana-etc cryptsetup dbus dhcpcd libedit openssh perl krb5 iputils openntpd inetutils libldap device-mapper systemd kbd util-linux
+working: initscripts-fork shadow acl attr cracklib expat file hwids less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash curl iana-etc cryptsetup dbus dhcpcd libedit openssh perl krb5 iputils openntpd inetutils libldap device-mapper systemd kbd util-linux tzdata dnssec-anchors
 
 
 validate-non-root:
@@ -1906,4 +1905,47 @@ shadow:
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
 
+# public domain
+# note: it is still common for servers to encounter fatal problems on leapseconds,
+#       if you are running a server my may consider freezing this package so no
+#       upcoming leapseconds are registrered on the local leapseconds register.
+tzdata:
+	[ -f "tzdata2013b.tar.gz" ] || \
+	wget "http://www.iana.org/time-zones/repository/releases/tzdata2013b.tar.gz" -O tzdata-2013b.tar.gz
+	[ -d "tzdata-2013b" ] || \
+	mkdir -p "tzdata-2013b" && cd "tzdata-2013b" && \
+	tar --gzip --get < "../tzdata-2013b.tar.gz" && \
+	timezones=('africa' 'antarctica' 'asia' 'australasia' 'europe' 'northamerica' 'southamerica' \
+	           'pacificnew' 'etcetera' 'backward' 'systemv' 'factory' 'solar87' 'solar88' 'solar89') && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo zic -y ./yearistype -d "$(MNT)"/usr/share/zoneinfo $${timezones[@]} && \
+	sudo zic -y ./yearistype -d "$(MNT)"/usr/share/zoneinfo/posix $${timezones[@]} && \
+	sudo zic -y ./yearistype -d "$(MNT)"/usr/share/zoneinfo/right -L leapseconds $${timezones[@]} && \
+	sudo zic -y ./yearistype -d "$(MNT)"/usr/share/zoneinfo -p America/New_York && \
+	sudo install -m444 -t "$(MNT)"/usr/share/zoneinfo iso3166.tab zone.tab && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# public domain (copyrightable inelligible)
+dnssec-anchors:
+	mkdir -p dnssec-anchors-build
+	cd dnssec-anchors-build && \
+	 drill -z -s DNSKEY . > root.key
+	cd dnssec-anchors-build && \
+	 curl "http://data.iana.org/root-anchors/root-anchors.xml" | \
+	 awk 'BEGIN{ORS=" "}(NR>4){gsub(/<[^>]*>/,"");print tolower($$0)}' | \
+	 sed 's/   /\n/' > root.ds
+	cd dnssec-anchors-build && \
+	 [[ "$$(<root.ds)" = '19036 8 2 49aac11d7b6f6446702e54a1607371607a1a41855200fd2ce1cdde32f24e8fb5' ]] && \
+	 grep -Pq 'IN\tDS\t'"$(<root.ds)" root.key || \
+	 (echo -e '\e[01;31mSuspicious dnssec-anchors\e[00m' ; return 1)
+	cd dnssec-anchors-build && \
+	 sed '/DNSKEY/s/ ;{id = '"$$(cut -d\  -f1<root.ds)"' .*//;t;d' root.key > trusted-key.key
+	cd dnssec-anchors-build && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo install -Dm644 trusted-key.key "$(MNT)"/etc/trusted-key.key && \
+	sudo install -Dm644 ../patches/dnssec-anchors-license \
+	        "$(MNT)"/usr/share/licenses/dnssec-anchors/LICENSE && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
 
