@@ -39,23 +39,22 @@ BOOT_SPLASH = ./boot/splash.png
 BOOT_CONFIG = ./boot/syslinux.cfg
 
 
-MORE_PACKAGE = filesystem
-MORE_PACKAGE += linux linux-api-headers linux-firmware
-MORE_PACKAGE += device-mapper shadow systemd tzdata dnssec-anchors
-MORE_PACKAGE += glibc util-linux kbd pam
-MORE_PACKAGE += libtirpc  gcc-libs-multilib lib32-gcc-libs  initscripts-fork
+ARCH_PACKAGE = filesystem linux linux-api-headers linux-firmware
+ARCH_PACKAGE += tzdata dnssec-anchors
+ARCH_PACKAGE += libtirpc  gcc-libs-multilib lib32-gcc-libs  glibc  pam
 
 
-temp-default: validate-non-root filesystem more-packages working logs chown-usb
+temp-default: validate-non-root filesystem arch-packages working logs chown-usb
 all: validate-non-root kernel usb-init filesystem packages logs chown-usb
 
-packages: glibc util-linux kbd pam new working more-packages
+# the order of some packages matters
+packages: arch-packages new working
 
 new:
-not-compiling: libtirpc gcc-libs initscripts-fork
-not-running: 
+not-compiling: libtirpc gcc-libs glibc pam
+not-running:
 
-working: acl attr cracklib expat file hwids less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash curl iana-etc cryptsetup dbus dhcpcd libedit openssh perl krb5 iputils openntpd inetutils libldap
+working: initscripts-fork shadow acl attr cracklib expat file hwids less libsasl libcap libnl libssh2 libusbx netcfg pcre popt sysfsutils xz ldns keyutils which tar nano coreutils db findutils gawk gettext gmp libffi libgcrypt zlib sed libgpg-error ncurses bzip2 gdbm glib2 grep gzip iproute2 texinfo openssl libpcap sysvinit libgssglue readline kmod e2fsprogs bash curl iana-etc cryptsetup dbus dhcpcd libedit openssh perl krb5 iputils openntpd inetutils libldap device-mapper systemd kbd util-linux
 
 
 validate-non-root:
@@ -227,119 +226,19 @@ logs:
 
 
 
-glibc:
-	export CFLAGS="-march=x86-64 -mtune=generic -O2 -pipe --param=ssp-buffer-size=4" && \
-	export LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro" && \
-	[ -f "$(GLIBC).tar.xz" ] || \
-	wget "http://ftp.gnu.org/gnu/libc/$(GLIBC).tar.xz"
-	[ -d "$(GLIBC)" ] || \
-	tar --xz --get < "$(GLIBC).tar.xz"
-	[ ! -d "glibc-build" ] || rm -r "glibc-build"
-	mkdir "glibc-build"
-	cd "$(GLIBC)" && patch -p1 -i ../patches/glibc-2.17-sync-with-linux37.patch && cd ..
-	cd "glibc-build" && \
-	unset LD_LIBRARY_PATH && \
-	echo "slibdir=/usr/lib" >> configparms && \
-	"../$(GLIBC)/configure" \
-	        --prefix="/usr" \
-		--libdir="/usr/lib" \
-		--libexecdir="/usr/libexec" \
-		--with-headers="/usr/include" \
-	        --enable-add-ons=nptl,libidn \
-	        --enable-obsolete-rpc \
-	        --enable-kernel=2.6.32 \
-	        --enable-bind-now --disable-profile \
-	        --enable-stackguard-randomization \
-	        --enable-multi-arch && \
-	echo "build-programs=no" >> configparms && \
-	make && \
-	sed -i "/build-programs=/s#no#yes#" configparms && \
-	echo "CC += -fstack-protector -D_FORTIFY_SOURCE=2" >> configparms && \
-	echo "CXX += -fstack-protector -D_FORTIFY_SOURCE=2" >> configparms && \
-	make && \
-	sed -i '2,4d' configparms && \
-	install -dm755 $(MNT)/etc && \
-	touch $(MNT)/etc/ld.so.conf && \
-	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
-	make install_root="$(MNT)" install && \
-	cd ..
-	rm -f "$(MNT)"/etc/ld.so.{cache,conf}
-	install -dm755 "$(MNT)"/usr/lib/{locale,systemd/system,tmpfiles.d}
-	install -m644 "$(GLIBC)"/nscd/nscd.conf "$(MNT)"/etc/nscd.conf
-	install -m644 nscd.service "$(MNT)"/usr/lib/systemd/system
-	install -m644 nscd.tmpfiles "$(MNT)"/usr/lib/tmpfiles.d/nscd.conf
-	install -m644 "$(GLIBC)"/posix/gai.conf "$(MNT)"/etc/gai.conf
-	install -m755 locale-gen "$(MNT)"/usr/bin
-	([ "$$(realpath "$(MNT)/sbin")" = "$$(realpath "$(MNT)/usr/bin")" ] || \
-	        ln -sf ../../sbin/ldconfig "$(MNT)"/usr/bin/ldconfig)
-	strip --strip-all \
-	        "$(MNT)"/sbin/{ldconfig,sln} \
-	        "$(MNT)"/usr/bin/{gencat,getconf,getent,iconv,locale,localedef} \
-	        "$(MNT)"/usr/bin/{makedb,pcprofiledump,pldd,rpcgen,sprof} \
-	        "$(MNT)"/usr/sbin/{iconvconfig,nscd}
-	strip --strip-debug "$(MNT)"/usr/lib/*.a
-	strip --strip-unneeded \
-	        "$(MNT)"/usr/lib/{libanl,libBrokenLocale,libcidn,libcrypt}-*.so \
-	        "$(MNT)"/usr/lib/libnss_{compat,db,dns,files,hesiod,nis,nisplus}-*.so \
-	        "$(MNT)"/usr/lib/{libdl,libm,libnsl,libresolv,librt,libutil}-*.so \
-	        "$(MNT)"/usr/lib/{libmemusage,libpcprofile,libSegFault}.so \
-	        "$(MNT)"/usr/lib/{audit,gconv}/*.so
-	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)")
-
-util-linux:
-	[ -f "$(UTIL_LINUX).tar.xz" ] || \
-	wget "http://www.kernel.org/pub/linux/utils/util-linux/v$(UTIL_LINUX_VERSION)/$(UTIL_LINUX).tar.xz"
-	[ -d "$(UTIL_LINUX)" ] || \
-	tar --xz --get < "$(UTIL_LINUX).tar.xz"
-	cd "$(UTIL_LINUX)" && \
-	./autogen.sh && \
-	./configure && \
-	make && \
-	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
-	sudo make DESTDIR="$(MNT)" install && \
-	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
-	cd ..
-
-kbd:
-	[ -f "$(KBD).tar.gz" ] || \
-	wget "http://www.kernel.org/pub/linux/utils/kbd/$(KBD).tar.gz"
-	[ -d "$(KBD)" ] || \
-	tar --gzip --get < "$(KBD).tar.gz"
-	cd "$(KBD)" && \
-	./configure && \
-	make && \
-	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
-	sudo make DESTDIR="$(MNT)" install && \
-	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
-	cd ..
-
-pam:
-	[ -f "$(PAM).tar.bz2" ] || \
-	wget "https://fedorahosted.org/releases/l/i/linux-pam/$(PAM).tar.bz2"
-	[ -d "$(PAM)" ] || \
-	tar --bzip2 --get < "$(PAM).tar.bz2"
-	cd "$(PAM)" && \
-	./configure --libdir=/usr/lib && \
-	sed -i 's_mkdir -p $$(namespaceddir)_mkdir -p $$(DESTDIR)$$(namespaceddir)_g' \
-	    modules/pam_namespace/Makefile && \
-	make && \
-	make DESTDIR="$(MNT)" SCONFIGDIR=/etc/security install
-
-
 # TODO : copying files installed with Arch Linux's pacman while no installation script has been made
-more-packages:
-	sudo pacman -Ql $(MORE_PACKAGE) | \
+arch-packages:
+	sudo pacman -Ql $(ARCH_PACKAGE) | \
 	        cut -d ' ' -f 2 | grep    '/$$' | while read f; do \
 	            echo "mkdir -p $(MNT)$$f"; \
 	            sudo mkdir -p "$(MNT)$$f"; \
 	        done
-	sudo pacman -Ql $(MORE_PACKAGE) | \
+	sudo pacman -Ql $(ARCH_PACKAGE) | \
 	        cut -d ' ' -f 2 | grep -v '/$$' | while read f; do \
 	            echo "cp $$f => $(MNT)$$f"; \
 	            [ -e "$(MNT)$$f" ] || \
 	                sudo cp "$$f" "$(MNT)$$f"; \
 	        done
-	cd "$(MNT)" && sudo tar --create * > "../morefiles.tar" && cd ..
 
 
 chown-usb:
@@ -1409,6 +1308,7 @@ initscripts-fork:
 	    mv TZ86-initscripts-fork-* "initscripts-fork-2012.12.1") && \
 	cd "initscripts-fork-2012.12.1" && \
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sed -i 's_ln -s _ln -sf _g' Makefile && \
 	sudo make DESTDIR="$(MNT)" install && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
@@ -1770,6 +1670,239 @@ libldap:
 	sudo ln -sf liblber.so "$(MNT)"/usr/lib/liblber.so.2 && \
 	sudo ln -sf libldap.so "$(MNT)"/usr/lib/libldap.so.2 && \
 	sudo install -Dm644 LICENSE "$(MNT)"/usr/share/licenses/libldap/LICENSE && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL2, LGPL2.1
+# make dependencies: systemd
+device-mapper:
+	[ -f "LVM2-2.02.98.tar.gz" ] || \
+	wget "ftp://sources.redhat.com/pub/lvm2/LVM2.2.02.98.tgz" -O LVM2-2.02.98.tar.gz
+	[ -d "LVM2-2.02.98" ] || \
+	(tar --gzip --get < "LVM2-2.02.98.tar.gz" && mv LVM2.2.02.98 LVM2-2.02.98)
+	cd "LVM2-2.02.98" && \
+	unset LDFLAGS && \
+	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --with-udev-prefix=/usr \
+	        --with-systemdsystemunitdir=/usr/lib/systemd/system --with-default-pid-dir=/run \
+	        --with-default-dm-run-dir=/run --with-default-run-dir=/run/lvm \
+	        --enable-pkgconfig --enable-readline --enable-dmeventd --enable-cmdlib --enable-applib \
+	        --enable-udev_sync --enable-udev_rules --with-default-locking-dir=/run/lock/lvm \
+	        --enable-lvmetad && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install_device-mapper && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL2, LGPL2.1, MIT
+# split packages: systemd
+# make dependencies: cryptsetup docbook-xsl gobject-introspection gperf gtk-doc intltool
+#                    libmicrohttpd libxslt linux-api-headers python quota-tools xz
+systemd:
+	[ -f "systemd-198.tar.xz" ] || \
+	wget "http://www.freedesktop.org/software/systemd/systemd-198.tar.xz"
+	[ -d "systemd-198" ] || \
+	tar --xz --get < "systemd-198.tar.xz"
+	cd "systemd-198" && \
+	patch -Np1 < ../patches/use-split-usr-path.patch && \
+	patch -Np1 < ../patches/0001-journal-pass-the-pid-to-sd_pid_get_owner_uid.patch && \
+	patch -Np1 < ../patches/0001-strv-fix-STRV_FOREACH_PAIR-macro-definition.patch && \
+	patch -Np1 < ../patches/0001-rules-move-builtin-calls-before-the-permissions-sect.patch && \
+	./configure --enable-static --libexecdir=/usr/lib --localstatedir=/var \
+	        --sysconfdir=/etc --enable-introspection --enable-gtk-doc --disable-audit \
+	        --disable-ima --with-sysvinit-path= --with-sysvrcnd-path= && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo sh -c 'printf "d /run/console 0755 root root\n" > "$(MNT)"/usr/lib/tmpfiles.d/console.conf' && \
+	sudo mkdir -p "$(MNT)"/bin && \
+	sudo mkdir -p "$(MNT)"/sbin && \
+	sudo ln -sf ../usr/lib/systemd/systemd "$(MNT)"/bin/systemd && \
+	sudo rm -r "$(MNT)"/etc/systemd/system/getty.target.wants/getty@tty1.service && \
+	sudo rm -r "$(MNT)"/etc/rpm && \
+	sudo ln -sf ../usr/bin/udevadm "$(MNT)"/sbin/udevadm && \
+	sudo ln -sf ../lib/systemd/systemd-udevd "$(MNT)"/usr/bin/udevd && \
+	sudo install -m644 tmpfiles.d/legacy.conf "$(MNT)"/usr/lib/tmpfiles.d && \
+	sudo sed -i 's#GROUP="dialout"#GROUP="uucp"#g' "$(MNT)"/usr/lib/udev/rules.d/*.rules && \
+	sudo sed -i 's#GROUP="tape"#GROUP="storage"#g' "$(MNT)"/usr/lib/udev/rules.d/*.rules && \
+	sudo sed -i 's#GROUP="cdrom"#GROUP="optical"#g' "$(MNT)"/usr/lib/udev/rules.d/*.rules && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL
+kbd:
+	[ -f "$(KBD).tar.gz" ] || \
+	wget "ftp://ftp.altlinux.org/pub/people/legion/kbd/$(KBD).tar.gz"
+	[ -d "$(KBD)" ] || \
+	tar --gzip --get < "$(KBD).tar.gz"
+	cd "$(KBD)" && \
+	mv data/keymaps/i386/qwertz/cz{,-qwertz}.map && \
+	mv data/keymaps/i386/olpc/es{,-olpc}.map && \
+	mv data/keymaps/i386/olpc/pt{,-olpc}.map && \
+	mv data/keymaps/i386/dvorak/no{,-dvorak}.map && \
+	mv data/keymaps/i386/fgGIod/trf{,-fgGIod}.map && \
+	mv data/keymaps/i386/colemak/{en-latin9,colemak}.map && \
+	patch -Np1 -i ../patches/fix-keymap-loading-1.15.5.patch && \
+	./configure --prefix=/usr --datadir=/usr/share/kbd --mandir=/usr/share/man && \
+	make KEYCODES_PROGS=yes RESIZECONS_PROGS=yes && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make KEYCODES_PROGS=yes RESIZECONS_PROGS=yes DESTDIR="$(MNT)" install && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL, LGPL
+glibc:
+	export CFLAGS="-O2 -pipe --param=ssp-buffer-size=4" && \
+	export LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro" && \
+	[ -f "$(GLIBC).tar.xz" ] || \
+	wget "http://ftp.gnu.org/gnu/libc/$(GLIBC).tar.xz"
+	[ -d "$(GLIBC)" ] || \
+	tar --xz --get < "$(GLIBC).tar.xz"
+	[ ! -d "glibc-build" ] || rm -r "glibc-build"
+	mkdir "glibc-build"
+	cd "$(GLIBC)" && patch -p1 -i ../patches/glibc-2.17-sync-with-linux37.patch && cd ..
+	cd "glibc-build" && \
+	unset LD_LIBRARY_PATH && \
+	echo "slibdir=/usr/lib" >> configparms && \
+	"../$(GLIBC)/configure" --prefix="/usr" --libdir="/usr/lib" --libexecdir="/usr/libexec" \
+		--with-headers="/usr/include" --enable-add-ons=nptl,libidn --enable-obsolete-rpc \
+	        --enable-kernel=2.6.32 --enable-bind-now --disable-profile \
+	        --enable-stackguard-randomization --enable-multi-arch && \
+	echo "build-programs=no" >> configparms && \
+	make && \
+	sed -i "/build-programs=/s#no#yes#" configparms && \
+	echo "CC += -fstack-protector -D_FORTIFY_SOURCE=2" >> configparms && \
+	echo "CXX += -fstack-protector -D_FORTIFY_SOURCE=2" >> configparms && \
+	make && \
+	sed -i '2,4d' configparms && \
+	touch $(MNT)/etc/ld.so.conf && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make install_root="$(MNT)" install && \
+	cd ..
+	sudo rm -f "$(MNT)"/etc/ld.so.{cache,conf}
+	sudo install -dm755 "$(MNT)"/usr/lib/{locale,systemd/system,tmpfiles.d}
+	sudo install -m644 "$(GLIBC)"/nscd/nscd.conf "$(MNT)"/etc/nscd.conf
+	sudo install -m644 confs/nscd.tmpfiles "$(MNT)"/usr/lib/tmpfiles.d/nscd.conf
+	sudo install -m644 "$(GLIBC)"/posix/gai.conf "$(MNT)"/etc/gai.conf
+	sudo install -m755 patches/locale-gen "$(MNT)"/usr/bin
+	([ "$$(realpath "$(MNT)/sbin")" = "$$(realpath "$(MNT)/usr/bin")" ] || \
+	        sudo ln -sf ../../sbin/ldconfig "$(MNT)"/usr/bin/ldconfig)
+	sudo strip --strip-all \
+	        "$(MNT)"/sbin/{ldconfig,sln} \
+	        "$(MNT)"/usr/bin/{gencat,getconf,getent,iconv,locale,localedef} \
+	        "$(MNT)"/usr/bin/{makedb,pcprofiledump,pldd,rpcgen,sprof} \
+	        "$(MNT)"/usr/sbin/{iconvconfig,nscd}
+	sudo strip --strip-debug "$(MNT)"/usr/lib/*.a
+	sudo strip --strip-unneeded \
+	        "$(MNT)"/usr/lib/{libanl,libBrokenLocale,libcidn,libcrypt}-*.so \
+	        "$(MNT)"/usr/lib/libnss_{compat,db,dns,files,hesiod,nis,nisplus}-*.so \
+	        "$(MNT)"/usr/lib/{libdl,libm,libnsl,libresolv,librt,libutil}-*.so \
+	        "$(MNT)"/usr/lib/{libmemusage,libpcprofile,libSegFault}.so \
+	        "$(MNT)"/usr/lib/{audit,gconv}/*.so
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)")
+
+# GPL2
+# make dependencies: flex w3m docbook-xml>=4.4 docbook-xsl
+pam:
+	[ -f "$(PAM).tar.bz2" ] || \
+	wget "https://fedorahosted.org/releases/l/i/linux-pam/$(PAM).tar.bz2"
+	[ -d "$(PAM)" ] || \
+	tar --bzip2 --get < "$(PAM).tar.bz2"
+	[ -f "pam_unix2-2.9.1.tar.bz2" ] || \
+	wget "ftp://ftp.archlinux.org/other/pam_unix2/pam_unix2-2.9.1.tar.bz2"
+	[ -d "pam_unix2-2.9.1" ] || \
+	tar --bzip2 --get < "pam_unix2-2.9.1.tar.bz2"
+	cd "$(PAM)" && \
+	./configure --libdir=/usr/lib && \
+	sed -i 's_mkdir -p $$(namespaceddir)_mkdir -p $$(DESTDIR)$$(namespaceddir)_g' \
+	    modules/pam_namespace/Makefile && \
+	make && \
+	cd ../pam_unix2-2.9.1 && \
+	patch -Np1 -i ../patches/pam_unix2-glibc216.patch && \
+	./configure --libdir=/usr/lib && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	cd ..
+	cd "$(PAM)" && \
+	sudo make DESTDIR="$(MNT)" SCONFIGDIR=/etc/security install && \
+	cd ..
+	cd pam_unix2-2.9.1 && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo sed -i 's|# End of file||' "$(MNT)"/etc/security/limits.conf && \
+	sudo sh -c '*               -       rtprio          0 >> $(MNT)/etc/security/limits.conf' && \
+	sudo sh -c '*               -       nice            0 >> $(MNT)/etc/security/limits.conf' && \
+	sudo sh -c '@audio          -       rtprio          65 >> $(MNT)/etc/security/limits.conf' && \
+	sudo sh -c '@audio          -       nice           -10 >> $(MNT)/etc/security/limits.conf' && \
+	sudo sh -c '@audio          -       memlock         40000 >> $(MNT)/etc/security/limits.conf' && \
+	sudo ln -sf pam_unix.so "$(MNT)"/usr/lib/security/pam_unix_acct.so && \
+	sudo ln -sf pam_unix.so "$(MNT)"/usr/lib/security/pam_unix_auth.so && \
+	sudo ln -sf pam_unix.so "$(MNT)"/usr/lib/security/pam_unix_passwd.so && \
+	sudo ln -sf pam_unix.so "$(MNT)"/usr/lib/security/pam_unix_session.so && \
+	sudo chmod +s "$(MNT)"/sbin/unix_chkpwd && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# GPL2
+util-linux:
+	V="$(UTIL_LINUX_VERSION)" && V="$${V%.*}" && \
+	([ -f "$(UTIL_LINUX).tar.xz" ] || \
+	wget "http://www.kernel.org/pub/linux/utils/util-linux/v$${V}/$(UTIL_LINUX).tar.xz")
+	[ -d "$(UTIL_LINUX)" ] || \
+	tar --xz --get < "$(UTIL_LINUX).tar.xz"
+	cd "$(UTIL_LINUX)" && \
+	./configure --prefix=/usr --libdir=/usr/lib --localstatedir=/run \
+	        --enable-fs-paths-extra=/usr/bin:/usr/sbin --enable-raw --enable-vipw \
+	        --enable-newgrp --enable-chfn-chsh --enable-write --enable-mesg \
+	        --enable-socket-activation && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo chmod 4755 "$(MNT)"/usr/bin/{newgrp,ch{sh,fn}} && \
+	sudo install -Dm644 ../confs/pam-common "$(MNT)"/etc/pam.d/chfn && \
+	sudo install -m644 ../confs/pam-common "$(MNT)"/etc/pam.d/chsh && \
+	sudo install -m644 ../confs/pam-login "$(MNT)"/etc/pam.d/login && \
+	sudo install -m644 ../confs/pam-su "$(MNT)"/etc/pam.d/su && \
+	sudo install -m644 ../confs/pam-su "$(MNT)"/etc/pam.d/su-l && \
+	sudo install -Dm644 ../confs/uuidd.tmpfiles "$(MNT)"/usr/lib/tmpfiles.d/uuidd.conf && \
+	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
+	cd ..
+
+# BSD
+shadow:
+	[ -f "shadow-4.1.5.1.tar.bz2" ] || \
+	wget "http://pkg-shadow.alioth.debian.org/releases/shadow-4.1.5.1.tar.bz2"
+	[ -d "shadow-4.1.5.1" ] || \
+	tar --bzip2 --get < "shadow-4.1.5.1.tar.bz2"
+	cd "shadow-4.1.5.1" && \
+	sed -i '/^user\(mod\|add\)_LDADD/s|$$| -lattr|' src/Makefile.am && \
+	export LIBS="-lcrypt" && \
+	patch -Np1 < ../patches/xstrdup.patch && \
+	patch -Np1 < ../patches/shadow-strncpy-usage.patch && \
+	sed -i '/^SUBDIRS/s/pam.d//' etc/Makefile.in && \
+	./configure --prefix=/usr --libdir=/lib --mandir=/usr/share/man --sysconfdir=/etc \
+	        --with-libpam --without-selinux --with-group-name-max-length=32 && \
+	make && \
+	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
+	sudo make DESTDIR="$(MNT)" install && \
+	sudo install -Dm644 ../patches/shadow-license "$(MNT)"/usr/share/licenses/shadow/LICENSE && \
+	sudo install -Dm644 ../confs/useradd.defaults "$(MNT)"/etc/default/useradd && \
+	sudo install -Dm744 ../confs/shadow.cron.daily "$(MNT)"/etc/cron.daily/shadow && \
+	sudo install -Dm644 ../confs/login.defs "$(MNT)"/etc/login.defs && \
+	sudo install -dm755 "$(MNT)"/etc/pam.d && \
+	sudo install -t "$(MNT)"/etc/pam.d -m644 ../confs/{passwd,chgpasswd,chpasswd,newusers} && \
+	sudo install -Dm644 etc/pam.d/groupmems "$(MNT)"/etc/pam.d/groupmems && \
+	for file in chage groupadd groupdel groupmod shadow useradd usermod userdel; do \
+	        sudo install -Dm644 ../confs/shadow-defaults.pam "$(MNT)"/etc/pam.d/$$file; \
+	done && \
+	sudo install -Dm644 ../confs/lastlog.tmpfiles "$(MNT)"/usr/lib/tmpfiles.d/lastlog.conf && \
+	sudo rm "$(MNT)"/usr/sbin/logoutd && \
+	sudo rm "$(MNT)"/usr/bin/{chsh,chfn,sg} && \
+	sudo rm "$(MNT)"/bin/{login,su} && \
+	sudo rm "$(MNT)"/usr/sbin/{vipw,vigr} && \
+	sudo mv "$(MNT)"/usr/bin/{newgrp,sg} && \
+	sudo find "$(MNT)"/usr/share/man \( -name chsh.1 -o -name chfn.1 -o -name su.1 -o -name logoutd.8 -o \
+	        -name login.1 -o -name vipw.8 -o -name vigr.8 -o -name newgrp.1 \) -delete && \
+	sudo rmdir "$(MNT)"/usr/share/man/{{fi,id,zh_TW}/man1,fi,ko/man8} && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
 
