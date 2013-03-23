@@ -3,7 +3,7 @@ TAR = tar-$(TAR_VERSION)
 CLEAN_DIR += "$(TAR)"
 packages: tar
 tar:
-	[ -f "$(TAR)" ] || \
+	[ -f "$(TAR)".tar.xz ] || \
 	wget "ftp://ftp.gnu.org/gnu/tar/$(TAR).tar.xz"
 	[ -d "$(TAR)" ] || \
 	tar --xz --get < "$(TAR).tar.xz"

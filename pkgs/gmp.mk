@@ -3,7 +3,7 @@ GMP = gmp-$(GMP_VERSION)
 CLEAN_DIR += "$(GMP)"
 packages: gmp
 gmp:
-	[ -f "$(GMP)" ] || \
+	[ -f "$(GMP).tar.xz" ] || \
 	wget "ftp://ftp.gmplib.org/pub/$(GMP)/$(GMP).tar.xz"
 	[ -d "$(GMP)" ] || \
 	tar --xz --get < "$(GMP).tar.xz"
