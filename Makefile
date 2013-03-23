@@ -12,15 +12,13 @@ ARCH_PACKAGE = linux linux-api-headers linux-firmware
 
 KERNEL_VERSION = 3.8.3
 MEMTEST_VERSION = 4.20
-UPX_COMPRESSION_LEVEL = --best
 
 include mkfiles/auxiliary-config.mk
 include versions.mk
 
 
-# TODO: upx-live
-temp-default: essentials arch-packages packages chown-live compress-live tar-usb
-all: validate-non-root kernel init-live essentials arch-packages packages chown-live compress-live
+temp-default: essentials arch-packages packages chown-live tar-usb
+all: validate-non-root kernel init-live essentials arch-packages packages chown-live
 
 
 include mkfiles/kernel.mk
