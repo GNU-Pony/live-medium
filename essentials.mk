@@ -113,7 +113,7 @@ gnupony-files:
 	cp confs/securetty "$(MNT)"/etc/securetty
 	echo '/bin/sh' > "$(MNT)"/etc/shells
 	echo '/bin/bash' >> "$(MNT)"/etc/shells
-	cp locale.sh "$(MNT)"/etc/profile.d/locale.sh
+	cp confs/locale.sh "$(MNT)"/etc/profile.d/locale.sh
 	chmod a+x "$(MNT)"/etc/profile.d/locale.sh
 	cp confs/profile "$(MNT)"/etc/profile
 	cp confs/auth-group "$(MNT)"/etc/group
