@@ -1,5 +1,4 @@
 # BSD
-# TODO: libedit is in critical need of patch of non-ASCII character support
 LIBEDIT = libedit-$(LIBEDIT_VERSION)
 CLEAN_DIR += "$(LIBEDIT)"
 packages: libedit

@@ -1,4 +1,5 @@
 # TODO do error check on gmp
+# TODO: libedit is in critical need of patch of non-ASCII character support
 
 
 # Edit config.mk if you want to change a configuration or use another architecture than x86_64
@@ -25,6 +26,8 @@ include kernel.mk
 include boot.mk
 include essentials.mk
 
+# Each file starts with a list of licenses that
+# applies the the package installed by its rule
 include pkgs/acl.mk
 include pkgs/attr.mk
 include pkgs/cracklib.mk
