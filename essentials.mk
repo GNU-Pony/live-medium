@@ -100,7 +100,7 @@ gnupony-files:
 	cp confs/issue "$(MNT)"/etc/issue
 	touch "$(MNT)"/etc/crypttab
 	touch "$(MNT)"/etc/fstab
-	ln -s /proc/self/mounts "$(MNT)"/etc/mtab
+	ln -sf /proc/self/mounts "$(MNT)"/etc/mtab
 	echo 'order hosts,bind' > "$(MNT)"/etc/host.conf
 	echo 'multi on' >> "$(MNT)"/etc/host.conf
 	echo '127.0.0.1 localhost.localdomain localhost canterlot' > "$(MNT)"/etc/hosts
