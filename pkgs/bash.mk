@@ -13,12 +13,12 @@ bash:
 	if [ ! $(BASH_PATCH) = 0 ]; then \
 	for (( p=1; p<=$(BASH_PATCH); p++ )); do \
 	    [ -f "$(BASH_)-$$(printf "%03d" $$p)" ] || \
-                wget "http://ftp.gnu.org/gnu/bash/$(BASH)-patches/$(BASH_)-$$(printf "%03d" $$p)" || exit 1 \
+                wget "http://ftp.gnu.org/gnu/bash/$(BASH)-patches/$(BASH_)-$$(printf "%03d" $$p)" || exit 1; \
 	done; fi && \
 	cd "$(BASH)" && \
 	if [ ! $(BASH_PATCH) = 0 ]; then \
 	for (( p=1; p<=$(BASH_PATCH); p++ )); do \
-	    patch -Np0 -i "../$(BASH_)-$$(printf "%03d" $$p)" || exit 1 \
+	    patch -Np0 -i "../$(BASH_)-$$(printf "%03d" $$p)" || exit 1; \
 	done; fi && \
 	bashconfig=(-DDEFAULT_PATH_VALUE=\'\"/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin\"\' \
 	        -DSTANDARD_UTILS_PATH=\'\"/usr/bin:/bin:/usr/sbin:/sbin\"\' \
