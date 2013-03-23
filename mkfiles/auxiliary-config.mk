@@ -5,3 +5,9 @@ SYSLINUX_DIR = /usr/lib/syslinux
 MBR = $(SYSLINUX_DIR)/mbr.bin
 INITCPIO_COMPRESS = xz -e9
 CLEAN_DIR =
+
+utmp=20
+ftp=11
+games=50
+root=0
+

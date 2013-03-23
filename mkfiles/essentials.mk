@@ -126,10 +126,10 @@ gnupony-files:
 chown-live:
 	sudo find "$(MNT)" | while read file; do \
 	    echo 'chown root:root '"$$file"; \
-	    sudo chown "root:root" "$$file"; \
+	    sudo chown $(root):$(root) "$$file"; \
 	done
 	sudo chmod 755 "$(MNT)"
-	sudo chgrp utmp "$(MNT)"/var/log/lastlog
-	sudo chgrp ftp "$(MNT)"/srv/ftp
-	sudo chgrp games "$(MNT)"/var/games
+	sudo chgrp $(utmp) "$(MNT)"/var/log/lastlog
+	sudo chgrp $(ftp) "$(MNT)"/srv/ftp
+	sudo chgrp $(games) "$(MNT)"/var/games
 
