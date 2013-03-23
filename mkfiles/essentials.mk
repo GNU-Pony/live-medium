@@ -135,5 +135,5 @@ chown-live:
 
 conf-override:
 	sudo cp -f confs/rc.conf "$(MNT)"/etc/rc.conf
-	sudo cp -f confs/inittab.conf "$(MNT)"/etc/inittab.conf
+	sudo cp -f confs/inittab "$(MNT)"/etc/inittab
 
