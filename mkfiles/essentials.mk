@@ -104,7 +104,7 @@ gnupony-files:
 	echo 'order hosts,bind' > "$(MNT)"/etc/host.conf
 	echo 'multi on' >> "$(MNT)"/etc/host.conf
 	echo '127.0.0.1 localhost.localdomain localhost canterlot' > "$(MNT)"/etc/hosts
-	echo '::1 localhost.localdomain localhost canterlot' >> "$(MNT)"/etc/host
+	echo '::1 localhost.localdomain localhost canterlot' >> "$(MNT)"/etc/hosts
 	touch "$(MNT)"/etc/motd
 	echo 'hosts: files dns' > "$(MNT)"/etc/nsswitch.conf
 	for x in network passwd group shadow publickey protocols services ethers rpc netgroup; \
