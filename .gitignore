@@ -1,9 +1,11 @@
 _/
+.hidden
 
 *~
 \#*\#
 .\#*
 *.bak
+*.swp
 
 /memtest.bin
 /cpiolist
