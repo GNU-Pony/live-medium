@@ -134,6 +134,6 @@ chown-live:
 	sudo chgrp $(games) "$(MNT)"/var/games
 
 conf-override:
-	sudo cp -f conf/rc.conf "$(MNT)"/etc/rc.conf
-	sudo cp -f conf/inittab.conf "$(MNT)"/etc/inittab.conf
+	sudo cp -f confs/rc.conf "$(MNT)"/etc/rc.conf
+	sudo cp -f confs/inittab.conf "$(MNT)"/etc/inittab.conf
 
