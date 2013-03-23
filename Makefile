@@ -13,7 +13,7 @@ ARCH_PACKAGE = linux linux-api-headers linux-firmware
 KERNEL_VERSION = 3.8.3
 MEMTEST_VERSION = 4.20
 
-include auxiliary-config.mk
+include mkfiles/auxiliary-config.mk
 include versions.mk
 
 
@@ -22,9 +22,9 @@ temp-default: essentials arch-packages packages chown-live tar-usb
 all: validate-non-root kernel init-live essentials arch-packages packages chown-live
 
 
-include kernel.mk
-include boot.mk
-include essentials.mk
+include mkfiles/kernel.mk
+include mkfiles/boot.mk
+include mkfiles/essentials.mk
 
 # Each file starts with a list of licenses that
 # applies the the package installed by its rule
@@ -104,6 +104,6 @@ include pkgs/shadow.mk
 include pkgs/tzdata.mk
 include pkgs/dnssec-anchors.mk
 
-include auxiliary.mk
-include clean.mk
+include mkfiles/auxiliary.mk
+include mkfiles/clean.mk
 
