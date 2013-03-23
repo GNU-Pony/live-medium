@@ -26,7 +26,6 @@ all: validate-non-root kernel init-live essentials arch-packages packages conf-o
 include mkfiles/kernel.mk
 include mkfiles/boot.mk
 include mkfiles/essentials.mk
-include mkfiles/compression.mk
 
 # Each file starts with a list of licenses that
 # applies the the package installed by its rule
