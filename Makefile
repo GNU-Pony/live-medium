@@ -1,8 +1,10 @@
 # TODO: do error check on gmp
 # TODO: libedit is in critical need of patch of non-ASCII character support
+# TODO: use linux-libre
 
 
-# Edit config.mk if you want to change a configuration or use another architecture than x86_64
+# Edit config.mk if you want to change a configuration
+# or use another architecture than x86_64
 include config.mk
 
 
