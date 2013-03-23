@@ -1,4 +1,4 @@
-# TODO do error check on gmp
+# TODO: do error check on gmp
 # TODO: libedit is in critical need of patch of non-ASCII character support
 
 
@@ -18,7 +18,7 @@ include auxiliary-config.mk
 include versions.mk
 
 
-temp-default: validate-non-root essentials arch-packages packages chown-live tar-usb
+temp-default: essentials arch-packages packages chown-live tar-usb
 all: validate-non-root kernel init-live essentials arch-packages packages chown-live
 
 
