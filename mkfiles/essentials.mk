@@ -133,3 +133,7 @@ chown-live:
 	sudo chgrp $(ftp) "$(MNT)"/srv/ftp
 	sudo chgrp $(games) "$(MNT)"/var/games
 
+conf-override:
+	sudo cp -f conf/rc.conf "$(MNT)"/etc/rc.conf
+	sudo cp -f conf/inittab.conf "$(MNT)"/etc/inittab.conf
+
