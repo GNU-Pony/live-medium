@@ -36,7 +36,7 @@ init-live: memtest.bin validate-device
 	)
 	mkdir -p "$(MNT)/syslinux"
 	mkdir -p "$(MNT)/memtest86+"
-	cp /usr/lib/syslinux/{*.{c32,com,0},memdisk} "$(MNT)/syslinux"
+	cp "$(SYSLINUX_DIR)"/{*.{c32,com,0},memdisk} "$(MNT)/syslinux"
 	cp ./memtest.bin "$(MNT)/memtest86+"
 	cp "$(BOOT_CONFIG)" "$(MNT)/syslinux/syslinux.cfg"
 	sed -i 's/root=LABEL=GNU_PONY/root=LABEL=$(USB_LABEL)/g' "$(MNT)/syslinux/syslinux.cfg"
