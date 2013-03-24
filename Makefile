@@ -10,7 +10,7 @@ include config.mk
 
 # This is used to copy files via Arch Linux's pacman,
 # so that package inclusion testing can be done easier
-ARCH_PACKAGE = linux linux-api-headers linux-firmware
+ARCH_PACKAGE = linux-api-headers linux-firmware
 
 KERNEL_VERSION = 3.8.3
 MEMTEST_VERSION = 4.20
