@@ -21,7 +21,7 @@ include versions.mk
 
 all:	validate-non-root			\
 	kernel					\
-	init-live initramfs-linux update-init	\
+	initramfs-linux update-init init-live	\
 	essentials arch-packages packages	\
 	conf-override				\
 	chown-live
