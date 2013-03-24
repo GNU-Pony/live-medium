@@ -37,6 +37,7 @@ gnupony-filesystem:
 	ln -sf bin "$(MNT)"/usr/games
 	mkdir -p "$(MNT)"/usr/doc
 	mkdir -p "$(MNT)"/usr/lib
+	mkdir -p "$(MNT)"/usr/lib/pkgconfig
 	mkdir -p "$(MNT)"/usr/libexec
 	mkdir -p "$(MNT)"/usr/libmulti
 	[ ! "$(ARCH)" = "x86_64" ] || ln -sf lib "$(MNT)"/usr/lib64

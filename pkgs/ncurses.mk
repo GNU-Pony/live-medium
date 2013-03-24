@@ -21,7 +21,7 @@ ncurses:
 	    --with-shared --with-normal --without-debug --without-ada $$CONFIGFLAG && \
 	make && \
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
-	sudo make CF_MFLAGS="$(MNT)" DESTDIR="$(MNT)" install && \
+	sudo make CF_MFLAGS="DESTDIR=$(MNT)" DESTDIR="$(MNT)" install && \
 	for lib in ncurses form panel menu; do \
 	    sudo sh -c 'echo "INPUT(-l$${lib}w)" > "$(MNT)"/usr/lib/lib$${lib}.so'; \
 	    sudo ln -sf lib$${lib}w.a "$(MNT)"/usr/lib/lib$${lib}.a; \
