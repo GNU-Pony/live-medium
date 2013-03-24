@@ -1,5 +1,5 @@
 # TODO: do error check on gmp
-# TODO: libedit is in critical need of patch of non-ASCII character support
+# TODO: libedit is in critical need of patch for non-ASCII character support
 # TODO: use linux-libre
 
 
@@ -10,7 +10,7 @@ include config.mk
 
 # This is used to copy files via Arch Linux's pacman,
 # so that package inclusion testing can be done easier
-ARCH_PACKAGE = linux-api-headers linux-firmware
+ARCH_PACKAGE = 
 
 KERNEL_VERSION = 3.8.3
 MEMTEST_VERSION = 4.20
