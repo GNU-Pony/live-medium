@@ -19,8 +19,12 @@ include mkfiles/auxiliary-config.mk
 include versions.mk
 
 
-temp-default: essentials arch-packages packages conf-override chown-live tar-usb
-all: validate-non-root kernel init-live essentials arch-packages packages conf-override chown-live
+all:	validate-non-root			\
+	kernel					\
+	init-live initramfs-linux update-init	\
+	essentials arch-packages packages	\
+	conf-override				\
+	chown-live
 
 
 include mkfiles/kernel.mk
