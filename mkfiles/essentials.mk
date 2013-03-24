@@ -1,8 +1,10 @@
 essentials: gnupony-filesystem gnupony-files essential-logs
 
+# /boot is symlinked to / in the live-medium so that /boot and /
+# can be the same partition will still having a /boot directory
 gnupony-filesystem:
 	mkdir -p "$(MNT)"/bin
-	mkdir -p "$(MNT)"/boot
+	ln -sf . "$(MNT)"/boot
 	mkdir -p "$(MNT)"/dev/shm
 	mkdir -p "$(MNT)"/etc/opt
 	mkdir -p "$(MNT)"/etc/skel
