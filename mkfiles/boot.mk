@@ -1,6 +1,6 @@
 cpiolist:
 	if [ ! -L "cpiolist" ]; then \
-	    ln -s "$(GNU_PONY_INITRAM)/cpiolist" cpiolist; \
+	    ln -sf "$(GNU_PONY_INITRAM)"/cpiolist cpiolist; \
 	fi
 
 initramfs: cpiolist
@@ -10,7 +10,7 @@ initramfs-linux: initramfs
 	make -B update-init
 
 update-init:
-	"linux-$(KERNEL_VERSION)/usr/gen_init_cpio" cpiolist | $(INITCPIO_COMPRESS) > initramfs-linux
+	$(INITCPIO_COMPRESS) < "$(GNU_PONY_INITRAM)"/initramfs-linux > initramfs-linux
 
 
 memtest: memtest.bin
