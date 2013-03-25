@@ -1,10 +1,12 @@
 # This is used to copy files via Arch Linux's pacman, so that package inclusion testing can be done easier
 arch-packages:
+	[ "$(ARCH_PACKAGE)" = "" ] || \
 	sudo pacman -Ql $(ARCH_PACKAGE) | \
 	        cut -d ' ' -f 2 | grep    '/$$' | while read f; do \
 	            echo "mkdir -p $(MNT)$$f"; \
 	            sudo mkdir -p "$(MNT)$$f"; \
 	        done
+	[ "$(ARCH_PACKAGE)" = "" ] || \
 	sudo pacman -Ql $(ARCH_PACKAGE) | \
 	        cut -d ' ' -f 2 | grep -v '/$$' | while read f; do \
 	            echo "cp $$f => $(MNT)$$f"; \

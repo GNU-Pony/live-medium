@@ -4,7 +4,7 @@ essentials: gnupony-filesystem gnupony-files essential-logs
 # can be the same partition will still having a /boot directory
 gnupony-filesystem:
 	mkdir -p "$(MNT)"/bin
-	ln -sf . "$(MNT)"/boot
+	ln -sf . "$(MNT)"/boot || true
 	mkdir -p "$(MNT)"/dev/shm
 	mkdir -p "$(MNT)"/etc/opt
 	mkdir -p "$(MNT)"/etc/skel
