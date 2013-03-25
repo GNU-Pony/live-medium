@@ -11,6 +11,9 @@ _/
 /cpiolist
 /initramfs-linux
 
+/confs/confs
+/patches/patches
+
 /*-*
 /*-*/
 !/*-gen
