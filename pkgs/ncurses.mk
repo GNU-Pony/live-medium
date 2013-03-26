@@ -20,6 +20,7 @@ ncurses:
 	../configure --prefix=/usr \
 	    --with-shared --with-normal --without-debug --without-ada $$CONFIGFLAG && \
 	make && \
+	cd ../ncursesw-build && \
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
 	sudo make CF_MFLAGS="DESTDIR=$(MNT)" DESTDIR="$(MNT)" install && \
 	for lib in ncurses form panel menu; do \
