@@ -32,4 +32,5 @@ scanner:x::
 power:x::
 nobody:::
 users:::
+ntp:!::root
 systemd-journal:x::
