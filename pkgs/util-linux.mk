@@ -16,6 +16,7 @@ util-linux:
 	make && \
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
 	sudo make DESTDIR="$(MNT)" install && \
+	sudo install -m755 login "$(MNT)"/bin && \
 	sudo chmod 4755 "$(MNT)"/usr/bin/{newgrp,ch{sh,fn}} && \
 	sudo install -Dm644 ../confs/pam-common "$(MNT)"/etc/pam.d/chfn && \
 	sudo install -m644 ../confs/pam-common "$(MNT)"/etc/pam.d/chsh && \
