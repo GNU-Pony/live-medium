@@ -4,6 +4,6 @@ ID=gnu_pony
 VERSION_ID=0.0
 PRETTY_NAME="GNU/Pony 0.0 (ponyhoof)"
 ANSI_COLOR="1;34"
-HOME_URL="https://www.archlinux.org/"
+HOME_URL="https://github.com/GNU-Pony/info"
 SUPPORT_URL="https://github.com/GNU-Pony/info/issues"
 BUG_REPORT_URL="https://github.com/GNU-Pony/info/issues"
