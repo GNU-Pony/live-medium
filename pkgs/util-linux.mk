@@ -9,11 +9,12 @@ util-linux:
 	[ -d "$(UTIL_LINUX)" ] || \
 	tar --xz --get < "$(UTIL_LINUX).tar.xz"
 	cd "$(UTIL_LINUX)" && \
+	./autogen.sh && \
 	./configure --prefix=/usr --libdir=/usr/lib --localstatedir=/run \
 	        --enable-fs-paths-extra=/usr/bin:/usr/sbin --enable-raw --enable-vipw \
 	        --enable-newgrp --enable-chfn-chsh --enable-write --enable-mesg \
 	        --enable-socket-activation && \
-	make && \
+	make INCLUDES+='-lcrypt' && \
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
 	sudo make DESTDIR="$(MNT)" install && \
 	sudo install -m755 login "$(MNT)"/bin && \

@@ -104,8 +104,8 @@ include pkgs/kbd.mk
 include pkgs/glibc.mk
 include pkgs/pam.mk
 include pkgs/pam_unix.mk
-include pkgs/util-linux.mk
 include pkgs/shadow.mk
+include pkgs/util-linux.mk
 include pkgs/tzdata.mk
 include pkgs/dnssec-anchors.mk
 

@@ -44,6 +44,7 @@ ncurses:
 	done && \
 	cd .. && \
 	sudo install -dm755 "$(MNT)"/usr/share/licenses/ncurses && \
+	ln -s libncurses.so.5 "$(MNT)"/usr/lib/libncurses.so && \
 	sudo sh -c 'grep -B 100 \$$Id README > "$(MNT)"/usr/share/licenses/ncurses/license.txt' && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
