@@ -140,4 +140,5 @@ conf-override:
 	sudo cp -f confs/rc.conf "$(MNT)"/etc/rc.conf
 	sudo cp -f confs/inittab "$(MNT)"/etc/inittab
 	sudo cp -f confs/issue "$(MNT)"/etc/issue
+	sudo cp -f confs/fstab "$(MNT)"/etc/fstab
 
