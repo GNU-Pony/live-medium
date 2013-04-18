@@ -20,4 +20,5 @@ iproute2:
 	sudo install -Dm644 lib/libnetlink.a "$(MNT)"/usr/lib/libnetlink.a && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

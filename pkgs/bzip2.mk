@@ -33,4 +33,5 @@ bzip2:
 	sudo install -Dm644 LICENSE "$(MNT)"/usr/share/licenses/bzip2/LICENSE && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

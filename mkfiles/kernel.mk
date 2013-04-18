@@ -1,8 +1,7 @@
 KERNEL_VERSION_CAT = $(shell echo $(KERNEL_VERSION) | cut -d . -f 1).0
 KERNEL = linux-$(KERNEL_VERSION)
 
-kernel: $(KERNEL)/.config \
-	$(KERNEL)/vmlinux
+kernel: $(KERNEL)/vmlinux
 
 $(KERNEL).tar.xz:
 	wget '$(KERNEL_MIRROR)/kernel/v$(KERNEL_VERSION_CAT)/$(KERNEL).tar.xz'
@@ -18,6 +17,6 @@ $(KERNEL)/.config: $(KERNEL)
 	make -C "$(KERNEL)" menuconfig
 	yes "" | make -C "$(KERNEL)" config > /dev/null
 
-$(KERNEL)/vmlinux: #initramfs
+$(KERNEL)/vmlinux: $(KERNEL)/.config
 	make -C "$(KERNEL)"
 

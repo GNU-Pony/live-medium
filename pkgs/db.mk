@@ -17,4 +17,5 @@ db:
 	sudo install -Dm644 ../LICENSE "$(MNT)"/usr/share/licenses/db/LICENSE && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ../..
+	echo "[$@]" >> built
 

@@ -21,4 +21,5 @@ gdbm:
 	sudo ln -sf ../dbm.h  "$(MNT)"/usr/include/gdbm/dbm.h && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

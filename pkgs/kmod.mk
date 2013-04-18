@@ -21,4 +21,5 @@ kmod:
 	sudo install -Dm644 "../confs/depmod-search.conf" "$(MNT)/usr/lib/depmod.d/search.conf" && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

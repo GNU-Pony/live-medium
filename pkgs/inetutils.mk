@@ -29,4 +29,5 @@ inetutils:
 	sudo install -D -m644 ../confs/rsh.xinetd "$(MNT)"/etc/xinetd.d/rsh && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

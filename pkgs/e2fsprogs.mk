@@ -20,4 +20,5 @@ e2fsprogs:
 	sudo sed -i -e 's#^ET_DIR=.*#ET_DIR="/usr/share/et"#' "$(MNT)/usr/bin/compile_et" && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

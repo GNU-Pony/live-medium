@@ -31,4 +31,5 @@ readline:
 	sudo install -Dm644 ../confs/inputrc "$(MNT)"/etc/inputrc && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

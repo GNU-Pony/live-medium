@@ -31,4 +31,5 @@ openssh:
 	         -i "$(MNT)"/etc/ssh/sshd_config && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

@@ -23,4 +23,5 @@ openntpd:
 	sudo install -dm755 "$(MNT)"/usr/lib/systemd/ntp-units.d && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

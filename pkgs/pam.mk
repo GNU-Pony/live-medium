@@ -19,4 +19,5 @@ pam:
 	sudo make DESTDIR="$(MNT)" SCONFIGDIR=/etc/security install && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

@@ -39,4 +39,5 @@ shadow:
 	sudo rmdir "$(MNT)"/usr/share/man/{{fi,id,zh_TW}/man1,fi,ko/man8} && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

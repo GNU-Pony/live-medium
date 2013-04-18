@@ -15,4 +15,5 @@ file:
 	sudo install -Dm644 COPYING "$(MNT)"/usr/share/licenses/file/COPYING && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

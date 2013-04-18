@@ -80,4 +80,5 @@ libsasl:
 	sudo ln -sf ../COPYING "$(MNT)"/usr/share/licenses/cyrus-sasl-ldap/COPYING && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ../..
+	echo "[$@]" >> built
 

@@ -23,4 +23,5 @@ curl:
 	sudo install -m644 ../patches/curlbuild.h "$(MNT)"/usr/include/curl/curlbuild.h && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

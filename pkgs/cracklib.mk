@@ -17,4 +17,5 @@ cracklib:
 	    sudo sh ./util/cracklib-packer "$(MNT)"/usr/share/cracklib/pw_dict && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

@@ -19,4 +19,5 @@ glib2:
 	sudo sed -i "s_#!/usr/bin/env python_#!/usr/bin/env python2_" "$(MNT)"/usr/bin/gdbus-codegen && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

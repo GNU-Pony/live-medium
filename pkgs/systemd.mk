@@ -35,4 +35,5 @@ systemd:
 	sudo sed -i 's#GROUP="cdrom"#GROUP="optical"#g' "$(MNT)"/usr/lib/udev/rules.d/*.rules && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

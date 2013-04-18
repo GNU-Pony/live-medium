@@ -18,4 +18,5 @@ iana-etc:
 	sudo install -Dm644 protocol-numbers.iana "$(MNT)"/usr/share/iana-etc/protocol-numbers.iana && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

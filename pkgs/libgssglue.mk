@@ -16,4 +16,5 @@ libgssglue:
 	sudo install -Dm644 COPYING "$(MNT)"/usr/share/licenses/libgssglue/COPYING && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

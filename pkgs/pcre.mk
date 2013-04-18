@@ -16,4 +16,5 @@ pcre:
 	sudo install -Dm644 LICENCE "$(MNT)"/usr/share/licenses/pcre/LICENSE && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

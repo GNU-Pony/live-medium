@@ -33,4 +33,5 @@ iputils:
 	sudo install -m644 ../confs/tftp.xinetd "$(MNT)"/etc/xinetd.d/tftp && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

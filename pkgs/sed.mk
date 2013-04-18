@@ -16,4 +16,5 @@ sed:
 	sudo ln -s ../usr/bin/sed "$(MNT)"/bin && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

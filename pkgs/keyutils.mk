@@ -18,4 +18,5 @@ keyutils:
 	sudo chmod a-w "$(MNT)"/etc/request-key.conf && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

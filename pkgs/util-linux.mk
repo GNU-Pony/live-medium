@@ -26,4 +26,5 @@ util-linux:
 	sudo install -Dm644 ../confs/uuidd.tmpfiles "$(MNT)"/usr/lib/tmpfiles.d/uuidd.conf && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

@@ -15,4 +15,5 @@ sysfsutils:
 	sudo rm "$(MNT)"/usr/lib/libsysfs.a && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

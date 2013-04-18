@@ -26,4 +26,5 @@ dbus:
 	sudo install -Dm644 COPYING "$(MNT)"/usr/share/licenses/dbus/COPYING && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

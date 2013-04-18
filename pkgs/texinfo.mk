@@ -14,4 +14,5 @@ texinfo:
 	sudo make DESTDIR="$(MNT)" install && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

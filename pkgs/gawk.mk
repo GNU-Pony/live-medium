@@ -17,4 +17,5 @@ gawk:
 	sudo ln -sf gawk "$(MNT)"/bin/awk && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

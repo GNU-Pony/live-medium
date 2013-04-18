@@ -63,4 +63,5 @@ perl:
 	    (sudo cp -r "$${pkgdir}"/.* "$(MNT)" && sudo rm -r "$${pkgdir}")) && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

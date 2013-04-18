@@ -51,4 +51,5 @@ glibc:
 	        "$(MNT)"/usr/lib/{libmemusage,libpcprofile,libSegFault}.so \
 	        "$(MNT)"/usr/lib/{audit,gconv}/*.so
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)")
+	echo "[$@]" >> built
 

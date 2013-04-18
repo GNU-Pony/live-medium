@@ -19,4 +19,5 @@ xz:
 	sudo ln -sf /usr/share/licenses/common/GPL3/license.txt "$(MNT)"/usr/share/doc/xz/COPYING.GPLv3 && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

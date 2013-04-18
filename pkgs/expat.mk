@@ -15,4 +15,5 @@ expat:
 	sudo install -Dm644 COPYING "$(MNT)"/usr/share/licenses/expat/COPYING && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

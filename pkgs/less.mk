@@ -14,4 +14,5 @@ less:
 	sudo make prefix="$(MNT)"/usr install && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

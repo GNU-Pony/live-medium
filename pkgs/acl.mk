@@ -15,3 +15,4 @@ acl:
 	sudo make DIST_ROOT="$(MNT)" install install-lib install-dev && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built

@@ -21,4 +21,5 @@ kbd:
 	sudo make KEYCODES_PROGS=yes RESIZECONS_PROGS=yes DESTDIR="$(MNT)" install && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

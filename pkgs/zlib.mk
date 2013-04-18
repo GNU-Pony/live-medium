@@ -16,4 +16,5 @@ zlib:
 	sudo install -D -m644 LICENSE "$(MNT)"/usr/share/licenses/zlib/LICENSE
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

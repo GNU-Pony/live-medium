@@ -19,4 +19,5 @@ coreutils:
 	for c in $${fhs[@]}; do  sudo ln -s ../usr/bin/$$c "$(MNT)"/bin/$$c;  done && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

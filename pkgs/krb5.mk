@@ -36,4 +36,5 @@ krb5:
 	sudo install -Dm644 ../NOTICE "$(MNT)"/usr/share/licenses/krb5/LICENSE && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ../..
+	echo "[$@]" >> built
 

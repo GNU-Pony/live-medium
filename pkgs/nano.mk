@@ -16,4 +16,5 @@ nano:
 	sudo install -DTm644 doc/nanorc.sample "$(MNT)"/etc/nanorc && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

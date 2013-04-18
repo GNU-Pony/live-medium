@@ -28,4 +28,5 @@ openssl:
 	sudo install -D -m644 LICENSE "$(MNT)"/usr/share/licenses/openssl/LICENSE && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

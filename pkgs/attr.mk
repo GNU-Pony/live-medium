@@ -17,4 +17,5 @@ attr:
 	sudo chmod 0755 "$(MNT)"/usr/lib/libattr.so.*.*.* && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

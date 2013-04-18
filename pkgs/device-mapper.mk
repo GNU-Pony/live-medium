@@ -22,4 +22,5 @@ device-mapper:
 	sudo make DESTDIR="$(MNT)" install_device-mapper && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

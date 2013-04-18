@@ -40,4 +40,5 @@ sysvinit:
 	popd && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

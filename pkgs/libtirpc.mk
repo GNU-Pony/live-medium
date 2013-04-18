@@ -19,4 +19,5 @@ libtirpc:
 	sudo install -D -m644 COPYING "$(MNT)"/usr/share/licenses/libtirpc/LICENSE && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

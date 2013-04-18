@@ -21,4 +21,5 @@ dhcpcd:
 	sudo sh -c 'echo noipv4ll >> "$(MNT)"/etc/dhcpcd.conf' && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

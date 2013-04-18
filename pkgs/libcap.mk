@@ -16,4 +16,5 @@ libcap:
 	sudo install -Dm644 pam_cap/capability.conf "$(MNT)"/usr/share/doc/libcap/capability.conf.example && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

@@ -22,4 +22,5 @@ dnssec-anchors:
 	        "$(MNT)"/usr/share/licenses/dnssec-anchors/LICENSE && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

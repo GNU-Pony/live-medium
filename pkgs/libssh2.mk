@@ -15,4 +15,5 @@ libssh2:
 	sudo install -Dm644 COPYING "$(MNT)"/usr/share/licenses/libssh2/LICENSE && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

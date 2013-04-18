@@ -34,4 +34,5 @@ libldap:
 	sudo install -Dm644 LICENSE "$(MNT)"/usr/share/licenses/libldap/LICENSE && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

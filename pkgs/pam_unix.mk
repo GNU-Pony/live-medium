@@ -29,4 +29,5 @@ pam_unix:
 	sudo chmod +s "$(MNT)"/sbin/unix_chkpwd && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

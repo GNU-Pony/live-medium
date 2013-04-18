@@ -16,4 +16,5 @@ netcfg:
 	sudo ln -sf netcfg.service "$(MNT)"/usr/lib/systemd/system/net-profiles.service && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

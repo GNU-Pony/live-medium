@@ -22,4 +22,5 @@ tzdata:
 	sudo install -m444 -t "$(MNT)"/usr/share/zoneinfo iso3166.tab zone.tab && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

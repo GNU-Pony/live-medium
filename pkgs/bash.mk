@@ -40,4 +40,5 @@ bash:
 	sudo install -m644 ../confs/user.bash_logout "$(MNT)"/etc/skel/.bash_logout && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

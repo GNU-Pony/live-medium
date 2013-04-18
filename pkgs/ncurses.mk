@@ -47,4 +47,5 @@ ncurses:
 	sudo sh -c 'grep -B 100 \$$Id README > "$(MNT)"/usr/share/licenses/ncurses/license.txt' && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

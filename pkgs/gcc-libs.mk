@@ -62,4 +62,5 @@ gcc-libs:
 	        "$(MNT)"/usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 

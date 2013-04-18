@@ -21,4 +21,5 @@ libpcap:
 	sudo install -D -m644 LICENSE "$(MNT)"/usr/share/licenses/libpcap/LICENSE && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
+	echo "[$@]" >> built
 
