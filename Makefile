@@ -35,6 +35,7 @@ include mkfiles/essentials.mk
 # applies the the package installed by its rule
 include pkgs/acl.mk
 include pkgs/attr.mk
+include pkgs/audit.mk
 include pkgs/cracklib.mk
 include pkgs/expat.mk
 include pkgs/file.mk
