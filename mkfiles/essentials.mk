@@ -142,3 +142,6 @@ conf-override:
 	sudo cp -f confs/fstab "$(MNT)"/etc/fstab
 	sudo cp -f confs/login "$(MNT)"/etc/pam.d/login
 
+create-users:
+	cat confs/create-users | sudo chroot "$(MNT)"
+

@@ -1,0 +1,6 @@
+passwd -d root
+useradd -m celestia
+passwd -d celestia
+useradd -m twilight
+passwd -d twilight
+echo 'celestia ALL=(ALL) ALL' >> /etc/sudoers
