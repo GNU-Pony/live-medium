@@ -141,4 +141,5 @@ conf-override:
 	sudo cp -f confs/inittab "$(MNT)"/etc/inittab
 	sudo cp -f confs/issue "$(MNT)"/etc/issue
 	sudo cp -f confs/fstab "$(MNT)"/etc/fstab
+	sudo cp -f confs/login "$(MNT)"/etc/pam.d/login
 
