@@ -128,8 +128,8 @@ gnupony-files:
 
 chown-live:
 	sudo find "$(MNT)" | while read file; do \
-	    echo 'chown root:root '"$$file"; \
-	    sudo chown $(root):$(root) "$$file"; \
+	    echo 'chown -h root:root '"$$file"; \
+	    sudo chown -h $(root):$(root) "$$file"; \
 	done
 	sudo chmod 755 "$(MNT)"
 	sudo chgrp $(utmp) "$(MNT)"/var/log/lastlog
@@ -138,7 +138,6 @@ chown-live:
 
 conf-override:
 	sudo cp -f confs/rc.conf "$(MNT)"/etc/rc.conf
-	sudo cp -f confs/inittab "$(MNT)"/etc/inittab
 	sudo cp -f confs/issue "$(MNT)"/etc/issue
 	sudo cp -f confs/fstab "$(MNT)"/etc/fstab
 	sudo cp -f confs/login "$(MNT)"/etc/pam.d/login

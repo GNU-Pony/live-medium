@@ -23,8 +23,7 @@ all:	validate-non-root			\
 	kernel					\
 	initramfs-linux update-init init-live	\
 	essentials arch-packages packages	\
-	local conf-override			\
-	chown-live
+	conf-override chown-live		\
 
 
 include mkfiles/kernel.mk
@@ -111,6 +110,5 @@ include pkgs/tzdata.mk
 include pkgs/dnssec-anchors.mk
 
 include mkfiles/auxiliary.mk
-include mkfiles/local.mk
 include mkfiles/clean.mk
 
