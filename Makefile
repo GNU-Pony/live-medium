@@ -23,7 +23,7 @@ all:	validate-non-root			\
 	kernel					\
 	initramfs-linux update-init init-live	\
 	essentials arch-packages packages	\
-	conf-override chown-live create-users	\
+	conf-override chown-live create-users
 
 
 include mkfiles/kernel.mk
