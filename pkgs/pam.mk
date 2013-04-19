@@ -17,7 +17,7 @@ pam:
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)")
 	cd "$(PAM)" && \
 	sudo make DESTDIR="$(MNT)" SCONFIGDIR=/etc/security install && \
-	install -m644 ../confs/limits.conf "$(MNT)"/etc/security && \
+	sudo install -m644 ../confs/limits.conf "$(MNT)"/etc/security && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
 	echo "[$@]" >> built
