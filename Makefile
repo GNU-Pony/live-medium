@@ -62,7 +62,6 @@ include pkgs/coreutils.mk
 include pkgs/db.mk
 include pkgs/findutils.mk
 include pkgs/gawk.mk
-include pkgs/gettext.mk
 include pkgs/gmp.mk
 include pkgs/libffi.mk
 include pkgs/libgcrypt.mk
@@ -97,6 +96,7 @@ include pkgs/krb5.mk
 include pkgs/iputils.mk
 include pkgs/openntpd.mk
 include pkgs/inetutils.mk
+include pkgs/gettext.mk
 include pkgs/libldap.mk
 include pkgs/device-mapper.mk
 include pkgs/systemd.mk
