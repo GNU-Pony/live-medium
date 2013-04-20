@@ -21,3 +21,9 @@ _/
 !/*-*.mk
 /built
 
+*.tar
+*.gz
+*.xz
+*.bz2
+*.zip
+*.tgz
