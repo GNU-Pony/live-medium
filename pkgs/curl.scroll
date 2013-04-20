@@ -1,0 +1,36 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUALLPermissive]
+from dragonsuite import *
+
+pkgname = 'curl'
+pkgver = '7.29.0'
+pkgdesc = 'An URL retrieval utility and library'
+upstream = 'http://curl.haxx.se'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['MIT']
+private = UNSUPPORTED
+source = ['http://curl.haxx.se/download/curl-%s.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    global curlbuild
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    curlbuild = 'curlbuild-%i' % (8 * int(bash('cpp <<<\'__SIZEOF_POINTER__\' | sed \'/^#/d\'')))
+    bash('patch -Np1 < ../patches/0001-Fix-NULL-pointer-reference-when-closing-an-unused-mu.patch')
+    execute('./configure --prefix=/usr --mandir=/usr/share/man --disable-dependency-tracking --disable-ldap --disable-ldaps --enable-ipv6 --enable-manual --enable-versioned-symbols --enable-threaded-resolver --without-libidn --with-random=/dev/urandom --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'.split(' '))
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    install('curl', pkgdir + '/usr/share/licenses', mode = 0o755, directory = True)
+    install('COPYING', pkgdir + '/usr/share/licenses/curl/COPYING', mode = 0o644)
+    install('docs/libcurl/libcurl.m4', pkgdir + '/usr/share/aclocal/libcurl.m4', mode = 0o644)
+    mv(pkgdir + '/usr/include/curl/curlbuild.h', pkgdir + '/usr/include/curl/' + curlbuild)
+    install('../patches/curlbuild.h', pkgdir + '/usr/include/curl/curlbuild.h', mode = 0o644)
+

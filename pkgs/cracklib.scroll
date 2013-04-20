@@ -1,0 +1,31 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUALLPermissive]
+from dragonsuite import *
+
+pkgname = 'cracklib'
+pkgver = '2.8.22'
+pkgdesc = 'Password checking library'
+upstream = 'http://sourceforge.net/projects/cracklib'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL']
+private = UNSUPPORTED
+source = ['http://downloads.sourceforge.net/sourceforge/cracklib/%s.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('./configure', '--prefix=/usr', '--without-python')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    install('cracklib-small', pkgdir + '/usr/share/dict/cracklib-small', directory = True, parents = True)
+    install('cracklib-small', '/usr/share/dict', mode = 0o644)
+    bash('./util/cracklib-format dicts/cracklib-small | ./util/cracklib-packer /usr/share/cracklib/pw_dict')
+

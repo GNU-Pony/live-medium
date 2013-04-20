@@ -9,7 +9,7 @@ acl:
 	tar --gzip --get < "$(ACL).src.tar.gz"
 	cd "$(ACL)" && \
 	export INSTALL_USER=root INSTALL_GROUP=root && \
-	./configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/lib && \
+	./configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/libexec && \
 	make && \
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
 	sudo make DIST_ROOT="$(MNT)" install install-lib install-dev && \

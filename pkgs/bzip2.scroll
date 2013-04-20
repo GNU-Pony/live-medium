@@ -1,0 +1,45 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUALLPermissive]
+from dragonsuite import *
+
+pkgname = 'bzip2'
+pkgver = '1.0.6'
+pkgdesc = 'A high-quality data compression program'
+upstream = 'http://sources.redhat.com/bzip2'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['custom (permissive free)']
+private = UNSUPPORTED
+source = ['http://www.bzip.org/%s/bzip2-%s.tar.gz' % (pkgver, pkgver)]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('sed', '-e', 's/^CFLAGS=\\(.*\\)$/CFLAGS=\\1 \\$(BIGFILES)/', '-i', './Makefile-libbz2_so')
+    bash('patch -Np1 < ../patches/bzip2-1.0.4-bzip2recover.patch')
+    make('-f', 'Makefile-libbz2_so')
+    make('bzip2', 'bzip2recover', 'libbz2.a')
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    install(['bin', 'lib', 'include', 'share/man/man1'], pkgdir + '/usr', mode = 0o755, directory = True)
+    install('bzip2-shared', pkgdir + '/usr/bin/bzip2', mode = 0o755)
+    install(['bzip2recover', 'bzdiff', 'bzgrep', 'bzmore'], pkgdir + '/usr/bin')
+    ln('bzip2', pkgdir + '/usr/bin/bunzip2')
+    ln('bzip2', pkgdir + '/usr/bin/bzcat')
+    install('libbz2.so.%s' % pkgver, pkgdir + '/usr/lib', mode = 0o755)
+    ln('libbz2.so.%s' % pkgver, pkgdir + '/usr/lib/libbz2.so')
+    ln('libbz2.so.%s' % pkgver, pkgdir + '/usr/lib/libbz2.so.' + pkgver.split('.')[0])
+    ln('libbz2.so.%s' % pkgver, pkgdir + '/usr/lib/libbz2.so.' + '.'.join(pkgver.split('.')[:2]))
+    install('libbz2.a', pkgdir + '/usr/lib/libbz2.a', mode = 0o644)
+    install('libbz2.a', pkgdir + '/usr/include/', mode = 0o644)
+    install('libbz2.a', pkgdir + '/usr/share/man/man1/', mode = 0o644)
+    ln('bzip2.1', pkgdir + '/usr/share/man/man1/bunzip2.1')
+    ln('bzip2.1', pkgdir + '/usr/share/man/man1/bzcat.1')
+    ln('bzip2.1', pkgdir + '/usr/share/man/man1/bzip2recover.1')
+    install('LICENSE', pkgdir + '/usr/share/licenses/bzip2', mode = 0o644, parents = True)
+

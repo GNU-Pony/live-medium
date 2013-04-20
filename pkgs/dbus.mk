@@ -8,7 +8,7 @@ dbus:
 	[ -d "$(DBUS)" ] || \
 	tar --gzip --get < "$(DBUS).tar.gz"
 	cd "$(DBUS)" && \
-	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libexecdir=/usr/lib/dbus-1.0 \
+	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libexecdir=/usr/libexec \
 	        --with-dbus-user=dbus --with-system-pid-file=/run/dbus/pid \
 	        --with-system-socket=/run/dbus/system_bus_socket --with-console-auth-dir=/run/console/ \
 	        --enable-inotify --disable-dnotify --disable-verbose-mode --disable-static \

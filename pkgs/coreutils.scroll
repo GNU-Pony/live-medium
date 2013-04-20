@@ -1,0 +1,28 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUALLPermissive]
+from dragonsuite import *
+
+pkgname = 'coreutils'
+pkgver = '8.21'
+pkgdesc = 'The basic file, shell and text manipulation utilities of the GNU operating system'
+upstream = 'http://www.gnu.org/software/coreutils'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL3']
+private = UNSUPPORTED
+source = ['http://ftp.gnu.org/gnu/coreutils/coreutils-%s.tar.xz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('./configure', '--prefix=', '--libexecdir=/lib', '--enable-no-install-program=groups,hostname,kill,uptime')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+

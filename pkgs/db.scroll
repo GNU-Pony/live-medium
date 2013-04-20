@@ -1,0 +1,30 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUALLPermissive]
+from dragonsuite import *
+
+pkgname = 'db'
+pkgver = '5.3.21'
+pkgdesc = 'The Berkeley DB embedded database system'
+upstream = 'http://www.oracle.com/technology/software/products/berkeley-db/index.html'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['custom (permissive free)']
+private = UNSUPPORTED
+source = ['http://download.oracle.com/berkeley-db/db-%s.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s/build_unix' % (srcdir, pkgname, pkgver))
+    execute('../dist/configure --prefix=/usr --enable-compat185 --enable-shared --enable-static --enable-cxx --enable-dbm'.split(' '))
+    make('LIBSO_LIBS=-lpthread')
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s/build_unix' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    rm_r(pkgdir + '/usr/docs')
+    install('../LICENSE', pkgdir + '/usr/share/licenses/db/LICENSE', mode = 0o644, parents = True)
+

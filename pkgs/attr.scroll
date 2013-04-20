@@ -1,0 +1,32 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUALLPermissive]
+from dragonsuite import *
+
+pkgname = 'attr'
+pkgver = '2.4.46'
+pkgdesc = 'Extended attribute support library for ACL support'
+upstream = 'http://savannah.nongnu.org/projects/attr'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['LGPL']
+private = UNSUPPORTED
+source = ['http://download.savannah.gnu.org/releases/attr/attr-%s.src.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    export('INSTALL_USER', 'root')
+    export('INSTALL_GROUP', 'root')
+    execute('./configure', '--prefix=/usr', '--libdir=/usr/lib', '--libexecdir=/usr/libexec')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DEST_ROOT=%s' % pkgdir, 'install', 'install-lib', 'install-dev')
+    rm(pkgdir + '/usr/lib/libattr.a')
+    chmod(path(pkgdir + '/usr/lib/libattr.so.*.*.*'), 0o755)
+
