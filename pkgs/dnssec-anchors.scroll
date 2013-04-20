@@ -1,0 +1,37 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'dnssec-anchors'
+pkgver = '20130320'
+pkgdesc = 'DNSSEC trust anchors for the root zone'
+upstream = 'http://data.iana.org/root-anchors'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['public (copyright inelligible)']
+private = UNSUPPORTED
+source = ['http://data.iana.org/root-anchors/root-anchors.xml']
+noextract = source
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s' % srcdir)
+    bash('drill -z -s DNSKEY . > root.key')
+    bash('http://data.iana.org/root-anchors/root-anchors.xml | BEGIN{ORS=" "}(NR>4){gsub(/<[^>]*>/,"");print tolower($0)} | sed \'s/   /\n/\' > root.ds')
+    try:
+        bash('[[ "$(<root.ds)" = \'19036 8 2 49aac11d7b6f6446702e54a1607371607a1a41855200fd2ce1cdde32f24e8fb5\' ]]')
+    except Exception as err:
+        echo('\e[01;31mSuspicious dnssec-anchors\e[00m')
+        raise err
+    bash('grep -Pq \'IN\\tDS\\t\'"$(<root.ds)" root.key')
+    bash('sed \'/DNSKEY/s/ ;{id = \'"$(cut -d " "  -f 1 < root.ds)"\' .*//;t;d\' root.key > trusted-key.key')
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s' % srcdir)
+    install('trusted-key.key', pkgdir + '/etc/trusted-key.key', mode = 0o644, parents = True)
+    install('../patches/dnssec-anchors-license', pkgdir + '/usr/share/licenses/dnssec-anchors/LICENSE', mode = 0o644, parents = True)
+
