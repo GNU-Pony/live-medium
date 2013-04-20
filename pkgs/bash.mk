@@ -24,9 +24,10 @@ bash:
 	        -DSTANDARD_UTILS_PATH=\'\"/usr/bin:/bin:/usr/sbin:/sbin\"\' \
 	        -DSYS_BASHRC=\'\"/etc/bash.bashrc\"\' \
 	        -DSYS_BASH_LOGOUT=\'\"/etc/bash.bash_logout\"\') && \
+	export CFLAGS="${bashconfig[*]}" && \
 	./configure --prefix=/usr --with-curses --enable-readline \
 	        --without-bash-malloc --with-installed-readline && \
-	make CFLAGS="${bashconfig[@]}" && \
+	make && \
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)") && \
 	sudo make DESTDIR="$(MNT)" install && \
 	sudo install -dm755  "$(MNT)"/bin && \

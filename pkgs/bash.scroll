@@ -1,0 +1,42 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUALLPermissive]
+from dragonsuite import *
+
+_version = '1.6'
+_patch = 8
+
+_ver = _version.replace('.', '')
+pkgname = 'bash'
+pkgver = '%s.%i' % (_version, _patch)
+pkgdesc = 'The GNU Bourne Again shell'
+upstream = 'http://www.gnu.org/software/bash/bash.html'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL']
+private = UNSUPPORTED
+source = ['http://ftp.gnu.org/gnu/bash/bash-%s.tar.gz' % _version]
+source += ['http://ftp.gnu.org/gnu/bash/bash-%s-patches/bash%s-%03i' % (_version, _ver, p) for p in range(_patch)]
+noextract = source[1:]
+sha3sums = (1 + _patch) * [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    DEFAULT_PATH_VALUE = ':'.join(['/usr/local/bin', '/usr/bin', '/bin', '/usr/local/sbin', '/usr/sbin', '/sbin'])
+    STANDARD_UTILS_PATH = ':'.join(['/usr/bin', '/bin', '/usr/sbin', '/sbin'])
+    SYS_BASHRC = '/etc/bash.bashrc'
+    SYS_BASH_LOGOUT = '/etc/bash.bash_logout'
+    export(CFLAGS, '-DDEFAULT_PATH_VALUE=\'"%s"\' -DSTANDARD_UTILS_PATH=\'"%s"\' -DSYS_BASHRC=\'"%s"\' -DSYS_BASH_LOGOUT=\'"%s"\'' % (DEFAULT_PATH_VALUE, STANDARD_UTILS_PATH, SYS_BASHRC, SYS_BASH_LOGOUT))
+    execute('./config --prefix= --with-curses --enable-readline --without-bash-malloc --with-installed-readline'.split(' '))
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    mkdir_p(pkgdir + '/etc/skel')
+    install(['../confs/system.bash' + f for f in ['rc', '_logout']], pkgdir + '/etc', mode = 0o644)
+    install(['../confs/user.bash' + f for f in ['rc', '_profile', '_logout']], pkgdir + '/etc/skel', mode = 0o644)
+
