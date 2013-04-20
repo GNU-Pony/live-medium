@@ -1,0 +1,29 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'expat'
+pkgver = '2.1.0'
+pkgdesc = 'An XML parser library'
+upstream = 'http://expat.sourceforge.net/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['custom (permissive free)']
+private = UNSUPPORTED
+source = ['http://downloads.sourceforge.net/sourceforge/expat/expat-%s.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s (srcdir, pkgname, pkgver))
+    execute(['./configure', '--prefix=/usr', '--mandir=/usr/share/man'])
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    install('COPYING', pkgdir + '/usr/share/licenses/expat/COPYING', mode = 0o644, parents = True)
+
