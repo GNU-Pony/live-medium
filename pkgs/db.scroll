@@ -18,7 +18,7 @@ sha3sums = [None]
 
 
 def build(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s/build_unix' % (srcdir, pkgname, pkgver))
+    mkcd('%s/%s-%s/build_unix' % (srcdir, pkgname, pkgver))
     execute('../dist/configure --prefix=/usr --enable-compat185 --enable-shared --enable-static --enable-cxx --enable-dbm'.split(' '))
     make('LIBSO_LIBS=-lpthread')
 
