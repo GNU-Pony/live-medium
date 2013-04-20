@@ -1,0 +1,32 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUALLPermissive]
+from dragonsuite import *
+
+pkgname = 'dhcpcd'
+pkgver = '5.6.7'
+pkgdesc = 'RFC2131 compliant DHCP client daemon'
+upstream = 'http://roy.marples.name/projects/dhcpcd'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['BSD']
+private = UNSUPPORTED
+source = ['http://roy.marples.name/downloads/dhcpcd/dhcpcd-%s.tar.bz2' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute(['./configure', '--prefix=', '--libexecdir=/usr/libexec', '--dbdir=/var/lib/dhcpcd', '--rundir=/run'])
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    install('../confs/dhcpcd.conf.d', pkgdir + '/etc/conf.d/dhcpcd', mode = 0o644, parents = True)
+    mkdir_p('/usr/share/licenses/dhcpcd')
+    bash('awk \'{if(FNR<27)print $0}\' ./configure.h >> "%s"/usr/share/licenses/dhcpcd/LICENSE' % pkgdir)
+    bash('echo noipv4ll >> "%s"/etc/dhcpcd.conf' % pkgdir)
+

@@ -17,7 +17,7 @@ dhcpcd:
 	sudo install -D -m644 ../confs/dhcpcd.conf.d "$(MNT)"/etc/conf.d/dhcpcd && \
 	sudo mkdir -p "$(MNT)"/usr/share/licenses/dhcpcd && \
 	sudo sh -c \
-	  'awk '\''{if(FNR<27)print $0}'\'' ./configure.h >> "$(MNT)"/usr/share/licenses/dhcpcd/LICENSE' && \
+	  'awk '\''{if(FNR<27)print $$0}'\'' ./configure.h >> "$(MNT)"/usr/share/licenses/dhcpcd/LICENSE' && \
 	sudo sh -c 'echo noipv4ll >> "$(MNT)"/etc/dhcpcd.conf' && \
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)") && \
 	cd ..
