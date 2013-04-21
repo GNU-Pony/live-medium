@@ -18,7 +18,7 @@ gcc-libs:
 	export CXXFLAGS=" -O2 -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2" && \
 	mkdir -p ../gcc-build && cd ../gcc-build && \
 	../gcc-4.7.2/configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/libexec \
-	         --mandir=/usr/share/man --infodir=/usr/share/info--enable-languages=c,c++,fortran,lto \
+	        --mandir=/usr/share/man --infodir=/usr/share/info--enable-languages=c,c++,fortran,lto \
 	        --enable-shared --enable-threads=posix --with-system-zlib --enable-__cxa_atexit \
 	        --disable-libunwind-exceptions --enable-clocale=gnu --disable-libstdcxx-pch \
 	        --enable-libstdcxx-time --enable-gnu-unique-object --enable-linker-build-id \

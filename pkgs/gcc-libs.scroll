@@ -1,0 +1,78 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'gcc-libs'
+pkgver = '4.7.2'
+pkgdesc = 'Runtime libraries shipped by the GNU Compiler Collection'
+upstream = 'http://gcc.gnu.org'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL', 'LGPL', 'FDL', 'custom (free exception)']
+private = UNSUPPORTED
+source = ['ftp://gcc.gnu.org/pub/gcc/releases/gcc-%s/gcc-%s.tar.bz2' % (pkgver, pkgver)]
+sha3sums = [None]
+
+ARCH = get('ARCH')
+CHOST = get('CHOST')
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('sed', '-i', 's/install_to_$(INSTALL_DEST) //', 'libiberty/Makefile.in')
+    execute('sed', '-i', 's_\\./fixinc\\.sh_-c true_', 'gcc/Makefile.in')
+    if ARCH == 'x86_64':
+        execute('sed', '-i', '/m64=/s/lib64/lib/', 'gcc/config/i386/t-linux64')
+    execute('patch' '-p1' '-i' '../patches/gcc-4.7.1-libgo-write.patch')
+    with open('gcc/BASE-VER', 'rb') as file:
+        file.write(pkgver.encode('utf-8'))
+    export('CFLAGS', ' -O2 -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2')
+    export('CXXFLAGS', ' -O2 -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2')
+    mkcd('gcc-build')
+    params = ['--prefix=/usr' '--libdir=/usr/lib' '--libexecdir=/usr/libexec', '--mandir=/usr/share/man']
+    params.append(--infodir=/usr/share/info--enable-languages=c,c++,fortran,lto)
+    params += ['--with-' + x for x in 'system-zlib -ppl plugin-ld=ld.gold linker-hash-style=gnu'.split(' ')]
+    params += ['--enable-' + x for x in 'shared threads=posix __cxa_atexit clocale=gnu libstdcxx-time gnu-unique-object linker-build-id cloog-backend=isl checking=release'.split(' ')]
+    params += ['--disable-' + x for x in 'libunwind-exceptions libstdcxx-pch ppl-version-check plugin multilib libssp build-with-cxx build-poststage1-with-cxx'.split(' ')]
+    execute(['../configure'] + params)
+    cd('..')
+    execute('sed', '-i', 's|@itemx --help|@item --help|g', 'gcc/doc/cppopts.texi')
+    for e in ['enable-@var{kind}-@var{pass}'] + ['-fdump-rtl-' + p for p in ['cprop_hardreg csa dce dbr into_cfglayout outof_cfglayout pro_and_epilogue'.split(' ')]]:
+        execute('sed', '-i', 's|@itemx -f%s|@item -f%s|g' % (e, e), 'gcc/doc/invoke.texi')
+    execute('sed', '-i', 's|@tie{KiB}|@tie{}KiB|g', 'gcc/doc/invoke.texi')
+    execute('sed', '-i', 's|@itemx all.cross|@item all.cross|g', 'gcc/doc/sourcebuild.texi')
+    execute('sed', '-i', 's|@itemx POINTER_PLUS_EXPR|@item POINTER_PLUS_EXPR|g', 'gcc/doc/generic.texi')
+    execute('sed', '-i', 's|@itemx PLUS_EXPR|@item PLUS_EXPR|g', 'gcc/doc/generic.texi')
+    cd('gcc-build')
+    make()
+    cd(CHOST + '/libstdc++-v3')
+    make('doc-man-doxygen')
+
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s/gcc-build' % (srcdir, pkgname, pkgver))
+    MAKEFLAGS = get('MAKEFLAGS').split(' ')
+    skipnext = False
+    _MAKEFLAGS = []
+    for e in MAKEFLAGS:
+        if skipnext and (len(e.replace(' ', '')) > 0):
+            skipnext = False
+        elif e == '-j':
+            skipnext = True
+        elif not e.startswith('-j'):
+            _MAKEFLAGS.append(e)
+    export('MAKEFLAGS', ' '.join(_MAKEFLAGS))
+    make('-j1', '-C', CHOST + '/libgcc', 'DESTDIR=' + pkgdir, 'install-shared')
+    for lib in ['mudflap', 'gomp', 'stdc++-v3/src', 'itm']:
+        make('-j1', '-C', CHOST + '/lib' + lib, 'DESTDIR=' + pkgdir, 'install-toolexeclibLTLIBRARIES')
+    for (lib, install) in [('stdc++-v3', ''), ('gomp', '-info'), ('itm', '-info')]:
+        make('-j1', '-C', CHOST + '/lib' + lib, 'DESTDIR=' + pkgdir, 'install' + install)
+    make(['-j1', 'DESTDIR=' + pkgdir] + ['install-target-lib' + lib for lib in ['quadmath', 'gfortran', 'objc']]
+    rm_r(path('%s/usr/lib/{gcc/,libgfortran.spec}') % pkgdir)
+    bash('find %s' -name *.a -delete' % pkgdir)
+    cd('..')
+    install('COPYING.RUNTIME', pkgdir + '/usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION', mode = 0o644, parents = False)
+
