@@ -18,5 +18,5 @@ $(KERNEL)/.config: $(KERNEL)
 	yes "" | make -C "$(KERNEL)" config > /dev/null
 
 $(KERNEL)/vmlinux: $(KERNEL)/.config
-	make -C "$(KERNEL)"
+	make -j$(CPUS) -C "$(KERNEL)"
 
