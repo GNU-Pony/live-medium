@@ -1,0 +1,51 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'glibc'
+pkgver = '2.17'
+pkgdesc = 'GNU C Library'
+upstream = 'http://www.gnu.org/software/libc'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL', 'LGPL']
+private = UNSUPPORTED
+source = ['http://ftp.gnu.org/gnu/libc/glibc-%s.tar.xz' % pkgdir]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('patch', '-p1', '-i', '../patches/glibc-2.17-sync-with-linux37.patch')
+    mkcd('glibc-build')
+    export('CFLAGS', '-O2 -pipe --param=ssp-buffer-size=4')
+    export('LDFALGS', '-Wl,-O1,--sort-common,--as-needed,-z,relro')
+    unset('LD_LIBRARY_PATH')
+    bash('echo "slibdir=/usr/lib" >> configparms')
+    execute(['../configure', '--prefix="/usr"', '--libdir="/usr/lib"', '--libexecdir="/usr/libexec"', '--with-headers="/usr/include"', '--enable-add-ons=nptl,libidn', '--enable-obsolete-rpc', '--enable-kernel=2.6.32', '--enable-bind-now', '--disable-profile', '--enable-stackguard-randomization', '--enable-multi-arch'])
+    bash('echo "build-programs=no" >> configparms')
+    make()
+    execute('sed', '-i', '/build-programs=/s#no#yes#', configparms)
+    bash('echo "CC += -fstack-protector -D_FORTIFY_SOURCE=2" >> configparms')
+    bash('echo "CXX += -fstack-protector -D_FORTIFY_SOURCE=2" >> configparms')
+    make()
+    execute('sed', '-i', '2,4d', configparms)
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s/glibc-build' % (srcdir, pkgname, pkgver))
+    touch(pkgdir + '/etc/ld.so.conf')
+    make('install_root=' + pkgdir, 'install')
+    cd('..')
+    rm(pkgdir + '/etc/ld.so.cache')
+    rm(pkgdir + '/etc/ld.so.conf')
+    mkdir_p(path(path_escape(pkgdir) + '/usr/lib/{locale,systemd/system,tmpfiles.d}'))
+    install('nscd/nscd.conf', pkgdir + '/etc/nscd.conf', mode = 0o644)
+    install('../confs/nscd.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/nscd.conf', mode = 0o644)
+    install('posix/gai.conf', pkgdir + '/etc/gai.conf', mode = 0o644)
+    install('../patches/locale-gen', pkgdir + '/usr/bin', mode = 0o644)
+    if not os.path.exists(pkgdir + '/usr/bin/ldconfig'):
+        ln('../../sbin/ldconfig', pkgdir + '/usr/bin/ldconfig')
+
