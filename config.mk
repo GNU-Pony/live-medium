@@ -2,8 +2,6 @@ ARCH = x86_64
 KERNEL_ARCH = $(ARCH)
 CPUS = 16 # how many CPU:s you want to use when compiling
 
-CHOST = $(ARCH)-unknown-linux-gnu
-
 SYSVINIT_SIMPLIFY_WRITELOG = y
 SYSVINIT_ANSI = n
 
