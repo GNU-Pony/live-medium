@@ -1,0 +1,32 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'gdbm'
+pkgver = '1.10'
+pkgdesc = 'GNU database library'
+upstream = 'http://www.gnu.org/software/gdbm/gdbm.html'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL']
+private = UNSUPPORTED
+source = ['ftp://ftp.gnu.org/pub/gnu/gawk/gawk-%s.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('patch', '-Np1', '-i', '../patches/gdbm-1.10-zeroheaders.patch')
+    execute(['./configure', '--prefix=/usr', '--mandir=/usr/share/man', '--infodir=/usr/share/info', '--enable-libgdbm-compat'])
+    make('prefix=/usr')
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('prefix=%s/usr', 'manprefix=%s/usr/share/man' % pkgdir, 'man3dir=%s/usr/share/man/man3' % pkgdir, 'infodir=%s/usr/share/info' % pkgdir, 'install')
+    mkdir_p(pkgdir + '/usr/include/gdbm')
+    for f in ['gdbm', 'ndbm', 'dbm']:
+        ln('../' + f + '.h', pkgdir + '/usr/include/gdbm/' + f + '.h')
+
