@@ -1,0 +1,24 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'hwids'
+pkgver = '20130228'
+pkgdesc = 'Hardware identification databases'
+upstream = 'https://github.com/gentoo/hwids'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL2']
+private = UNSUPPORTED
+source = [('https://github.com/gentoo/hwids/tarball/hwids-%s' % pkgver, 'hwids-%s.tar.gz' % pkgver)]
+sha3sums = [None]
+
+
+def package(startdir, srcdir, pkgdir, private):
+    cd(path('%s/gentoo-%s*' % (path_escape(srcdir), pkgname)))
+    for ids in ['pci.ids', 'usb.ids']:
+        install(ids, pkgdir + '/usr/share/hwdata/' + ids, mode = 0o644)
+
