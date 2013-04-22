@@ -1,0 +1,29 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'gmp'
+pkgver = '5.1.1'
+pkgdesc = 'A free library for arbitrary precision arithmetic'
+upstream = 'http://gmplib.org/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['LGPL3']
+private = UNSUPPORTED
+source = ['ftp://ftp.gmplib.org/pub/gmp-%s/gmp-%s.tar.xz' % (pkgver, pkgver)]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    CHOST = get('CHOST')
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute(['./configure', '----build=' + CHOST, '--prefix=/usr', '--enable-cxx'])
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+
