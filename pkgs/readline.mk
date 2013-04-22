@@ -19,8 +19,7 @@ readline:
 	cd "$(READLINE)" && \
 	if [ ! $(READLINE_PATCH) = 0 ]; then \
 	for (( p=1; p<=$(READLINE_PATCH); p++ )); do \
-	    [ -f "$(READLINE_)-$$(printf "%03d" $$p)" ] || \
-            patch -Np0 -i ../"$(READLINE_)-$$(printf "%03d" $$p)" \
+	    patch -Np0 -i ../"$(READLINE_)-$$(printf "%03d" $$p)" \
 	    || exit 1; \
 	done; fi && \
 	sed -i 's_-Wl,-rpath,$$(libdir) __g' support/shobj-conf && \
