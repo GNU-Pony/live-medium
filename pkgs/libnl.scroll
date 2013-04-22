@@ -1,0 +1,28 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'libnl'
+pkgver = '3.2.21'
+pkgdesc = 'Library for applications dealing with netlink sockets'
+upstream = 'http://www.infradead.org/~tgr/libnl/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL']
+private = UNSUPPORTED
+source = ['http://www.infradead.org/~tgr/libnl/files/libnl-%s.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('./configure', '--prefix=/usr', '--sbindir=/usr/bin', '--disable-static')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+
