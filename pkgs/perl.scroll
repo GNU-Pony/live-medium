@@ -31,7 +31,7 @@ def build(startdir, srcdir, pkgdir, private):
     params += ['-Dinc_version_list=none', '-Dman1ext=1perl', '-Dman3ext=3perl']
     if get('ARCH') == 'x86_64':
         params.append("-Dcccdlflags='-fPIC'")
-    params += ['-Dlddlflags=-shared + LDFLAGS, '-Dldflags=' + LDFLAGS]
+    params += ['-Dlddlflags=-shared ' + LDFLAGS, '-Dldflags=' + LDFLAGS]
     execute(params)
     make()
     dir = srcdir + '/perl-build'
@@ -48,7 +48,7 @@ def build(startdir, srcdir, pkgdir, private):
     rm(path('%s/usr/share/perl%s/core_perl/*.pod' % path_escape([pkgdir, MAJOR])))
     for d in path('%s/usr/share/perl%s/core_perl/*' % path_escape([pkgdir, MAJOR])):
         if os.path.exists(d) and os.path.isdir(d) and (bashname(d) != 'pod'):
-            execute('find', d, '-name', path('*.pod'), '-delete')
+            execute('find', d, '-name', '*.pod', '-delete')
     execute(dir + '/usr/lib', '-name', '*.pod', '-delete')
     execute(dir, '-name', '.packlist', '-delete')
 
