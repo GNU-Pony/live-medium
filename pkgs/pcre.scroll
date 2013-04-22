@@ -1,0 +1,29 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'pcre'
+pkgver = '8.32'
+pkgdesc = 'A library that implements Perl 5-style regular expressions'
+upstream = 'http://www.pcre.org/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['BSD']
+private = UNSUPPORTED
+source = ['ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-%s.tar.bz2' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute(['./configure', '--prefix=/usr'] + path('--enable-{pcre16,pcre32,jit,utf,unicode-properties}'))
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=' + pkgdir, 'install')
+    install('LICENCE', pkgdir + '/usr/share/licenses/pcre/LICENSE', mode = 0o644, parents = True)
+
