@@ -1,0 +1,42 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'krb5'
+pkgver = '1.11.1'
+pkgdesc = 'The Kerberos network authentication system'
+upstream = 'http://web.mit.edu/kerberos/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['custom (permissive free)']
+private = UNSUPPORTED
+source = ['http://web.mit.edu/kerberos/dist/krb5/%s/krb5-%s-signed.tar' % ('.'.join(pkgver.split('.')[:2]), pkgver)]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('sed', '-i', 's_\'"$LDFLAG S"\'__g', 'krb5-config.in')
+    execute('sed', '-i', '/KRB5ROOT=/s/\/local//', 'util/ac_check_krb5.m4')
+    flags = '-O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2'
+    export('CFLAGS', flags + ' -fPIC -fno-strict-aliasing -fstack-protector-all')
+    export('CPPFLAGS', flags + ' -I/usr/include/et')
+    execute(['./configure'], path('--{prefix=/usr,sysconfdir=/etc,mandir=/usr/share/man,localstatedir=/var/lib,with{-{system-{et,ss},ldap},out-{tcl,system-verto}},enabled-{shared,dns-for-realm},disable-rpath}'))
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s/src' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'EXAMPLEDIR=/usr/share/doc/krb5/examples', 'install')
+    mkdir_p(path('%s{/var/lib/krb5kdc,/etc,/etc/rc.d,/usr/share/aclocal}' % path_escape(pkgdir)))
+    install(path('plugins/kdb/ldap/libkdb_ldap/kerberos.{ldif,schema}'), pkgdir + '/usr/share/doc/krb5/examples', mode = 0o644)
+    install('config-files/kdc.conf', pkgdir + '/var/lib/krb5kdc/kdc.conf', mode = 0o644, )
+    install('config-files/krb5.conf', pkgdir + '/etc/krb5.conf', mode = 0o644, )
+    install(path('../../confs/krb5-{kdc,kadmind,kpropd}'), pkgdir + '/etc/rc.d', mode = 0o755)
+    install('util/ac_check_krb5.m4', pkgdir + '/usr/share/aclocal', mode = 0o644)
+    install('../NOTICE', pkgdir + '/usr/share/licenses/krb5/LICENSE', mode = 0o644, parents = True)
+    execute('install', '-p', '-m644', 'config-files/kdc.conf', pkgdir + '/var/lib/krb5kdc/kdc.conf')
+    execute('install', '-p', '-m644', 'config-files/krb5.conf', pkgdir + '/etc/krb5.conf')
+
