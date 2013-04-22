@@ -1,0 +1,58 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'perl'
+pkgver = '5.16.3'
+pkgdesc = 'Highly capable, feature-rich programming language'
+upstream = 'http://www.perl.org'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL', 'PerlArtistic']
+private = UNSUPPORTED
+source = ['http://www.cpan.org/src/%s.0/perl-%s.tar.bz2' % (pkgver.split('.')[0], pkgver)]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('patch', '-p1', '-i', '../patches/cgi-cr-escaping.diff')
+    CFLAGS = '-O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2'
+    LDFLAGS = '-Wl,-O1,--sort-common,--as-needed,-z,relro'
+    MAJOR = pkgver.split('.')[0]
+    params = ['./Configure', '-des', '-Dusethreads', '-Duseshrplib', '-Doptimize=' + CFLAGS, '-Dprefix=/usr', '-Dvendorprefix=/usr']
+    for (a, b, c) for [('privlib', 'archlib', 'core'), ('sitelib', 'sitearch', 'site'), ('vendorlib', 'vendorarch', 'vendor')]:
+        params.append('-D&s=/lib/%s/perl%s/%s_perl' % (a, 'share', MAJOR, c))
+        params.append('-D&s=/lib/%s/perl%s/%s_perl' % (b, 'lib', MAJOR, c))
+    params += ['-Dscriptdir=/usr/bin/core_perl', '-Dsitescript=/usr/bin/site_perl', '-Dvendorscript=/usr/bin/vendor_perl']
+    params += ['-Dinc_version_list=none', '-Dman1ext=1perl', '-Dman3ext=3perl']
+    if get('ARCH') == 'x86_64':
+        params.append("-Dcccdlflags='-fPIC'")
+    params += ['-Dlddlflags=-shared + LDFLAGS, '-Dldflags=' + LDFLAGS]
+    execute(params)
+    make()
+    dir = srcdir + '/perl-build'
+    mkdir_p(dir)
+    make('DESTDIR=' + dir, 'install')
+    execute('sed', '-e', '/^man1ext=/ s/1perl/1p/', '-e', '/^man3ext=/ s/3perl/3pm/', '-e', "/^cf_email=/ s/'.*'/''/", '-e', "/^perladmin=/ s/'.*'/''/", pkgdir + '/usr/lib/perl' + MAJOR + '/core_perl/Config_heavy.pl')
+    execute('sed', '-e', '/(makepl_arg =>/   s/""/"INSTALLDIRS=site"/', '-e', '/(mbuildpl_arg =>/ s/""/"installdirs=site"/', '-i', pkgdir + '/usr/share/perl' + MAJOR + '/core_perl/CPAN/FirstTime.pm')
+    execute('sed', '-e', "/{'makemakerflags'}/ s/'';/'INSTALLDIRS=site';/", '-e', "/{'buildflags'}/     s/'';/'installdirs=site';/", '-i', pkgdir + '/usr/share/perl' + MAJOR + '/core_perl/CPANPLUS/Config.pm')
+    install('../confs/perlbin.sh', pkgdir + '/etc/profile.d/perlbin.sh', mode = 0o755, parents = True)
+    install('../confs/perlbin.csh', pkgdir + '/etc/profile.d/perlbin.csh', mode = 0o755, parents = True)
+    mv(pkgdir + '/usr/bin/perl' + pkgver, pkgdir + '/usr/bin/perl')
+    ln('c2ph', pkgdir + '/usr/bin/core_perl/pstruct')
+    ln('s2p', pkgdir + '/usr/bin/core_perl/psed')
+    rm(path('%s/usr/share/perl%s/core_perl/*.pod' % path_escape([pkgdir, MAJOR])))
+    for d in path('%s/usr/share/perl%s/core_perl/*' % path_escape([pkgdir, MAJOR])):
+        if os.path.exists(d) and os.path.isdir(d) and (bashname(d) != 'pod'):
+            execute('find', d, '-name', path('*.pod'), '-delete')
+    execute(dir + '/usr/lib', '-name', '*.pod', '-delete')
+    execute(dir, '-name', '.packlist', '-delete')
+
+def package(startdir, srcdir, pkgdir, private):
+    cd(srcdir)
+    cp_r(path('perl-build/*'), pkgdir)
+
