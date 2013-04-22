@@ -1,0 +1,28 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'less'
+pkgver = '451'
+pkgdesc = 'A terminal based program for viewing text files'
+upstream = 'http://www.greenwoodsoftware.com/less'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL3']
+private = UNSUPPORTED
+source = ['http://www.greenwoodsoftware.com/less/less-%s.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('./configure', '--prefix=/usr', '--sysconfdir=/etc', '--with-regex=pcre')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('prefix=%s/usr' % pkgdir, 'install')
+
