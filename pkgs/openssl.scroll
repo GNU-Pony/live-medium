@@ -1,0 +1,38 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'openssl'
+pkgver = '1.0.1e'
+pkgdesc = 'The Open Source toolkit for Secure Sockets Layer and Transport Layer Security'
+upstream = 'https://www.openssl.org'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['BSD']
+private = UNSUPPORTED
+source = ['https://www.openssl.org/source/openssl-%s.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('patch', '-p0', '-i', '../patches/no-rpath.patch')
+    execute('patch', '-p0', '-i', '../patches/ca-dir.patch')
+    params = ['./Configure', '--prefix=/usr', '--openssldir=/etc/ssl', '--libdir=lib', 'shared', 'zlib']
+    conf = execute('./config', '-h').split('\n')
+    params += (conf[-2] if conf[-1] == '' else conf[-1]).split(' ')[2:]
+    params.append('-fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2')
+    params.append('-Wl,-O1,--sort-common,--as-needed,-z,relro')
+    execute(params)
+    
+    make('depend')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('INSTALL_PREFIX=' + pkgdir, 'MANDIR=/usr/share/man', 'MANSUFFIX=ssl', 'install')
+    install('LICENSE', pkgdir + '/usr/share/licenses/openssl/LICENSE', mode = 0o644, parents = True)
+
