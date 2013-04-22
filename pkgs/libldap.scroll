@@ -1,0 +1,43 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'libldap'
+pkgver = '2.4.34'
+pkgdesc = 'Lightweight Directory Access Protocol (LDAP) client libraries'
+upstream = 'http://www.openldap.org/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['custom (permissive free)']
+private = UNSUPPORTED
+source = ['ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-%s' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('patch', '-Np1', '-i', '../patches/ntlm.patch')
+    execute('sed', '-i', 's#-m 644 $$(LIBRARY)#-m 755 $$(LIBRARY)#', path('libraries/{liblber,libldap,libldap_r}/Makefile.in'))
+    execute('sed', '-i', 's|#define LDAPI_SOCK LDAP_RUNDIR LDAP_DIRSEP "run" LDAP_DIRSEP "ldapi"|#define LDAPI_SOCK LDAP_DIRSEP "run" LDAP_DIRSEP "openldap" LDAP_DIRSEP "ldapi"|', 'include/ldap_defaults.h')
+    execute('sed', '-i', 's|%LOCALSTATEDIR%/run|/run/openldap|', 'servers/slapd/slapd.conf')
+    execute('sed', '-i', 's|-$$(MKDIR) $$(DESTDIR)$$(localstatedir)/run|-$$(MKDIR) $$(DESTDIR)/run/openldap|', 'servers/slapd/Makefile.in')
+    params = ['--prefix=/usr', '--mandir=/usr/share/man', '--libexecdir=/usr/lib', '--sysconfdir=/etc', '--localstatedir=/var/lib/openldap']
+    params += path('--{enable-{ipv6,syslog,local,bdb,hdb,crypt,dynamic,spasswd,overlays=mod,modules=yes},disable-wrappers,with{out-fetch,-cyrus-sasl,-threads}}')
+    execute(['./configure'] + params)
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    for dir in ['include', 'libraries', 'doc/man/man3']:
+        pushd(dir)
+	make('DESTDIR=' + pkgdir, 'install')
+	popd()
+    install('doc/man/man5/ldap.conf.5.tmp', pkgdir + '/usr/share/man/man5/ldap.conf.5', mode = 0o644, parents = True)
+    rm(pkgdir + '/usr/share/man/man5/ldap.conf.5')
+    ln('liblber.so', pkgdir + '/usr/lib/liblber.so.' + pkgdir.split('.')[0])
+    ln('libldap.so', pkgdir + '/usr/lib/libldap.so.' + pkgdir.split('.')[0])
+    install('LICENSE', pkgdir + '/usr/share/licenses/libldap/LICENSE', mode = 0o644, parents = True)
+
