@@ -1,0 +1,35 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'kbd'
+pkgver = '1.15.5'
+pkgdesc = 'Keytable files and keyboard utilities'
+upstream = 'http://www.kbd-project.org'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['LGPL3']
+private = UNSUPPORTED
+source = ['ftp://ftp.altlinux.org/pub/people/legion/kbd/kbd-%s.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    mv('data/keymaps/i386/qwertz/cz.map', 'data/keymaps/i386/qwertz/cz-qwertz.map')
+    mv('data/keymaps/i386/olpc/es.map', 'data/keymaps/i386/olpc/es-olpc.map')
+    mv('data/keymaps/i386/olpc/pt.map', 'data/keymaps/i386/olpc/pt-olpc.map')
+    mv('data/keymaps/i386/dvorak/no.map', 'data/keymaps/i386/dvorak/no-dvorak.map')
+    mv('data/keymaps/i386/fgGIod/trf.map', 'data/keymaps/i386/fgGIod/trf-fgGIod.map')
+    mv('data/keymaps/i386/colemak/en-latin9.map', 'data/keymaps/i386/colemak/colemak.map')
+    execute('patch', '-Np1', '-i', '../patches/fix-keymap-loading-1.15.5.patch')
+    execute('./configure', '--prefix=/usr', '--datadir=/usr/share/kbd', '--mandir=/usr/share/man')
+    make('KEYCODES_PROGS=yes', 'RESIZECONS_PROGS=yes')
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('KEYCODES_PROGS=yes', 'RESIZECONS_PROGS=yes', 'DESTDIR=%s' % pkgdir, 'install')
+
