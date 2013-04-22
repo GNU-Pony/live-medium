@@ -1,0 +1,29 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'libedit'
+pkgver = '20120601_3.0'
+pkgdesc = 'Command line editor library providing generic line editing, history, and tokenization functions'
+upstream = 'http://www.thrysoee.dk/editline/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['BSD']
+private = UNSUPPORTED
+source = ['http://www.thrysoee.dk/editline/libedit-%s.tar.gz' % pkgver.replace('_', '-')]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('./configure', '--prefix=/usr', '--enable-widec', '--enable-static=no')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('prefix=%s/usr' % pkgdir, 'install')
+    install('LICENSE', pkgdir + '/usr/share/licenses/libedit/LICENSE', mode = 0o644, parents = True)
+
