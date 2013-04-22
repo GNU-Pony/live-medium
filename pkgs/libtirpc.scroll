@@ -1,0 +1,32 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'libtirpc'
+pkgver = '0.2.2'
+pkgdesc = 'Transport Independent RPC library (SunRPC replacement)'
+upstream = 'http://libtirpc.sourceforge.net/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['BSD']
+private = UNSUPPORTED
+source = ['http://downloads.sourceforge.net/sourceforge/libtirpc/libtirpc-%s.tar.bz2' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    for patch in ['0.2.1-fortify', '0.2.3rc1', 'fix-segfault-0.2.2']:
+        execute('patch', '-Np1', '-i', '../patches/libtirpc-%s.patch' % patch)
+    execute('./configure', '--prefix=/usr', '--enable-gss')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    install('doc/etc_netconfig', pkgdir + '/etc/netconfig', mode = 0o644, parents = True)
+    install('COPYING', pkgdir + '/usr/share/licenses/libtirpc/LICENSE', mode = 0o644, parents = True)
+
