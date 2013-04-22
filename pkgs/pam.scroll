@@ -1,0 +1,30 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'pam'
+pkgver = '1.1.6'
+pkgdesc = 'Pluggable Authentication Modules library'
+upstream = 'http://www.kernel.org/pub/linux/libs/pam/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL2']
+private = UNSUPPORTED
+source = ['https://fedorahosted.org/releases/l/i/linux-pam/Linux-PAM-%s.tar.bz2' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('./configure', '--libdir=/usr/lib')
+    execute('sed', '-i', 's_mkdir -p $(namespaceddir)_mkdir -p $(DESTDIR)$(namespaceddir)_g', 'modules/pam_namespace/Makefile')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=' + pkgdir, 'SCONFIGDIR=/etc/security', 'install')
+    install('../confs/limits.conf', pkgdir + '/etc/security', mode = 0o644)
+
