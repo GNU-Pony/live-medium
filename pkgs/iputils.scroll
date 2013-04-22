@@ -1,0 +1,43 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'iputils'
+pkgver = '20121221'
+pkgdesc = 'Network monitoring tools, including ping'
+upstream = 'http://www.skbuff.net/iputils/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL', 'BSD']
+private = UNSUPPORTED
+source = ['http://www.skbuff.net/iputils/iputils-s%s' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-s%s' % (srcdir, pkgname, pkgver))
+    make('USE_GNUTLS=no', 'CCOPTOPT=-O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2')
+    for file in path('*.sgml'):
+        xf = file[:-5] + '.xml'
+        try:
+            bash('osx -xlower -xno-nl-in-tag %s > %s' % (file, xf))
+        except:
+            pass
+        execute('sed', '-i', 's_<refname>%(.*%), %(.*%)</refname>_<refname>%1</refname>, <refname>%2</refname>_g'.replace('%', '\\'), xf)
+	execute('docbook2man', xf)
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-s%s' % (srcdir, pkgname, pkgver))
+    mkdir_p([pkgdir + d for d in '/usr/bin /usr/sbin /bin /usr/share/man/man8 /etc/xinetd.d'.split(' ')])
+    install(['arping', 'clockdiff', 'rarpd', 'rdisc', 'tftpd', 'tracepath', 'tracepath6'], pkgdir + '/usr/sbin/', mode = 0o755)
+    install(['ping', 'ping6'], pkgdir + '/usr/bin/', mode = 0o755)
+    ln('/usr/bin/ping', pkgdir + '/bin')
+    ln('/usr/bin/ping6', pkgdir + '/bin')
+    install(path('doc/{arping,clockdiff,ping,rarpd,rdisc,tftpd,tracepath}.8'), pkgdir + '/usr/share/man/man8', mode = 0o644)
+    ln('ping.8.gz', pkgdir + '/usr/share/man/man8/ping6.8.gz')
+    ln('tracepath.8.gz', pkgdir + '/usr/share/man/man8/tracepath6.8.gz')
+    install('../confs/tftp.xinetd', pkgdir + '/etc/xinetd.d/tftp', mode = 0o644)
+
