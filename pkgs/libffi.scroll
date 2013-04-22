@@ -1,0 +1,29 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'libffi'
+pkgver = '3.0.12'
+pkgdesc = 'Portable, high level programming interface to various calling conventions'
+upstream = 'http://sourceware.org/libffi/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['MIT']
+private = UNSUPPORTED
+source = ['ftp://sourceware.org/pub/libffi/libffi-3.0.12.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('./configure', '--prefix=/usr', '--disable-static')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    install('LICENSE', pkgdir + '/usr/share/licenses/libffi/LICENSE', mode = 0o644, parents = True)
+
