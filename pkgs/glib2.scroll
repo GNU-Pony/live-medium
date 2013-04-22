@@ -26,8 +26,8 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('completiondir=/usr/share/bash-completion/completions', 'DESTDIR=%s' % pkgdir, 'install')
-    for s in path(('%s/usr/share/bash-completion/completions/' % path_escape(pkgdir) + '*'):
+    make('completiondir=/usr/share/bash-completion/completions', 'DESTDIR=' + pkgdir, 'install')
+    for s in path(('%s/usr/share/bash-completion/completions/' % path_escape(pkgdir)) + '*'):
         chmod(s, 0, 0o111)
     execute('sed', '-i', 's_#!/usr/bin/env python_#!/usr/bin/env python2_', pkgdir + '/usr/bin/gdbus-codegen')
 

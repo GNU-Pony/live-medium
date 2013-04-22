@@ -72,7 +72,7 @@ def package(startdir, srcdir, pkgdir, private):
         make('-j1', '-C', CHOST + '/lib' + lib, 'DESTDIR=' + pkgdir, 'install' + install)
     make(['-j1', 'DESTDIR=' + pkgdir] + ['install-target-lib' + lib for lib in ['quadmath', 'gfortran', 'objc']]
     rm_r(path('%s/usr/lib/{gcc/,libgfortran.spec}') % pkgdir)
-    bash('find %s' -name *.a -delete' % pkgdir)
+    execute('find', pkgdir, '-name', path('*.a'), '-delete')
     cd('..')
     install('COPYING.RUNTIME', pkgdir + '/usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION', mode = 0o644, parents = False)
 
