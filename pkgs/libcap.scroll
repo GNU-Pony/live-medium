@@ -1,0 +1,30 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'libcap'
+pkgver = '2.22'
+pkgdesc = 'POSIX 1003.1e capabilities'
+upstream = 'http://sites.google.com/site/fullycapable'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['BSD']
+private = UNSUPPORTED
+source = ['ftp://ftp.archlinux.org/other/libcap/libcap-%s.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('prefix=/usr', 'DESTDIR=' + pkgdir, 'RAISE_SETFCAP=no', 'install')
+    chmod(pkgdir + '/usr/lib/libcap.so.' + pkgver, 0o755)
+    rm(pkgdir + '/usr/lib/libcap.a')
+    install('pam_cap/capability.conf', pkgdir + '/usr/share/doc/libcap/capability.conf.example', mode = 0o644, parents = True)
+
