@@ -1,0 +1,29 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'ldns'
+pkgver = '1.6.16'
+pkgdesc = 'Fast DNS library supporting recent RFCs'
+upstream = 'http://www.nlnetlabs.nl/projects/ldns/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['BSD']
+private = UNSUPPORTED
+source = ['http://www.nlnetlabs.nl/downloads/ldns/ldns-%s.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('./configure', '--prefix=/usr', '--sysconfdir=/etc', '--localstatedir=/var', '--enable-static=no', '--disable-rpath', '--with-drill', '--with-examples')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    install('LICENSE', pkgdir + '/usr/share/licenses/ldns/LICENSE', mode = 0o644, parents = True)
+
