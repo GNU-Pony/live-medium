@@ -20,7 +20,7 @@ sha3sums = [None]
 def build(startdir, srcdir, pkgdir, private):
     CHOST = get('CHOST')
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('./configure', '----build=' + CHOST, '--prefix=/usr', '--enable-cxx')
+    execute('./configure', '--build=' + CHOST, '--prefix=/usr', '--enable-cxx')
     make()
 
 def package(startdir, srcdir, pkgdir, private):

@@ -1,0 +1,41 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'inetutils'
+pkgver = '1.9.1'
+pkgdesc = 'Collection of common network programs'
+upstream = 'http://www.gnu.org/software/inetutils/"'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL3']
+private = UNSUPPORTED
+source = ['http://ftp.gnu.org/gnu/inetutils/inetutils-%s.tar.gz' % (pkgver, pkgver)]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('sed', '-i', 's#_GL_WARN_ON_USE (gets#//_GL_WARN_ON_USE (gets#', 'lib/stdio.in.h')
+    params = ['./configure', '--prefix=/usr', '--libexec=/usr/sbin', '--localstatedir=/var', '--sysconfdir=/etc',
+            '--mandir=/usr/share/man', '--infodir=/usr/share/info', '--without-wrap', '--with-pam']
+    params += path('--enable-{{ftp,telnet,talk,rlogin,rsh}{,d},rcp,hostname}')
+    params += path('--disable-{{rexec,tftp}{,d},ping{,6},logger,syslogd,inetd,whois,uucpd,ifconfig,traceroute}')
+    execute(params)
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    mkdir_p(pkgdir + '/bin')
+    ln('/usr/bin/hostname', pkgdir + '/bin/hostname')
+    install('../confs/ftpd.rc', pkgdir + '/etc/rc.d/ftpd', mode = 0o755, parents = True)
+    install('../confs/ftpd.conf', pkgdir + '/etc/conf.d/ftpd', mode = 0o644, parents = True)
+    install('../confs/telnet.xinetd', pkgdir + '/etc/xinetd.d/telnet', mode = 0o644, parents = True)
+    install('../confs/talk.xinetd', pkgdir + '/etc/xinetd.d/talk', mode = 0o644, parents = True)
+    install('../confs/rlogin.xinetd', pkgdir + '/etc/xinetd.d/rlogin', mode = 0o644, parents = True)
+    install('../confs/rsh.xinetd', pkgdir + '/etc/xinetd.d/rsh', mode = 0o644, parents = True)
+
