@@ -1,0 +1,40 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'pam_unix'
+pkgver = '2.9.1'
+pkgdesc = 'Module for traditional password authentication'
+upstream = 'ftp://ftp.archlinux.org/other/pam_unix2'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL2']
+private = UNSUPPORTED
+source = ['ftp://ftp.archlinux.org/other/pam_unix2/pam_unix2-%s.tar.bz2' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname + '2', pkgver))
+    execute('patch', '-Np1', '-i', '../patches/pam_unix2-glibc216.patch')
+    execute('./configure', '--libdir=/usr/lib')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname + '2', pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    execute('sed', '-i', 's|# End of file||', pkgdir + '/etc/security/limits.conf')
+    data = None
+    with open(pkgdir + '/etc/security/limits.conf', 'rb') as file:
+        data = file.read().decode('utf-8', 'replace')
+    for d in [('*     ', 'rtprio ', '0'), ('*     ', 'nice   ', '0'), ('@audio', 'rtprio ', ' 65'), ('@audio', 'nice   ', '-10'), ('@audio', 'memlock', ' 40000')]:
+        data += '%s          -       %s        %s\n' % d
+    with open(pkgdir + '/etc/security/limits.conf', 'wb') as file:
+        file.write(data.encode('utf-8'))
+    for f in ['acct', 'auth', 'passwd', 'session']:
+        ln('pam_unix.so', pkgdir + ('/usr/lib/security/pam_unix_%.so' % f))
+    chmod(pkgdir + '/sbin/unix_chkpwd', 0o6000, 0o6000)
+
