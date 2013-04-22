@@ -1,0 +1,24 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'initscripts-fork'
+pkgver = '2012.12.1'
+pkgdesc = 'System initialisation/bootup scripts'
+upstream = 'initscripts-fork.mk'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL2']
+private = UNSUPPORTED
+source = ['https://bitbucket.org/TZ86/initscripts-fork/get/%s.tar.bz2' % (pkgver, pkgver)]
+sha3sums = [None]
+
+
+def package(startdir, srcdir, pkgdir, private):
+    cd(path(path_escape(srcdir) + '/TZ86-initscripts-fork-*'))
+    execute('sed', '-i', 's_ln -s _ln -sf _g', 'Makefile')
+    make('DESTDIR=%s' % pkgdir, 'install')
+
