@@ -19,7 +19,7 @@ sha3sums = [None]
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute(['./configure', '--prefix=/usr', '--libexecdir=/usr/libexec'])
+    execute('./configure', '--prefix=/usr', '--libexecdir=/usr/libexec')
     make()
 
 def package(startdir, srcdir, pkgdir, private):

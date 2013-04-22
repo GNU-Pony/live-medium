@@ -5,22 +5,22 @@
 # without any warranty.  [GNUAllPermissive]
 from dragonsuite import *
 
-pkgname = 'gmp'
-pkgver = '5.1.1'
-pkgdesc = 'A free library for arbitrary precision arithmetic'
-upstream = 'http://gmplib.org/'
+pkgname = 'gzip'
+pkgver = '1.5'
+pkgdesc = 'GNU compression utility'
+upstream = 'http://www.gnu.org/software/gzip/'
 arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
-license = ['LGPL3']
+license = ['GPL3']
 private = UNSUPPORTED
-source = ['ftp://ftp.gmplib.org/pub/gmp-%s/gmp-%s.tar.xz' % (pkgver, pkgver)]
+source = ['ftp://ftp.gnu.org/pub/gnu/gzip/gzip-%s.tar.xz' % pkgver]
 sha3sums = [None]
 
 
 def build(startdir, srcdir, pkgdir, private):
-    CHOST = get('CHOST')
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('./configure', '----build=' + CHOST, '--prefix=/usr', '--enable-cxx')
+    execute('./configure', '--prefix=/usr')
+    execute('patch', '-p1', '-i', '../patches/gzip-1.5-yesno-declaration.patch')
     make()
 
 def package(startdir, srcdir, pkgdir, private):
