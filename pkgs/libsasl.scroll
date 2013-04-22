@@ -1,0 +1,77 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'libsasl'
+pkgver = '2.1.23'
+pkgdesc = 'Cyrus Simple Authentication Service Layer (SASL) library'
+upstream = 'http://cyrusimap.web.cmu.edu/'
+arch = ['custom (permissive free)']
+freedom = SOFTWARE | MEDIA
+license = ['LGPL']
+private = UNSUPPORTED
+source = ['ftp://ftp.andrew.cmu.edu/pub/cyrus-mail/cyrus-sasl-%s.tar.gz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('patch', '-Np0', '-i', '../patches/cyrus-sasl-2.1.23-authd-fix.patch')
+    patches = 'cyrus-sasl-2.1.19-checkpw.c cyrus-sasl-2.1.22-crypt cyrus-sasl-2.1.22-qa cyrus-sasl-2.1.22-automake-1.10 0003_saslauthd_mdoc'
+    patches += ' 0010_maintainer_mode 0011_saslauthd_ac_prog_libtool 0012_xopen_crypt_prototype. 0016_pid_file_lock_creation_mask 0018_auth_rimap_quotes'
+    patches += ' 0019_ldap_deprecated 0022_gcc4.4_preprocessor_syntax 0025_ld_as_needed 0026_drop_krb5support_dependency 0012_xopen_crypt_prototype'
+    patches += ' 0016_pid_file_lock_creation_mask 0018_auth_rimap_quotes 0019_ldap_deprecated 0022_gcc4.4_preprocessor_syntax 0025_ld_as_needed'
+    patches += ' 0026_drop_krb5support_dependency 0027_db5_support 0030-dont_use_la_files_for_opening_plugins'
+    for patch in patches.split(' '):
+        execute('patch', '-Np1', '-i', '../patches/%s.patch' % patch)
+    rm('config/config.guess', 'config/config.sub', 'config/ltconfig', 'config/ltmain.sh', 'config/libtool.m4')
+    rm_r('autom4te.cache')
+    execute('libtoolize', '-c')
+    execute('aclocal', '-I', 'config', '-I', 'cmulocal')
+    execute('automake', '-a', '-c')
+    execute('autoheader')
+    execute('autoconf')
+    cd('saslauthd')
+    rm('config/config.guess', 'config/config.sub', 'config/ltconfig', 'config/ltmain.sh', 'config/libtool.m4')
+    rm_r('autom4te.cache')
+    execute('libtoolize', '-c')
+    execute('aclocal', '-I', 'config', '-I', '../config')
+    execute('automake', '-a', '-c')
+    execute('autoheader')
+    execute('autoconf')
+    cd('..')
+    params = '--prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --disable-static --sysconfdir=/etc --with-devrandom=/dev/urandom'.split(' ')
+    params += path('--enable-{shared,alwaystrue,checkapop,cram,digest,gssapi,apim,plain,anon,login,ntlm,sql,ldapdb}')
+    params += path('--disable-{otp,srp{,-setpass},krb4,passdss,macos-framework}')
+    params += path('--with-{pam,saslauthd=/var/run/saslauthd,ldap,configdir=/etc/sasl2:/etc/sasl:/usr/lib/sasl2}')
+    execute(['./configure'] + params)
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    for dir in ['include', 'lib', 'sasldb', 'plugins', 'utils']:
+        cd(dir)
+        make('DESTDIR=' + pkgdir, 'install')
+        cd('..')
+    rm(path('%s/usr/lib/sasl2/lib{sql,gssapiv2,ldapdb}.so*' % path_escape(pkgdir)))
+    install('COPYING', pkgdir + '/usr/share/licenses/libsasl/COPYING', mode = 0o644, parents = True)
+    cd('saslauthd')
+    make('DESTDIR=' + pkgdir, 'install')
+    mkdir_p(pkgdir + '/etc/rc.d')
+    mkdir_p(pkgdir + '/etc/conf.d')
+    install('../../confs/saslauthd', pkgdir + '/etc/rc.d/', mode = 0o755)
+    install('../../confs/saslauthd.conf.d', pkgdir + '/etc/conf.d/saslauthd', mode = 0o644)
+    mkdir_p(mkdir + '/usr/share/licenses/cyrus-sasl')
+    ln('../libsasl/COPYING', pkgdir + '/usr/share/licenses/cyrus-sasl/COPYING')
+    cd('../plugins')
+    execute('cp', '-a', path('.libs/libgssapiv2.so*'), pkgdir + '/usr/lib/sasl2/')
+    mkdir_p(pkgdir + '/usr/share/licenses/cyrus-sasl-gssapi')
+    ln('../libsasl/COPYING', pkgdir + '/usr/share/licenses/cyrus-sasl-gssapi/COPYING')
+    mkdir_p(pkgdir + '/usr/lib/sasl2')
+    execute('cp', '-a', path('.libs/libldapdb.so*'), pkgdir + '/usr/lib/sasl2/')
+    mkdir_p(pkgdir + '/usr/share/licenses/cyrus-sasl-ldap')
+    ln('../COPYING', pkgdir + '/usr/share/licenses/cyrus-sasl-ldap/COPYING')
+
