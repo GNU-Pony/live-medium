@@ -19,6 +19,8 @@ sha3sums = [None]
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    decompress('krb5-%s.tar.gz' % pkgver)
+    cd('src')
     execute('sed', '-i', 's_\'"$LDFLAG S"\'__g', 'krb5-config.in')
     execute('sed', '-i', '/KRB5ROOT=/s/\/local//', 'util/ac_check_krb5.m4')
     flags = '-O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2'
