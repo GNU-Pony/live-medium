@@ -14,7 +14,7 @@ $(KERNEL)/.config: $(KERNEL)
 	    cp "$(KERNEL_CONFIG)" "$(KERNEL)/.config"; \
 	fi
 	make -C "$(KERNEL)" prepare
-	make -C "$(KERNEL)" menuconfig
+	make -C "$(KERNEL)" nconfig
 	yes "" | make -C "$(KERNEL)" config > /dev/null
 
 $(KERNEL)/vmlinux: $(KERNEL)/.config
