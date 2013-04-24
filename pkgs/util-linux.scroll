@@ -1,0 +1,33 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'util-linux'
+pkgver = '2.22.2'
+pkgdesc = 'Miscellaneous system utilities for Linux'
+upstream = 'http://www.kernel.org/pub/linux/utils/util-linux/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL2']
+private = UNSUPPORTED
+source = ['http://www.kernel.org/pub/linux/utils/util-linux/v%s/util-linux-%s.tar.xz' % ('.'.join(pkgver.split('.')[:-1]), pkgver)]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('./autogen.sh')
+    execute(['./configure', '--prefix=/usr', '--libdir=/usr/lib', '--localstatedir=/run'] + path('--enable-{fs-paths-extra=/usr/bin:/usr/sbin,raw,vipw,newgrp,-chfn-chsh,write,mesg,socket-activation}'))
+    make('INCLUDES+=-lcrypt')
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    chmod(path('%s/usr/bin/{newgrp,ch{sh,fn}}' % path_escape(pkgdir)), 0o4755)
+    for (s, d) in [('common', 'chfn'), ('common', 'chsh'), ('login', 'login'), ('su', 'su'), ('su', 'su-l')]:
+        install('../confs/pam-' + s, pkgdir + '/etc/pam.d/' + d, mode = 0o644, parents = True)
+    install('../confs/uuidd.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/uuidd.conf', mode = 0o644, parents = True)
+
