@@ -1,0 +1,45 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'systemd'
+pkgver = '198'
+pkgdesc = 'System and service manager'
+upstream = 'http://www.freedesktop.org/wiki/Software/systemd'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL2', 'LGPL2.1', 'MIT']
+private = UNSUPPORTED
+source = ['http://www.freedesktop.org/software/systemd/systemd-%s.tar.xz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('patch', '-Np1', '-i', '../patches/use-split-usr-path.patch')
+    execute('patch', '-Np1', '-i', '../patches/0001-journal-pass-the-pid-to-sd_pid_get_owner_uid.patch')
+    execute('patch', '-Np1', '-i', '../patches/0001-strv-fix-STRV_FOREACH_PAIR-macro-definition.patch')
+    execute('patch', '-Np1', '-i', '../patches/0001-rules-move-builtin-calls-before-the-permissions-sect.patch')
+    execute(['./configure'] + path('--{libexecdir=/usr/lib,localstatedir=/var,sysconfdir=/etc,enable-{static,introspection,gtk-doc},disable-{audit,ima},with-{sysvinit,sysvrcnd}-path=}'))
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    with open(pkgdir + '/usr/lib/tmpfiles.d/console.conf', 'wb') as file:
+        file.write('d /run/console 0755 root root\n"'.encode('utf-8'))
+    mkdir_p(pkgdir + '/bin')
+    mkdir_p(pkgdir + '/sbin')
+    ln('../usr/lib/systemd/systemd', pkgdir + '/bin/systemd')
+    rm_r(pkgdir + '/etc/systemd/system/getty.target.wants')
+    rm_r(pkgdir + '/etc/rpm')
+    ln('../usr/bin/udevadm', pkgdir + '/sbin/udevadm')
+    ln('../lib/systemd/systemd-udevd', pkgdir + '/usr/bin/udevd')
+    install('tmpfiles.d/legacy.conf', pkgdir + '/usr/lib/tmpfiles.d', mode = 0o644)
+    execute(['sed', '-i', 's#GROUP="dialout"#GROUP="uucp"#g'] + path('%s/usr/lib/udev/rules.d/*.rules' % path_escape(pkgdir)))
+    execute(['sed', '-i', 's#GROUP="tape"#GROUP="storage"#g'] + path('%s/usr/lib/udev/rules.d/*.rules' % path_escape(pkgdir)))
+    execute(['sed', '-i', 's#GROUP="cdrom"#GROUP="optical"#g'] + path('%s/usr/lib/udev/rules.d/*.rules' % path_escape(pkgdir)))
+
