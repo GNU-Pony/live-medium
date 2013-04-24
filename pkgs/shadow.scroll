@@ -1,0 +1,47 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'shadow'
+pkgver = '4.1.5.1'
+pkgdesc = 'Password and account management tool suite with support for shadow files and PAM'
+upstream = 'http://pkg-shadow.alioth.debian.org/'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['BSD']
+private = UNSUPPORTED
+source = ['http://pkg-shadow.alioth.debian.org/releases/shadow-%s.tar.bz2' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    export('LIBS', '-lcrypt')
+    execute('patch', '-Np1', '-i', '../patches/xstrdup.patch')
+    execute('patch', '-Np1', '-i', '../patches/shadow-strncpy-usage.patch')
+    execute('sed', '-i', '/^SUBDIRS/s/pam.d//', 'etc/Makefile.in')
+    execute('./configure', '--prefix=/usr', '--libdir=/lib', '--mandir=/usr/share/man', '--sysconfdir=/etc', '--with-libpam', '--without-selinux', '--with-group-name-max-length=321')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+    install('../patches/shadow-license', pkgdir + '/usr/share/licenses/shadow/LICENSE', mode = 0o644, parents = True)
+    install('../confs/useradd.defaults', pkgdir + '/etc/default/useradd', mode = 0o644, parents = True)
+    install('../confs/shadow.cron.daily', pkgdir + '/etc/cron.daily/shadow', mode = 0o755, parents = True)
+    install('../confs/login.defs', pkgdir + '/etc/login.defs', mode = 0o644, parents = True)
+    install(path('../confs/{passwd,chgpasswd,chpasswd,newusers}'), pkgdir + '/etc/pam.d', mode = 0o644, parents = True)
+    install('etc/pam.d/groupmems', pkgdir + '/etc/pam.d/groupmems', mode = 0o644, parents = True)
+    for file in ['chage', 'groupadd', 'groupdel', 'groupmod', 'shadow', 'useradd', 'usermod', 'userdel']:
+        install('../confs/shadow-defaults.pam', pkgdir + '/etc/pam.d/' + file, mode = 0o644, parents = True)
+    install('../confs/lastlog.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/lastlog.conf', mode = 0o644, parents = True)
+    rm(path('%s/usr/sbin/{logoutd,vipw,vigr}' % path_escape(pkgdir)))
+    rm(path('%s/usr/bin/{chsh,chfn,sg}' % path_escape(pkgdir)))
+    rm(path('%s/bin/{login,su}' % path_escape(pkgdir)))
+    mv(pkgdir + '/usr/bin/newgrp', pkgdir + '/usr/bin/sg')
+    execute(['find', pkgdir + '/usr/share/man'] + '( -name chsh.1 -o -name chfn.1 -o -name su.1 -o -name logoutd.8 -o -name login.1 -o -name vipw.8 -o -name vigr.8 -o -name newgrp.1 ) -delete'.split(' '))
+    rmdir(path('%s/usr/share/man/{{fi,id,zh_TW}/man1,fi,ko/man8}' % path_escape(pkgdir)))
+
