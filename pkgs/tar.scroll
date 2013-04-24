@@ -1,0 +1,29 @@
+# -*- python -*-
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.  [GNUAllPermissive]
+from dragonsuite import *
+
+pkgname = 'tar'
+pkgver = '1.26'
+pkgdesc = 'Utility used to store, backup, and transport files'
+upstream = 'http://www.gnu.org/software/tar/tar.html'
+arch = ['x86_64']
+freedom = SOFTWARE | MEDIA
+license = ['GPL3']
+private = UNSUPPORTED
+source = ['ftp://ftp.gnu.org/gnu/tar/tar-%s.tar.xz' % pkgver]
+sha3sums = [None]
+
+
+def build(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    execute('sed', '-i', '-e', '/gets is a/d', 'gnu/stdio.in.h')
+    execute('./configure', '--prefix=/usr', '--libexecdir=/usr/lib/tar', '--bindir=/bin')
+    make()
+
+def package(startdir, srcdir, pkgdir, private):
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    make('DESTDIR=%s' % pkgdir, 'install')
+
