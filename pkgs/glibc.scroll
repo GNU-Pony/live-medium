@@ -13,13 +13,15 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL', 'LGPL']
 private = UNSUPPORTED
-source = ['http://ftp.gnu.org/gnu/libc/glibc-%s.tar.xz' % pkgdir]
-sha3sums = [None]
+source = ['http://ftp.gnu.org/gnu/libc/glibc-%s.tar.xz' % pkgdir,
+          '../patches/glibc-2.17-sync-with-linux37.patch', '../confs/nscd.tmpfiles', '../patches/locale-gen']
+noextract = source[1:]
+sha3sums = [None, None, None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('patch', '-p1', '-i', '../patches/glibc-2.17-sync-with-linux37.patch')
+    execute('patch', '-p1', '-i', '../glibc-2.17-sync-with-linux37.patch')
     mkcd('glibc-build')
     export('CFLAGS', '-O2 -pipe --param=ssp-buffer-size=4')
     export('LDFALGS', '-Wl,-O1,--sort-common,--as-needed,-z,relro')
@@ -43,9 +45,9 @@ def package(startdir, srcdir, pkgdir, private):
     rm(pkgdir + '/etc/ld.so.conf')
     mkdir_p(path(path_escape(pkgdir) + '/usr/lib/{locale,systemd/system,tmpfiles.d}'))
     install('nscd/nscd.conf', pkgdir + '/etc/nscd.conf', mode = 0o644)
-    install('../confs/nscd.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/nscd.conf', mode = 0o644)
+    install('../nscd.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/nscd.conf', mode = 0o644)
     install('posix/gai.conf', pkgdir + '/etc/gai.conf', mode = 0o644)
-    install('../patches/locale-gen', pkgdir + '/usr/bin', mode = 0o644)
+    install('../locale-gen', pkgdir + '/usr/bin', mode = 0o755)
     if not os.path.exists(pkgdir + '/usr/bin/ldconfig'):
         ln('../../sbin/ldconfig', pkgdir + '/usr/bin/ldconfig')
 
