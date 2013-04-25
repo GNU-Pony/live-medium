@@ -13,7 +13,7 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL']
 private = UNSUPPORTED
-source = ['http://downloads.sourceforge.net/sourceforge/cracklib/%s.tar.gz' % pkgver]
+source = ['http://downloads.sourceforge.net/sourceforge/cracklib/cracklib-%s.tar.gz' % pkgver]
 sha3sums = [None]
 
 
@@ -26,6 +26,6 @@ def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     make('DESTDIR=%s' % pkgdir, 'install')
     install('cracklib-small', pkgdir + '/usr/share/dict/cracklib-small', directory = True, parents = True)
-    install('cracklib-small', '/usr/share/dict', mode = 0o644)
+    install('cracklib-small', pkgdir + '/usr/share/dict', mode = 0o644)
     bash('./util/cracklib-format dicts/cracklib-small | ./util/cracklib-packer /usr/share/cracklib/pw_dict')
 

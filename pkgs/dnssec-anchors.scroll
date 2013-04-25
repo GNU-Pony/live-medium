@@ -21,11 +21,11 @@ sha3sums = [None, None]
 def build(startdir, srcdir, pkgdir, private):
     cd('%s' % srcdir)
     bash('drill -z -s DNSKEY . > root.key')
-    bash('http://data.iana.org/root-anchors/root-anchors.xml | BEGIN{ORS=" "}(NR>4){gsub(/<[^>]*>/,"");print tolower($0)} | sed \'s/   /\n/\' > root.ds')
+    bash('cat ../root-anchors.xml | awk \'BEGIN{ORS=" "}(NR>4){gsub(/<[^>]*>/,"");print tolower($0)}\' | sed \'s/   /\\n/\' > root.ds')
     try:
         bash('[[ "$(<root.ds)" = \'19036 8 2 49aac11d7b6f6446702e54a1607371607a1a41855200fd2ce1cdde32f24e8fb5\' ]]')
     except Exception as err:
-        echo('\e[01;31mSuspicious dnssec-anchors\e[00m')
+        echo('\033[01;31mSuspicious dnssec-anchors\033[00m')
         raise err
     bash('grep -Pq \'IN\\tDS\\t\'"$(<root.ds)" root.key')
     bash('sed \'/DNSKEY/s/ ;{id = \'"$(cut -d " "  -f 1 < root.ds)"\' .*//;t;d\' root.key > trusted-key.key')

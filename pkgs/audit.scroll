@@ -20,7 +20,7 @@ sha3sums = [None, None]
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('patch', '-p0', '-i', '../audit-python2.patch')
+    execute('patch', '-p0', '-i', startdir + '/audit-python2.patch')
     execute('./configure', '--prefix=/usr', '--sysconfdir=/etc', '--libexecdir=/usr/libexec/audit', '--with-python=yes', '--enable-gssapi-krb5=yes', '--with-libcap-ng=yes')
     make()
 

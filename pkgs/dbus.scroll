@@ -22,14 +22,14 @@ sha3sums = [None, None, None, None]
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     execute('./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libexecdir=/usr/libexec --with-dbus-user=dbus --with-system-pid-file=/run/dbus/pid --with-system-socket=/run/dbus/system_bus_socket --with-console-auth-dir=/run/console/ --enable-inotify --disable-dnotify --disable-verbose-mode --disable-static --disable-tests --disable-asserts --with-systemdsystemunitdir=/usr/lib/systemd/system --enable-systemd'.split(' '))
-    execute('patch', '-p1', '-i', '../systemd-user-session.patch')
+    execute('patch', '-p1', '-i', startdir + '/systemd-user-session.patch')
     make()
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     make('DESTDIR=%s' % pkgdir, 'install')
     rm_r(pkgdir + '/var/run')
-    install('../dbus', pkgdir + '/etc/rc.d/dbus', mode = 0o755, parents = True)
-    install('../30-dbus', pkgdir + '/etc/X11/xinit/xinitrc.d/30-dbus', mode = 0o755, parents = True)
+    install(startdir + '/dbus', pkgdir + '/etc/rc.d/dbus', mode = 0o755, parents = True)
+    install(startdir + '/30-dbus', pkgdir + '/etc/X11/xinit/xinitrc.d/30-dbus', mode = 0o755, parents = True)
     install('COPYING', pkgdir + '/usr/share/licenses/dbus/COPYING', mode = 0o644, parents = True)
 

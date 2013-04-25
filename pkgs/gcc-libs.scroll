@@ -22,26 +22,26 @@ HOST = get('HOST')
 
 
 def build(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd('%s/%s-%s' % (srcdir, 'gcc', pkgver))
     execute('sed', '-i', 's/install_to_$(INSTALL_DEST) //', 'libiberty/Makefile.in')
     execute('sed', '-i', 's_\\./fixinc\\.sh_-c true_', 'gcc/Makefile.in')
     if ARCH == 'x86_64':
         execute('sed', '-i', '/m64=/s/lib64/lib/', 'gcc/config/i386/t-linux64')
-    execute('patch' '-p1' '-i' '../gcc-4.7.1-libgo-write.patch')
-    with open('gcc/BASE-VER', 'rb') as file:
+    execute('patch', '-p1', '-i', startdir + '/gcc-4.7.1-libgo-write.patch')
+    with open('gcc/BASE-VER', 'wb') as file:
         file.write(pkgver.encode('utf-8'))
     export('CFLAGS', ' -O2 -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2')
     export('CXXFLAGS', ' -O2 -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2')
     mkcd('gcc-build')
     params = ['--prefix=/usr' '--libdir=/usr/lib' '--libexecdir=/usr/libexec', '--mandir=/usr/share/man']
-    params.append(--infodir=/usr/share/info--enable-languages=c,c++,fortran,lto)
+    params.append('--infodir=/usr/share/info--enable-languages=c,c++,fortran,lto')
     params += ['--with-' + x for x in 'system-zlib -ppl plugin-ld=ld.gold linker-hash-style=gnu'.split(' ')]
     params += ['--enable-' + x for x in 'shared threads=posix __cxa_atexit clocale=gnu libstdcxx-time gnu-unique-object linker-build-id cloog-backend=isl checking=release'.split(' ')]
     params += ['--disable-' + x for x in 'libunwind-exceptions libstdcxx-pch ppl-version-check plugin multilib libssp build-with-cxx build-poststage1-with-cxx'.split(' ')]
     execute(['../configure'] + params)
     cd('..')
     execute('sed', '-i', 's|@itemx --help|@item --help|g', 'gcc/doc/cppopts.texi')
-    for e in ['enable-@var{kind}-@var{pass}'] + ['-fdump-rtl-' + p for p in ['cprop_hardreg csa dce dbr into_cfglayout outof_cfglayout pro_and_epilogue'.split(' ')]]:
+    for e in ['enable-@var{kind}-@var{pass}'] + ['-fdump-rtl-' + p for p in 'cprop_hardreg csa dce dbr into_cfglayout outof_cfglayout pro_and_epilogue'.split(' ')]:
         execute('sed', '-i', 's|@itemx -f%s|@item -f%s|g' % (e, e), 'gcc/doc/invoke.texi')
     execute('sed', '-i', 's|@tie{KiB}|@tie{}KiB|g', 'gcc/doc/invoke.texi')
     execute('sed', '-i', 's|@itemx all.cross|@item all.cross|g', 'gcc/doc/sourcebuild.texi')
@@ -54,7 +54,7 @@ def build(startdir, srcdir, pkgdir, private):
 
 
 def package(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s/gcc-build' % (srcdir, pkgname, pkgver))
+    cd('%s/%s-%s/gcc-build' % (srcdir, 'gcc', pkgver))
     MAKEFLAGS = get('MAKEFLAGS').split(' ')
     skipnext = False
     _MAKEFLAGS = []
@@ -71,8 +71,8 @@ def package(startdir, srcdir, pkgdir, private):
         make('-j1', '-C', HOST + '/lib' + lib, 'DESTDIR=' + pkgdir, 'install-toolexeclibLTLIBRARIES')
     for (lib, install) in [('stdc++-v3', ''), ('gomp', '-info'), ('itm', '-info')]:
         make('-j1', '-C', HOST + '/lib' + lib, 'DESTDIR=' + pkgdir, 'install' + install)
-    make(['-j1', 'DESTDIR=' + pkgdir] + ['install-target-lib' + lib for lib in ['quadmath', 'gfortran', 'objc']]
-    rm_r(path('%s/usr/lib/{gcc/,libgfortran.spec}') % pkgdir)
+    make(['-j1', 'DESTDIR=' + pkgdir] + ['install-target-lib' + lib for lib in ['quadmath', 'gfortran', 'objc']])
+    rm_r(path('%s/usr/lib/{gcc/,libgfortran.spec}' % path_escape(pkgdir)))
     execute('find', pkgdir, '-name', '*.a', '-delete')
     cd('..')
     install('COPYING.RUNTIME', pkgdir + '/usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION', mode = 0o644, parents = False)

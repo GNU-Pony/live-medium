@@ -13,7 +13,7 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL']
 private = UNSUPPORTED
-source = ['http://cryptsetup.googlecode.com/files/%s.tar.bz2' % pkgver]
+source = ['http://cryptsetup.googlecode.com/files/cryptsetup-%s.tar.bz2' % pkgver]
 sha3sums = [None]
 
 

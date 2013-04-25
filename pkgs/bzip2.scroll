@@ -21,7 +21,7 @@ sha3sums = [None, None]
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     execute('sed', '-e', 's/^CFLAGS=\\(.*\\)$/CFLAGS=\\1 \\$(BIGFILES)/', '-i', './Makefile-libbz2_so')
-    execute('patch', '-Np1', '-i', '../bzip2-1.0.4-bzip2recover.patch')
+    execute('patch', '-Np1', '-i', startdir + '/bzip2-1.0.4-bzip2recover.patch')
     make('-f', 'Makefile-libbz2_so')
     make('bzip2', 'bzip2recover', 'libbz2.a')
 
