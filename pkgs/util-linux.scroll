@@ -13,8 +13,10 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL2']
 private = UNSUPPORTED
-source = ['http://www.kernel.org/pub/linux/utils/util-linux/v%s/util-linux-%s.tar.xz' % ('.'.join(pkgver.split('.')[:-1]), pkgver)]
-sha3sums = [None]
+source = ['http://www.kernel.org/pub/linux/utils/util-linux/v%s/util-linux-%s.tar.xz' % ('.'.join(pkgver.split('.')[:-1]), pkgver),
+          '../confs/uuidd.tmpfiles', '../confs/pam-common', '../confs/pam-login', '../confs/pam-su']
+noextract = source[1:]
+sha3sums = 5 * [None]
 
 
 def build(startdir, srcdir, pkgdir, private):
@@ -25,9 +27,9 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install')
+    make('DESTDIR=' + pkgdir, 'install')
     chmod(path('%s/usr/bin/{newgrp,ch{sh,fn}}' % path_escape(pkgdir)), 0o4755)
     for (s, d) in [('common', 'chfn'), ('common', 'chsh'), ('login', 'login'), ('su', 'su'), ('su', 'su-l')]:
-        install('../confs/pam-' + s, pkgdir + '/etc/pam.d/' + d, mode = 0o644, parents = True)
-    install('../confs/uuidd.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/uuidd.conf', mode = 0o644, parents = True)
+        install('../pam-' + s, pkgdir + '/etc/pam.d/' + d, mode = 0o644, parents = True)
+    install('../uuidd.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/uuidd.conf', mode = 0o644, parents = True)
 
