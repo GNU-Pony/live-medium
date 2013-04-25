@@ -22,8 +22,8 @@ sha3sums = [None, None, None]
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%sdsf' % (srcdir, pkgname, pkgver))
-    execute('patch', '-p1', '-d', 'src', '-i', '../0001-simplify-writelog.patch')
-    execute('patch', '-p1', '-d', 'src', '-i', '../0002-remove-ansi-escape-codes-from-log-file.patch')
+    execute('patch', '-p1', '-d', 'src', '-i', startdir + '/0001-simplify-writelog.patch')
+    execute('patch', '-p1', '-d', 'src', '-i', startdir + '/0002-remove-ansi-escape-codes-from-log-file.patch')
     make()
 
 def package(startdir, srcdir, pkgdir, private):

@@ -13,14 +13,14 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['custom (permissive free)']
 private = UNSUPPORTED
-source = ['ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-%s' % pkgver, '../patches/ntlm.patch']
+source = ['ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-%s.tgz' % pkgver, '../patches/ntlm.patch']
 noextract = source[1:]
 sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('patch', '-Np1', '-i', '../ntlm.patch')
+    cd('%s/%s-%s' % (srcdir, 'openldap', pkgver))
+    execute('patch', '-Np1', '-i', startdir + '/ntlm.patch')
     execute('sed', '-i', 's#-m 644 $(LIBRARY)#-m 755 $(LIBRARY)#', path('libraries/{liblber,libldap,libldap_r}/Makefile.in'))
     execute('sed', '-i', 's|#define LDAPI_SOCK LDAP_RUNDIR LDAP_DIRSEP "run" LDAP_DIRSEP "ldapi"|#define LDAPI_SOCK LDAP_DIRSEP "run" LDAP_DIRSEP "openldap" LDAP_DIRSEP "ldapi"|', 'include/ldap_defaults.h')
     execute('sed', '-i', 's|%LOCALSTATEDIR%/run|/run/openldap|', 'servers/slapd/slapd.conf')
@@ -31,11 +31,11 @@ def build(startdir, srcdir, pkgdir, private):
     make()
 
 def package(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd('%s/%s-%s' % (srcdir, 'openldap', pkgver))
     for dir in ['include', 'libraries', 'doc/man/man3']:
         pushd(dir)
-	make('DESTDIR=' + pkgdir, 'install')
-	popd()
+        make('DESTDIR=' + pkgdir, 'install')
+        popd()
     install('doc/man/man5/ldap.conf.5.tmp', pkgdir + '/usr/share/man/man5/ldap.conf.5', mode = 0o644, parents = True)
     rm(pkgdir + '/usr/share/man/man5/ldap.conf.5')
     ln('liblber.so', pkgdir + '/usr/lib/liblber.so.' + pkgdir.split('.')[0])

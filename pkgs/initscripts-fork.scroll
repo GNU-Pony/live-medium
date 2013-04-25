@@ -13,7 +13,7 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL2']
 private = UNSUPPORTED
-source = ['https://bitbucket.org/TZ86/initscripts-fork/get/%s.tar.bz2' % (pkgver, pkgver)]
+source = ['https://bitbucket.org/TZ86/initscripts-fork/get/%s.tar.bz2' % pkgver]
 sha3sums = [None]
 
 

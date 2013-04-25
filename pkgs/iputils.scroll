@@ -13,7 +13,7 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL', 'BSD']
 private = UNSUPPORTED
-source = ['http://www.skbuff.net/iputils/iputils-s%s' % pkgver, '../confs/tftp.xinetd']
+source = ['http://www.skbuff.net/iputils/iputils-s%s.tar.bz2' % pkgver, '../confs/tftp.xinetd']
 noextract = source[1:]
 sha3sums = [None, None]
 
@@ -28,7 +28,7 @@ def build(startdir, srcdir, pkgdir, private):
         except:
             pass
         execute('sed', '-i', 's_<refname>%(.*%), %(.*%)</refname>_<refname>%1</refname>, <refname>%2</refname>_g'.replace('%', '\\'), xf)
-	execute('docbook2man', xf)
+        execute('docbook2man', xf)
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-s%s' % (srcdir, pkgname, pkgver))

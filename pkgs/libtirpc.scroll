@@ -23,7 +23,7 @@ sha3sums = [None, None, None, None]
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     for patch in ['0.2.1-fortify', '0.2.3rc1', 'fix-segfault-0.2.2']:
-        execute('patch', '-Np1', '-i', '../libtirpc-%s.patch' % patch)
+        execute('patch', '-Np1', '-i', startdir + '/libtirpc-%s.patch' % patch)
     execute('./configure', '--prefix=/usr', '--enable-gss')
     make()
 

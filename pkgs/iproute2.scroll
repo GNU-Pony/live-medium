@@ -13,14 +13,14 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL2']
 private = UNSUPPORTED
-source = ['http://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-%s' % pkgver, '../patches/iproute2-fhs.patch']
+source = ['http://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-%s.tar.xz' % pkgver, '../patches/iproute2-fhs.patch']
 noextract = source[1:]
 sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('patch', '-Np1', '-i', '../iproute2-fhs.patch')
+    execute('patch', '-Np1', '-i', startdir + '/iproute2-fhs.patch')
     execute('./configure')
     make()
 
@@ -29,7 +29,7 @@ def package(startdir, srcdir, pkgdir, private):
     make('DESTDIR=' + pkgdir, 'install')
     mkdir_p(pkgdir + '/sbin')
     mv(pkgdir + '/usr/sbin/ip', pkgdir + '/sbin/ip')
-    ln('../../sbin/ip', '/usr/sbin/ip')
+    ln('../../sbin/ip', pkgdir + '/usr/sbin/ip')
     install('include/libnetlink.h', pkgdir + '/usr/include/libnetlink.h', mode = 0o644, parents = True)
     install('lib/libnetlink.a', pkgdir + '/usr/lib/libnetlink.a', mode = 0o644, parents = True)
 

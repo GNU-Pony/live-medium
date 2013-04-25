@@ -13,13 +13,13 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['LGPL']
 private = UNSUPPORTED
-source = ['ftp://ftp.gnu.org/pub/gnu/ncurses/ncurses.tar.gz' % pkgver]
+source = ['ftp://ftp.gnu.org/pub/gnu/ncurses/ncurses-%s.tar.gz' % pkgver]
 sha3sums = [None]
 
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    mkdir_p('ncurses-build', 'ncursesw-build')
+    mkdir_p(['ncurses-build', 'ncursesw-build'])
     cd('ncursesw-build')
     execute('../configure', '--prefix=/usr', '--mandir=/usr/share/man', '--with-shared', '--with-normal', '--without-debug', '--without-ada', '--enable-widec', '--enable-pc-files')
     make()
@@ -47,7 +47,7 @@ def package(startdir, srcdir, pkgdir, private):
     cd('../ncurses-build')
     for lib in ['ncurses', 'form', 'panel', 'menu']:
         install('lib/lib%s.so.%s' % (lib, pkgver), '%s/usr/lib/lib%s.so.%s' % (pkgdir, lib, pkgver), mode = 0o755, parents = True)
-	ln('lib/lib%s.so.%s' % (lib, pkgver), '%s/usr/lib/lib%s.so.%s' % (pkgdir, lib, pkgver.split('.')[0]))
+        ln('lib/lib%s.so.%s' % (lib, pkgver), '%s/usr/lib/lib%s.so.%s' % (pkgdir, lib, pkgver.split('.')[0]))
     cd('..')
     mkdir_p(pkgdir + '/usr/share/licenses/ncurses')
     try:

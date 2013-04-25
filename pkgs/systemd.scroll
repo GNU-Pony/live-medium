@@ -22,10 +22,10 @@ sha3sums = 5 * [None]
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('patch', '-Np1', '-i', '../use-split-usr-path.patch')
-    execute('patch', '-Np1', '-i', '../0001-journal-pass-the-pid-to-sd_pid_get_owner_uid.patch')
-    execute('patch', '-Np1', '-i', '../0001-strv-fix-STRV_FOREACH_PAIR-macro-definition.patch')
-    execute('patch', '-Np1', '-i', '../0001-rules-move-builtin-calls-before-the-permissions-sect.patch')
+    execute('patch', '-Np1', '-i', startdir + '/use-split-usr-path.patch')
+    execute('patch', '-Np1', '-i', startdir + '/0001-journal-pass-the-pid-to-sd_pid_get_owner_uid.patch')
+    execute('patch', '-Np1', '-i', startdir + '/0001-strv-fix-STRV_FOREACH_PAIR-macro-definition.patch')
+    execute('patch', '-Np1', '-i', startdir + '/0001-rules-move-builtin-calls-before-the-permissions-sect.patch')
     execute(['./configure'] + path('--{libexecdir=/usr/lib,localstatedir=/var,sysconfdir=/etc,enable-{static,introspection,gtk-doc},disable-{audit,ima},with-{sysvinit,sysvrcnd}-path=}'))
     make()
 

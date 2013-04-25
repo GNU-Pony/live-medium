@@ -18,12 +18,11 @@ sha3sums = [None]
 
 
 def build(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver.replace('_', '-')))
     execute('./configure', '--prefix=/usr', '--enable-widec', '--enable-static=no')
     make()
 
 def package(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd('%s/%s-%s' % (srcdir, pkgname, pkgver.replace('_', '-')))
     make('prefix=%s/usr' % pkgdir, 'install')
-    install('LICENSE', pkgdir + '/usr/share/licenses/libedit/LICENSE', mode = 0o644, parents = True)
 

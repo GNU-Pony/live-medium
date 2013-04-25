@@ -19,13 +19,14 @@ sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd('%s/%s-%s' % (srcdir, 'Linux-PAM', pkgver))
     execute('./configure', '--libdir=/usr/lib')
     execute('sed', '-i', 's_mkdir -p $(namespaceddir)_mkdir -p $(DESTDIR)$(namespaceddir)_g', 'modules/pam_namespace/Makefile')
     make()
 
 def package(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd('%s/%s-%s' % (srcdir, 'Linux-PAM', pkgver))
     make('DESTDIR=' + pkgdir, 'SCONFIGDIR=/etc/security', 'install')
-    install('../limits.conf', pkgdir + '/etc/security', mode = 0o644)
+    install(startdir + '/limits.conf', pkgdir + '/etc/security', mode = 0o644)
+    chmod(pkgdir + '/sbin/unix_chkpwd', 0o6000, 0o6000)
 

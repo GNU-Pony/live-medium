@@ -20,7 +20,7 @@ sha3sums = [None, None]
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('patch', '-p1', '-i', '../iana-etc-newer.patch')
+    execute('patch', '-p1', '-i', startdir + '/iana-etc-newer.patch')
     make('get')
     make()
 

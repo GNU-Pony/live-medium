@@ -13,7 +13,7 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL3']
 private = UNSUPPORTED
-source = ['http://ftp.gnu.org/gnu/inetutils/inetutils-%s.tar.gz' % (pkgver, pkgver),
+source = ['http://ftp.gnu.org/gnu/inetutils/inetutils-%s.tar.gz' % pkgver,
           '../confs/ftpd.rc', '../confs/ftpd.conf', '../confs/telnet.xinetd', '../confs/talk.xinetd', '../confs/rlogin.xinetd', '../confs/rsh.xinetd']
 noextract = source[1:]
 sha3sums = 7 * [None]
@@ -34,10 +34,10 @@ def package(startdir, srcdir, pkgdir, private):
     make('DESTDIR=' + pkgdir, 'install')
     mkdir_p(pkgdir + '/bin')
     ln('/usr/bin/hostname', pkgdir + '/bin/hostname')
-    install('../ftpd.rc', pkgdir + '/etc/rc.d/ftpd', mode = 0o755, parents = True)
-    install('../ftpd.conf', pkgdir + '/etc/conf.d/ftpd', mode = 0o644, parents = True)
-    install('../telnet.xinetd', pkgdir + '/etc/xinetd.d/telnet', mode = 0o644, parents = True)
-    install('../talk.xinetd', pkgdir + '/etc/xinetd.d/talk', mode = 0o644, parents = True)
-    install('../rlogin.xinetd', pkgdir + '/etc/xinetd.d/rlogin', mode = 0o644, parents = True)
-    install('../rsh.xinetd', pkgdir + '/etc/xinetd.d/rsh', mode = 0o644, parents = True)
+    install(startdir + '/ftpd.rc', pkgdir + '/etc/rc.d/ftpd', mode = 0o755, parents = True)
+    install(startdir + '/ftpd.conf', pkgdir + '/etc/conf.d/ftpd', mode = 0o644, parents = True)
+    install(startdir + '/telnet.xinetd', pkgdir + '/etc/xinetd.d/telnet', mode = 0o644, parents = True)
+    install(startdir + '/talk.xinetd', pkgdir + '/etc/xinetd.d/talk', mode = 0o644, parents = True)
+    install(startdir + '/rlogin.xinetd', pkgdir + '/etc/xinetd.d/rlogin', mode = 0o644, parents = True)
+    install(startdir + '/rsh.xinetd', pkgdir + '/etc/xinetd.d/rsh', mode = 0o644, parents = True)
 

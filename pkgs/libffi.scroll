@@ -13,7 +13,7 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['MIT']
 private = UNSUPPORTED
-source = ['ftp://sourceware.org/pub/libffi/libffi-3.0.12.tar.gz' % pkgver]
+source = ['ftp://sourceware.org/pub/libffi/libffi-%s.tar.gz' % pkgver]
 sha3sums = [None]
 
 

@@ -21,7 +21,7 @@ sha3sums = 5 * [None]
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('patch', '-Np1', '-i', '../linux-adjtimex.patch')
+    execute('patch', '-Np1', '-i', startdir + '/linux-adjtimex.patch')
     execute('autoreconf', '-fi')
     execute('./configure --prefix=/usr --sysconfdir=/etc --with-privsep-user=ntp --with-privsep-path=/run/openntpd/ --with-adjtimex'.split(' '))
     make()
@@ -29,10 +29,10 @@ def build(startdir, srcdir, pkgdir, private):
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     make('DESTDIR=' + pkgdir, 'install')
-    install('../openntpd', pkgdir + '/etc/rc.d/openntpd', mode = 0o755, parents = True)
-    install('../openntpd.conf', pkgdir + '/etc/conf.d/openntpd', mode = 0o644, parents = True)
+    install(startdir + '/openntpd', pkgdir + '/etc/rc.d/openntpd', mode = 0o755, parents = True)
+    install(startdir + '/openntpd.conf', pkgdir + '/etc/conf.d/openntpd', mode = 0o644, parents = True)
     install('LICENCE', pkgdir + '/usr/share/licenses/openntpd/LICENCE', mode = 0o644, parents = True)
     execute('sed', '-i', 's/\*/0.0.0.0/', pkgdir + '/etc/ntpd.conf')
-    install('../openntpd.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/openntpd.conf', mode = 0o644, parents = True)
+    install(startdir + '/openntpd.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/openntpd.conf', mode = 0o644, parents = True)
     mkdir_p(pkgdir + '/usr/lib/systemd/ntp-units.d')
 
