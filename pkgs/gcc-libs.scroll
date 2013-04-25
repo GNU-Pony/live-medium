@@ -13,8 +13,9 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL', 'LGPL', 'FDL', 'custom (free exception)']
 private = UNSUPPORTED
-source = ['ftp://gcc.gnu.org/pub/gcc/releases/gcc-%s/gcc-%s.tar.bz2' % (pkgver, pkgver)]
-sha3sums = [None]
+source = ['ftp://gcc.gnu.org/pub/gcc/releases/gcc-%s/gcc-%s.tar.bz2' % (pkgver, pkgver), '../patches/gcc-4.7.1-libgo-write.patch']
+noextract = source[1:]
+sha3sums = [None, None]
 
 ARCH = get('ARCH')
 CHOST = get('CHOST')
@@ -26,7 +27,7 @@ def build(startdir, srcdir, pkgdir, private):
     execute('sed', '-i', 's_\\./fixinc\\.sh_-c true_', 'gcc/Makefile.in')
     if ARCH == 'x86_64':
         execute('sed', '-i', '/m64=/s/lib64/lib/', 'gcc/config/i386/t-linux64')
-    execute('patch' '-p1' '-i' '../patches/gcc-4.7.1-libgo-write.patch')
+    execute('patch' '-p1' '-i' '../gcc-4.7.1-libgo-write.patch')
     with open('gcc/BASE-VER', 'rb') as file:
         file.write(pkgver.encode('utf-8'))
     export('CFLAGS', ' -O2 -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2')
