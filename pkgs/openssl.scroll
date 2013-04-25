@@ -13,14 +13,15 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['BSD']
 private = UNSUPPORTED
-source = ['https://www.openssl.org/source/openssl-%s.tar.gz' % pkgver]
-sha3sums = [None]
+source = ['https://www.openssl.org/source/openssl-%s.tar.gz' % pkgver, '../patches/no-rpath.patch', '../patches/ca-dir.patch']
+noextract = source[1:]
+sha3sums = [None, None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('patch', '-p0', '-i', '../patches/no-rpath.patch')
-    execute('patch', '-p0', '-i', '../patches/ca-dir.patch')
+    execute('patch', '-p0', '-i', '../no-rpath.patch')
+    execute('patch', '-p0', '-i', '../ca-dir.patch')
     params = ['./Configure', '--prefix=/usr', '--openssldir=/etc/ssl', '--libdir=lib', 'shared', 'zlib']
     conf = execute('./config', '-h').split('\n')
     params += (conf[-2] if conf[-1] == '' else conf[-1]).split(' ')[2:]
