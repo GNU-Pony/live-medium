@@ -13,8 +13,9 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['BSD']
 private = UNSUPPORTED
-source = ['http://www.citi.umich.edu/projects/nfsv4/linux/libgssglue/libgssglue-%s.tar.gz' % pkgver]
-sha3sums = [None]
+source = ['http://www.citi.umich.edu/projects/nfsv4/linux/libgssglue/libgssglue-%s.tar.gz' % pkgver, '../confs/gssapi_mech.conf']
+noextract = source[1:]
+sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
@@ -24,7 +25,7 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install')
-    install('../confs/gssapi_mech.conf', pkgdir + '/etc/gssapi_mech.conf', mode = 0o644, parents = True)
+    make('DESTDIR=' + pkgdir, 'install')
+    install('../gssapi_mech.conf', pkgdir + '/etc/gssapi_mech.conf', mode = 0o644, parents = True)
     install('COPYING', pkgdir + '/usr/share/licenses/libgssglue/COPYING', mode = 0o644, parents = True)
 
