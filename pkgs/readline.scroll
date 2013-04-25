@@ -13,10 +13,11 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL']
 private = UNSUPPORTED
-source = ['http://ftp.gnu.org/gnu/readline/readline-%s.tar.gz' % pkgver]
+source = ['http://ftp.gnu.org/gnu/readline/readline-%s.tar.gz' % pkgver, '../confs/inputrc']
 for p in range(int(pkgver.split('.')[-1])):
     source.append('http://ftp.gnu.org/gnu/readline/readline-%s-patches/readline-%s-%03i' % ('.'.join(pkgver.split('.')[:2]), ''.join(pkgver.split('.')[:2]), p))
-sha3sums = (1 + int(pkgver.split('.')[-1])) * [None]
+noextract = source[1:]
+sha3sums = (2 + int(pkgver.split('.')[-1])) * [None]
 
 
 def build(startdir, srcdir, pkgdir, private):
@@ -29,6 +30,6 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, '.'.join(pkgver.split('.')[:2])))
-    make('DESTDIR=%s' % pkgdir, 'install')
-    install('../confs/inputrc', pkgdir + '/etc/inputrc', mode = 0o644, parents = True)
+    make('DESTDIR=' + pkgdir, 'install')
+    install('../inputrc', pkgdir + '/etc/inputrc', mode = 0o644, parents = True)
 
