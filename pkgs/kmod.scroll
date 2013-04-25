@@ -13,8 +13,9 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL2']
 private = UNSUPPORTED
-source = ['ftp://ftp.kernel.org/pub/linux/utils/kernel/kmod/kmod-%s.tar.xz' % pkgver]
-sha3sums = [None]
+source = ['ftp://ftp.kernel.org/pub/linux/utils/kernel/kmod/kmod-%s.tar.xz' % pkgver, '../confs/depmod-search.conf']
+noextract = source[1:]
+sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
@@ -24,11 +25,11 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install')
+    make('DESTDIR=' + pkgdir, 'install')
     install(path('/{{etc,usr/lib}/{depmod,modprobe}.d,sbin}'), pkgdir, mode = 0o755, parents = True, directory = True)
     ln(../usr/bin/kmod, pkgdir + '/sbin/modprobe')
     ln(../usr/bin/kmod, pkgdir + '/sbin/depmod')
     for tool in ['insmod', 'lsmod', 'rmmod', 'modinfo']:
         ln('kmod', pkgdir + '/usr/bin/' + tool)
-    install('../confs/depmod-search.conf', pkgdir + '/usr/lib/depmod.d/search.conf', mode = 0o644, parents = True)
+    install('../depmod-search.conf', pkgdir + '/usr/lib/depmod.d/search.conf', mode = 0o644, parents = True)
 
