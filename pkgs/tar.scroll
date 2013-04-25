@@ -25,5 +25,5 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install')
+    make('DESTDIR=' + pkgdir, 'install')
 

@@ -24,7 +24,7 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install')
+    make('DESTDIR=' + pkgdir, 'install')
     mkdir_p(pkgdir + '/usr/share/licenses/xz/')
     ln('/usr/share/doc/xz/COPYING', pkgdir + '/usr/share/licenses/xz/COPYING')
     ln('/usr/share/licenses/common/LGPL2.1/license.txt', pkgdir + '/usr/share/doc/xz/COPYING.LGPLv2')
