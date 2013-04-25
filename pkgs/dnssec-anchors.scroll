@@ -13,9 +13,9 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['public (copyright inelligible)']
 private = UNSUPPORTED
-source = ['http://data.iana.org/root-anchors/root-anchors.xml']
+source = ['http://data.iana.org/root-anchors/root-anchors.xml', '../patches/dnssec-anchors-license']
 noextract = source
-sha3sums = [None]
+sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
@@ -33,5 +33,5 @@ def build(startdir, srcdir, pkgdir, private):
 def package(startdir, srcdir, pkgdir, private):
     cd('%s' % srcdir)
     install('trusted-key.key', pkgdir + '/etc/trusted-key.key', mode = 0o644, parents = True)
-    install('../patches/dnssec-anchors-license', pkgdir + '/usr/share/licenses/dnssec-anchors/LICENSE', mode = 0o644, parents = True)
+    install('../dnssec-anchors-license', pkgdir + '/usr/share/licenses/dnssec-anchors/LICENSE', mode = 0o644, parents = True)
 

@@ -18,9 +18,11 @@ freedom = SOFTWARE | MEDIA
 license = ['GPL']
 private = UNSUPPORTED
 source = ['http://ftp.gnu.org/gnu/bash/bash-%s.tar.gz' % _version]
+source += ['../confs/system.bash' + f for f in ['rc', '_logout']]
+source += ['../confs/user.bash' + f for f in ['rc', '_profile', '_logout']]
 source += ['http://ftp.gnu.org/gnu/bash/bash-%s-patches/bash%s-%03i' % (_version, _ver, p) for p in range(_patch)]
 noextract = source[1:]
-sha3sums = (1 + _patch) * [None]
+sha3sums = (6 + _patch) * [None]
 
 
 def build(startdir, srcdir, pkgdir, private):
@@ -37,6 +39,6 @@ def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     make('DESTDIR=%s' % pkgdir, 'install')
     mkdir_p(pkgdir + '/etc/skel')
-    install(['../confs/system.bash' + f for f in ['rc', '_logout']], pkgdir + '/etc', mode = 0o644)
-    install(['../confs/user.bash' + f for f in ['rc', '_profile', '_logout']], pkgdir + '/etc/skel', mode = 0o644)
+    install(['../system.bash' + f for f in ['rc', '_logout']], pkgdir + '/etc', mode = 0o644)
+    install(['../user.bash' + f for f in ['rc', '_profile', '_logout']], pkgdir + '/etc/skel', mode = 0o644)
 

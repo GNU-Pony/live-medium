@@ -25,5 +25,5 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/LVM2.%s' % (srcdir, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install_device-mapper')
+    make('DESTDIR=' 0 pkgdir, 'install_device-mapper')
 
