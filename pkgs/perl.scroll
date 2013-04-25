@@ -13,13 +13,15 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL', 'PerlArtistic']
 private = UNSUPPORTED
-source = ['http://www.cpan.org/src/%s.0/perl-%s.tar.bz2' % (pkgver.split('.')[0], pkgver)]
-sha3sums = [None]
+source = ['http://www.cpan.org/src/%s.0/perl-%s.tar.bz2' % (pkgver.split('.')[0], pkgver),
+          '../patches/cgi-cr-escaping.diff', '../confs/perlbin.sh', '../confs/perlbin.csh']
+noextract = source[1:]
+sha3sums = [None, None, None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('patch', '-p1', '-i', '../patches/cgi-cr-escaping.diff')
+    execute('patch', '-p1', '-i', '../cgi-cr-escaping.diff')
     CFLAGS = '-O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2'
     LDFLAGS = '-Wl,-O1,--sort-common,--as-needed,-z,relro'
     MAJOR = pkgver.split('.')[0]
@@ -40,8 +42,8 @@ def build(startdir, srcdir, pkgdir, private):
     execute('sed', '-e', '/^man1ext=/ s/1perl/1p/', '-e', '/^man3ext=/ s/3perl/3pm/', '-e', "/^cf_email=/ s/'.*'/''/", '-e', "/^perladmin=/ s/'.*'/''/", pkgdir + '/usr/lib/perl' + MAJOR + '/core_perl/Config_heavy.pl')
     execute('sed', '-e', '/(makepl_arg =>/   s/""/"INSTALLDIRS=site"/', '-e', '/(mbuildpl_arg =>/ s/""/"installdirs=site"/', '-i', pkgdir + '/usr/share/perl' + MAJOR + '/core_perl/CPAN/FirstTime.pm')
     execute('sed', '-e', "/{'makemakerflags'}/ s/'';/'INSTALLDIRS=site';/", '-e', "/{'buildflags'}/     s/'';/'installdirs=site';/", '-i', pkgdir + '/usr/share/perl' + MAJOR + '/core_perl/CPANPLUS/Config.pm')
-    install('../confs/perlbin.sh', pkgdir + '/etc/profile.d/perlbin.sh', mode = 0o755, parents = True)
-    install('../confs/perlbin.csh', pkgdir + '/etc/profile.d/perlbin.csh', mode = 0o755, parents = True)
+    install('../perlbin.sh', pkgdir + '/etc/profile.d/perlbin.sh', mode = 0o755, parents = True)
+    install('../perlbin.csh', pkgdir + '/etc/profile.d/perlbin.csh', mode = 0o755, parents = True)
     mv(pkgdir + '/usr/bin/perl' + pkgver, pkgdir + '/usr/bin/perl')
     ln('c2ph', pkgdir + '/usr/bin/core_perl/pstruct')
     ln('s2p', pkgdir + '/usr/bin/core_perl/psed')
