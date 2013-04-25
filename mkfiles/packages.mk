@@ -1,4 +1,4 @@
-PACKAGES = $(shell find pkgs/ | grep '\.scroll$$' | grep -v '\x23' | sed -e 's:^pkgs/::g' -e 's:\.scroll$$::g')
+PACKAGES = $(shell find pkgs/ | grep '\.scroll$$' | grep -v '\x23' | sed -e 's:^pkgs/::g' -e 's:\.scroll$$::g' | sort)
 
 CLEAN_DIR += $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE))
 
