@@ -8,7 +8,7 @@ from dragonsuite import *
 pkgname = 'libgpg-error'
 pkgver = '1.11'
 pkgdesc = 'Support library for libgcrypt'
-upstream = 'http://www.gnupg.or'
+upstream = 'http://www.gnupg.org'
 arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['LGPL']
@@ -24,5 +24,5 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install')
+    make('DESTDIR=' + pkgdir, 'install')
 
