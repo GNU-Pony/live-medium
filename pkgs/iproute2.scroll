@@ -13,19 +13,20 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL2']
 private = UNSUPPORTED
-source = ['http://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-%s' % pkgver]
-sha3sums = [None]
+source = ['http://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-%s' % pkgver, '../patches/iproute2-fhs.patch']
+noextract = source[1:]
+sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute(patch, '-Np1', '-i', '../patches/iproute2-fhs.patch')
+    execute('patch', '-Np1', '-i', '../iproute2-fhs.patch')
     execute('./configure')
     make()
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install')
+    make('DESTDIR=' + pkgdir, 'install')
     mkdir_p(pkgdir + '/sbin')
     mv(pkgdir + '/usr/sbin/ip', pkgdir + '/sbin/ip')
     ln('../../sbin/ip', '/usr/sbin/ip')
