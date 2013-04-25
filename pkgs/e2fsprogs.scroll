@@ -25,7 +25,7 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install', 'install-libs')
+    make('DESTDIR=' + pkgdir, 'install', 'install-libs')
     execute('sed', '-i', '-e', 's/^AWK=.*/AWK=awk/', pkgdir + '/usr/bin/compile_et')
     execute('sed', '-i', '-e', 's#^SS_DIR=.*#SS_DIR="/usr/share/ss"#', pkgdir + '/usr/bin/mk_cmds')
     execute('sed', '-i', '-e', 's#^ET_DIR=.*#ET_DIR="/usr/share/et"#', pkgdir + '/usr/bin/compile_et')
