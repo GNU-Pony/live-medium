@@ -25,7 +25,7 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'LIBDIR=/usr/lib', 'USRLIBDIR=/usr/lib', 'install')
+    make('DESTDIR=' + pkgdir, 'LIBDIR=/usr/lib', 'USRLIBDIR=/usr/lib', 'install')
     chmod(pkgdir + '/etc/request-key.conf', 0o222, 0o222)
     bash('echo "# NFS idmap resolver" >> %s/etc/request-key.conf' % bash_escape(pkgdir))
     bash('echo "create id_resolver * * /usr/sbin/nfsidmap %%k %%d" >> %s/etc/request-key.conf' % bash_escape(pkgdir))
