@@ -4,6 +4,7 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.  [GNUAllPermissive]
 from dragonsuite import *
+import os
 
 pkgname = 'glibc'
 pkgver = '2.17'
