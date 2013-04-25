@@ -13,19 +13,20 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['LGPL']
 private = UNSUPPORTED
-source = ['http://ftp.gnome.org/pub/GNOME/sources/glib/glib2-%s/glib2-%s.tar.xz' % ('.'.join(pkgver.split('.')[:2]), pkgver)]
-sha3sums = [None]
+source = ['http://ftp.gnome.org/pub/GNOME/sources/glib/%s/glib-%s.tar.xz' % ('.'.join(pkgver.split('.')[:2]), pkgver), '../patches/revert-warn-glib-compile-schemas.patch']
+noextract = source[1:]
+sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('patch', '-Rp1', '-i', '../patches/revert-warn-glib-compile-schemas.patch')
+    cd('%s/%s-%s' % (srcdir, 'glib', pkgver))
+    execute('patch', '-Rp1', '-i', startdir + '/revert-warn-glib-compile-schemas.patch')
     export('PYTHON', '/usr/bin/python2')
     execute(['./configure', '--prefix=/usr', '--sysconfdir=/etc', '--with-pcre=system', '--disable-fam'])
     make()
 
 def package(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd('%s/%s-%s' % (srcdir, 'glib', pkgver))
     make('completiondir=/usr/share/bash-completion/completions', 'DESTDIR=' + pkgdir, 'install')
     for s in path(('%s/usr/share/bash-completion/completions/' % path_escape(pkgdir)) + '*'):
         chmod(s, 0, 0o111)

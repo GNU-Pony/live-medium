@@ -19,7 +19,7 @@ sha3sums = [None]
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    CFLAGS = '-O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2"'
+    CFLAGS = '-O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2'
     LDFLAGS = '-Wl,-O1,--sort-common,--as-needed,-z,relro'
     make('CFLAGS=' + CFLAGS, 'LDFLAGS=' + LDFLAGS)
 

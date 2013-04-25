@@ -14,7 +14,7 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL', 'LGPL']
 private = UNSUPPORTED
-source = ['http://ftp.gnu.org/gnu/libc/glibc-%s.tar.xz' % pkgdir,
+source = ['http://ftp.gnu.org/gnu/libc/glibc-%s.tar.xz' % pkgver,
           '../patches/glibc-2.17-sync-with-linux37.patch', '../confs/nscd.tmpfiles', '../patches/locale-gen']
 noextract = source[1:]
 sha3sums = [None, None, None, None]
@@ -22,20 +22,20 @@ sha3sums = [None, None, None, None]
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execute('patch', '-p1', '-i', '../glibc-2.17-sync-with-linux37.patch')
+    execute('patch', '-p1', '-i', startdir + '/glibc-2.17-sync-with-linux37.patch')
     mkcd('glibc-build')
     export('CFLAGS', '-O2 -pipe --param=ssp-buffer-size=4')
     export('LDFALGS', '-Wl,-O1,--sort-common,--as-needed,-z,relro')
     unset('LD_LIBRARY_PATH')
     bash('echo "slibdir=/usr/lib" >> configparms')
-    execute(['../configure', '--prefix="/usr"', '--libdir="/usr/lib"', '--libexecdir="/usr/libexec"', '--with-headers="/usr/include"', '--enable-add-ons=nptl,libidn', '--enable-obsolete-rpc', '--enable-kernel=2.6.32', '--enable-bind-now', '--disable-profile', '--enable-stackguard-randomization', '--enable-multi-arch'])
+    execute(['../configure', '--prefix=/usr', '--libdir=/usr/lib', '--libexecdir=/usr/libexec', '--with-headers=/usr/include', '--enable-add-ons=nptl,libidn', '--enable-obsolete-rpc', '--enable-kernel=2.6.32', '--enable-bind-now', '--disable-profile', '--enable-stackguard-randomization', '--enable-multi-arch'])
     bash('echo "build-programs=no" >> configparms')
     make()
-    execute('sed', '-i', '/build-programs=/s#no#yes#', configparms)
+    execute('sed', '-i', '/build-programs=/s#no#yes#', 'configparms')
     bash('echo "CC += -fstack-protector -D_FORTIFY_SOURCE=2" >> configparms')
     bash('echo "CXX += -fstack-protector -D_FORTIFY_SOURCE=2" >> configparms')
     make()
-    execute('sed', '-i', '2,4d', configparms)
+    execute('sed', '-i', '2,4d', 'configparms')
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s/glibc-build' % (srcdir, pkgname, pkgver))
@@ -46,9 +46,9 @@ def package(startdir, srcdir, pkgdir, private):
     rm(pkgdir + '/etc/ld.so.conf')
     mkdir_p(path(path_escape(pkgdir) + '/usr/lib/{locale,systemd/system,tmpfiles.d}'))
     install('nscd/nscd.conf', pkgdir + '/etc/nscd.conf', mode = 0o644)
-    install('../nscd.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/nscd.conf', mode = 0o644)
+    install(startdir + '/nscd.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/nscd.conf', mode = 0o644)
     install('posix/gai.conf', pkgdir + '/etc/gai.conf', mode = 0o644)
-    install('../locale-gen', pkgdir + '/usr/bin', mode = 0o755)
+    install(startdir + '/locale-gen', pkgdir + '/usr/bin', mode = 0o755)
     if not os.path.exists(pkgdir + '/usr/bin/ldconfig'):
         ln('../../sbin/ldconfig', pkgdir + '/usr/bin/ldconfig')
 

@@ -22,7 +22,7 @@ sha3sums = 5 * [None]
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     execute('./autogen.sh')
-    execute(['./configure', '--prefix=/usr', '--libdir=/usr/lib', '--localstatedir=/run'] + path('--enable-{fs-paths-extra=/usr/bin:/usr/sbin,raw,vipw,newgrp,-chfn-chsh,write,mesg,socket-activation}'))
+    execute(['./configure', '--prefix=/usr', '--libdir=/usr/lib', '--localstatedir=/run'] + path('--enable-{fs-paths-extra=/usr/bin:/usr/sbin,raw,vipw,newgrp,chfn-chsh,write,mesg,socket-activation}'))
     make('INCLUDES+=-lcrypt')
 
 def package(startdir, srcdir, pkgdir, private):
@@ -30,6 +30,6 @@ def package(startdir, srcdir, pkgdir, private):
     make('DESTDIR=' + pkgdir, 'install')
     chmod(path('%s/usr/bin/{newgrp,ch{sh,fn}}' % path_escape(pkgdir)), 0o4755)
     for (s, d) in [('common', 'chfn'), ('common', 'chsh'), ('login', 'login'), ('su', 'su'), ('su', 'su-l')]:
-        install('../pam-' + s, pkgdir + '/etc/pam.d/' + d, mode = 0o644, parents = True)
-    install('../uuidd.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/uuidd.conf', mode = 0o644, parents = True)
+        install(startdir + '/pam-' + s, pkgdir + '/etc/pam.d/' + d, mode = 0o644, parents = True)
+    install(startdir + '/uuidd.tmpfiles', pkgdir + '/usr/lib/tmpfiles.d/uuidd.conf', mode = 0o644, parents = True)
 

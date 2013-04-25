@@ -5,8 +5,8 @@
 # without any warranty.  [GNUAllPermissive]
 from dragonsuite import *
 
-_version = '1.6'
-_patch = 8
+_version = '4.2'
+_patch = 45
 
 _ver = _version.replace('.', '')
 pkgname = 'bash'
@@ -20,25 +20,27 @@ private = UNSUPPORTED
 source = ['http://ftp.gnu.org/gnu/bash/bash-%s.tar.gz' % _version]
 source += ['../confs/system.bash' + f for f in ['rc', '_logout']]
 source += ['../confs/user.bash' + f for f in ['rc', '_profile', '_logout']]
-source += ['http://ftp.gnu.org/gnu/bash/bash-%s-patches/bash%s-%03i' % (_version, _ver, p) for p in range(_patch)]
+source += ['http://ftp.gnu.org/gnu/bash/bash-%s-patches/bash%s-%03i' % (_version, _ver, p + 1) for p in range(_patch)]
 noextract = source[1:]
 sha3sums = (6 + _patch) * [None]
 
 
 def build(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd('%s/%s-%s' % (srcdir, pkgname, _version))
+    for p in ['bash%s-%03i' % (_ver, p + 1) for p in range(_patch)]:
+        execute('patch', '-Np0', '-i', startdir + '/' + p)
     DEFAULT_PATH_VALUE = ':'.join(['/usr/local/bin', '/usr/bin', '/bin', '/usr/local/sbin', '/usr/sbin', '/sbin'])
     STANDARD_UTILS_PATH = ':'.join(['/usr/bin', '/bin', '/usr/sbin', '/sbin'])
     SYS_BASHRC = '/etc/bash.bashrc'
     SYS_BASH_LOGOUT = '/etc/bash.bash_logout'
-    export(CFLAGS, '-DDEFAULT_PATH_VALUE=\'"%s"\' -DSTANDARD_UTILS_PATH=\'"%s"\' -DSYS_BASHRC=\'"%s"\' -DSYS_BASH_LOGOUT=\'"%s"\'' % (DEFAULT_PATH_VALUE, STANDARD_UTILS_PATH, SYS_BASHRC, SYS_BASH_LOGOUT))
-    execute('./config --prefix= --with-curses --enable-readline --without-bash-malloc --with-installed-readline'.split(' '))
+    export('CFLAGS', '-DDEFAULT_PATH_VALUE=\'"%s"\' -DSTANDARD_UTILS_PATH=\'"%s"\' -DSYS_BASHRC=\'"%s"\' -DSYS_BASH_LOGOUT=\'"%s"\'' % (DEFAULT_PATH_VALUE, STANDARD_UTILS_PATH, SYS_BASHRC, SYS_BASH_LOGOUT))
+    execute('./configure --prefix= --with-curses --enable-readline --without-bash-malloc --with-installed-readline'.split(' '))
     make()
 
 def package(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd('%s/%s-%s' % (srcdir, pkgname, _version))
     make('DESTDIR=%s' % pkgdir, 'install')
     mkdir_p(pkgdir + '/etc/skel')
-    install(['../system.bash' + f for f in ['rc', '_logout']], pkgdir + '/etc', mode = 0o644)
-    install(['../user.bash' + f for f in ['rc', '_profile', '_logout']], pkgdir + '/etc/skel', mode = 0o644)
+    install([startdir + '/system.bash' + f for f in ['rc', '_logout']], pkgdir + '/etc', mode = 0o644)
+    install([startdir + '/user.bash' + f for f in ['rc', '_profile', '_logout']], pkgdir + '/etc/skel', mode = 0o644)
 

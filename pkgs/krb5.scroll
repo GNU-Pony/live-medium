@@ -14,16 +14,18 @@ freedom = SOFTWARE | MEDIA
 license = ['custom (permissive free)']
 private = UNSUPPORTED
 source = ['http://web.mit.edu/kerberos/dist/krb5/%s/krb5-%s-signed.tar' % ('.'.join(pkgver.split('.')[:2]), pkgver),
-          '../confs/krb5-kdc', '../confs/krb5-kadmind', '../confs/krb5-kpropd']
+          '../confs/krb5-kdc', '../confs/krb5-kadmind', '../confs/krb5-kpropd', '../patches/krb5-config_LDFLAGS.patch']
 noextract = source[1:]
-sha3sums = [None, None, None, None]
+sha3sums = [None, None, None, None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd(srcdir)
     decompress('krb5-%s.tar.gz' % pkgver)
+    cd('%s-%s' % (pkgname, pkgver))
     cd('src')
-    execute('sed', '-i', 's_\'"$LDFLAG S"\'__g', 'krb5-config.in')
+    execute('patch', '-Np2', '-i', startdir + '/krb5-config_LDFLAGS.patch')
+    rm('lib/krb5/krb/deltat.c')
     execute('sed', '-i', '/KRB5ROOT=/s/\/local//', 'util/ac_check_krb5.m4')
     flags = '-O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2'
     export('CFLAGS', flags + ' -fPIC -fno-strict-aliasing -fstack-protector-all')

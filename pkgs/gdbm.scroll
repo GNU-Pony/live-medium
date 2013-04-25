@@ -26,7 +26,7 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('prefix=%s/usr', 'manprefix=%s/usr/share/man' % pkgdir, 'man3dir=%s/usr/share/man/man3' % pkgdir, 'infodir=%s/usr/share/info' % pkgdir, 'install')
+    make('prefix=%s/usr' % pkgdir, 'manprefix=%s/usr/share/man' % pkgdir, 'man3dir=%s/usr/share/man/man3' % pkgdir, 'infodir=%s/usr/share/info' % pkgdir, 'install')
     mkdir_p(pkgdir + '/usr/include/gdbm')
     for f in ['gdbm', 'ndbm', 'dbm']:
         ln('../' + f + '.h', pkgdir + '/usr/include/gdbm/' + f + '.h')

@@ -27,7 +27,7 @@ def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     make('DESTDIR=' + pkgdir, 'install')
     install(startdir + '/dhcpcd.conf.d', pkgdir + '/etc/conf.d/dhcpcd', mode = 0o644, parents = True)
-    mkdir_p('/usr/share/licenses/dhcpcd')
+    mkdir_p(pkgdir + '/usr/share/licenses/dhcpcd')
     bash('awk \'{if(FNR<27)print $0}\' ./configure.h >> %s/usr/share/licenses/dhcpcd/LICENSE' % bash_escape(pkgdir))
     bash('echo noipv4ll >> %s/etc/dhcpcd.conf' % bash_escape(pkgdir))
 
