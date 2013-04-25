@@ -13,14 +13,16 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL']
 private = UNSUPPORTED
-source = ['http://download.savannah.gnu.org/releases/sysvinit/sysvinit-*dsf.tar.bz2' % pkgver]
-sha3sums = [None]
+source = ['http://download.savannah.gnu.org/releases/sysvinit/sysvinit-*dsf.tar.bz2' % pkgver,
+          '../patches/0001-simplify-writelog.patch', '../patches/0002-remove-ansi-escape-codes-from-log-file.patch']
+noextract = source[1:]
+sha3sums = [None, None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%sdsf' % (srcdir, pkgname, pkgver))
-    execute('patch', '-p1', '-d', 'src', '-i', '../../patches/0001-simplify-writelog.patch')
-    execute('patch', '-p1', '-d', 'src', '-i', '../../patches/0002-remove-ansi-escape-codes-from-log-file.patch')
+    execute('patch', '-p1', '-d', 'src', '-i', '../0001-simplify-writelog.patch')
+    execute('patch', '-p1', '-d', 'src', '-i', '../0002-remove-ansi-escape-codes-from-log-file.patch')
     make()
 
 def package(startdir, srcdir, pkgdir, private):
