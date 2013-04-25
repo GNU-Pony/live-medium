@@ -13,19 +13,20 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL2']
 private = UNSUPPORTED
-source = ['ftp://ftp.archlinux.org/other/pam_unix2/pam_unix2-%s.tar.bz2' % pkgver]
-sha3sums = [None]
+source = ['ftp://ftp.archlinux.org/other/pam_unix2/pam_unix2-%s.tar.bz2' % pkgver, '../patches/pam_unix2-glibc216.patch']
+noextract = source[1:]
+sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname + '2', pkgver))
-    execute('patch', '-Np1', '-i', '../patches/pam_unix2-glibc216.patch')
+    execute('patch', '-Np1', '-i', '../pam_unix2-glibc216.patch')
     execute('./configure', '--libdir=/usr/lib')
     make()
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname + '2', pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install')
+    make('DESTDIR=' + pkgdir, 'install')
     execute('sed', '-i', 's|# End of file||', pkgdir + '/etc/security/limits.conf')
     data = None
     with open(pkgdir + '/etc/security/limits.conf', 'rb') as file:
