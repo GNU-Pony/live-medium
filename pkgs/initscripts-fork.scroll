@@ -20,5 +20,5 @@ sha3sums = [None]
 def package(startdir, srcdir, pkgdir, private):
     cd(path(path_escape(srcdir) + '/TZ86-initscripts-fork-*'))
     execute('sed', '-i', 's_ln -s _ln -sf _g', 'Makefile')
-    make('DESTDIR=%s' % pkgdir, 'install')
+    make('DESTDIR=' + pkgdir, 'install')
 
