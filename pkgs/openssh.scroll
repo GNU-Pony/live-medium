@@ -13,8 +13,10 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['BSD']
 private = UNSUPPORTED
-source = ['ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%s.tar.gz' % pkgver]
-sha3sums = [None]
+source = ['ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%s.tar.gz' % pkgver,
+          '../confs/sshd.close-sessions', '../confs/sshd.confd', '../confs/sshd.pam', '../confs/sshd']
+noextract = source[1:]
+sha3sums = 5 * [None]
 
 
 def build(startdir, srcdir, pkgdir, private):
@@ -26,14 +28,14 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install')
+    make('DESTDIR=' + pkgdir, 'install')
     rm(pkgdir + '/usr/share/man/man1/slogin.1')
     ln('ssh.1.gz', pkgdir + '/usr/share/man/man1/slogin.1.gz')
     install('LICENCE', pkgdir + '/usr/share/licenses/openssh/LICENCE', mode = 0o644, parents = True)
-    install('../confs/sshd.close-sessions', pkgdir + '/etc/rc.d/functions.d/sshd-close-sessions', mode = 0o755, parents = True)
-    install('../confs/sshd.confd', pkgdir + '/etc/conf.d/sshd', mode = 0o644, parents = True)
-    install('../confs/sshd.pam', pkgdir + '/etc/pam.d/sshd', mode = 0o644, parents = True)
-    install('../confs/sshd', pkgdir + '/etc/rc.d/sshd', mode = 0o755, parents = True)
+    install('../sshd.close-sessions', pkgdir + '/etc/rc.d/functions.d/sshd-close-sessions', mode = 0o755, parents = True)
+    install('../sshd.confd', pkgdir + '/etc/conf.d/sshd', mode = 0o644, parents = True)
+    install('../sshd.pam', pkgdir + '/etc/pam.d/sshd', mode = 0o644, parents = True)
+    install('../sshd', pkgdir + '/etc/rc.d/sshd', mode = 0o755, parents = True)
     install('contrib/findssl.sh', pkgdir + '/usr/bin/findssl.sh', mode = 0o755, parents = True)
     install('contrib/ssh-copy-id', pkgdir + '/usr/bin/ssh-copy-id', mode = 0o755, parents = True)
     install('contrib/ssh-copy-id.1', pkgdir + '/usr/share/man/man1/ssh-copy-id.1', mode = 0o644, parents = True)
