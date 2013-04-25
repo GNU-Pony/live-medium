@@ -13,17 +13,18 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL3']
 private = UNSUPPORTED
-source = ['ftp://ftp.gnu.org/pub/gnu/gzip/gzip-%s.tar.xz' % pkgver]
-sha3sums = [None]
+source = ['ftp://ftp.gnu.org/pub/gnu/gzip/gzip-%s.tar.xz' % pkgver, '../patches/gzip-1.5-yesno-declaration.patch']
+noextract = source[1:]
+sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     execute('./configure', '--prefix=/usr')
-    execute('patch', '-p1', '-i', '../patches/gzip-1.5-yesno-declaration.patch')
+    execute('patch', '-p1', '-i', '../gzip-1.5-yesno-declaration.patch')
     make()
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install')
+    make('DESTDIR=' + pkgdir, 'install')
 
