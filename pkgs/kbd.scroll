@@ -13,8 +13,9 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['LGPL3']
 private = UNSUPPORTED
-source = ['ftp://ftp.altlinux.org/pub/people/legion/kbd/kbd-%s.tar.gz' % pkgver]
-sha3sums = [None]
+source = ['ftp://ftp.altlinux.org/pub/people/legion/kbd/kbd-%s.tar.gz' % pkgver, '../patches/fix-keymap-loading-1.15.5.patch']
+noextract = source[1:]
+sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
@@ -25,11 +26,11 @@ def build(startdir, srcdir, pkgdir, private):
     mv('data/keymaps/i386/dvorak/no.map', 'data/keymaps/i386/dvorak/no-dvorak.map')
     mv('data/keymaps/i386/fgGIod/trf.map', 'data/keymaps/i386/fgGIod/trf-fgGIod.map')
     mv('data/keymaps/i386/colemak/en-latin9.map', 'data/keymaps/i386/colemak/colemak.map')
-    execute('patch', '-Np1', '-i', '../patches/fix-keymap-loading-1.15.5.patch')
+    execute('patch', '-Np1', '-i', '../fix-keymap-loading-1.15.5.patch')
     execute('./configure', '--prefix=/usr', '--datadir=/usr/share/kbd', '--mandir=/usr/share/man')
     make('KEYCODES_PROGS=yes', 'RESIZECONS_PROGS=yes')
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('KEYCODES_PROGS=yes', 'RESIZECONS_PROGS=yes', 'DESTDIR=%s' % pkgdir, 'install')
+    make('KEYCODES_PROGS=yes', 'RESIZECONS_PROGS=yes', 'DESTDIR=' + pkgdir, 'install')
 
