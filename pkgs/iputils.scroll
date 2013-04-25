@@ -13,8 +13,9 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL', 'BSD']
 private = UNSUPPORTED
-source = ['http://www.skbuff.net/iputils/iputils-s%s' % pkgver]
-sha3sums = [None]
+source = ['http://www.skbuff.net/iputils/iputils-s%s' % pkgver, '../confs/tftp.xinetd']
+noextract = source[1:]
+sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
@@ -39,5 +40,5 @@ def package(startdir, srcdir, pkgdir, private):
     install(path('doc/{arping,clockdiff,ping,rarpd,rdisc,tftpd,tracepath}.8'), pkgdir + '/usr/share/man/man8', mode = 0o644)
     ln('ping.8.gz', pkgdir + '/usr/share/man/man8/ping6.8.gz')
     ln('tracepath.8.gz', pkgdir + '/usr/share/man/man8/tracepath6.8.gz')
-    install('../confs/tftp.xinetd', pkgdir + '/etc/xinetd.d/tftp', mode = 0o644)
+    install('../tftp.xinetd', pkgdir + '/etc/xinetd.d/tftp', mode = 0o644)
 
