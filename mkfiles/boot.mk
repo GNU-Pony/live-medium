@@ -15,7 +15,9 @@ update-init:
 
 memtest: memtest.bin
 memtest.bin:
+	[ -f memtest86+-$(MEMTEST_VERSION).tar.gz ] || \
 	wget "http://www.memtest.org/download/$(MEMTEST_VERSION)/memtest86+-$(MEMTEST_VERSION).tar.gz"
+	[ -d memtest86+-$(MEMTEST_VERSION) ] || \
 	tar --gzip --get < "memtest86+-$(MEMTEST_VERSION).tar.gz"
 	make -C "memtest86+-$(MEMTEST_VERSION)"
 	cp "memtest86+-$(MEMTEST_VERSION)/memtest.bin" .
