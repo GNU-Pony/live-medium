@@ -13,13 +13,14 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['BSD']
 private = UNSUPPORTED
-source = ['http://www.tcpdump.org/release/libpcap-%s.tar.gz' % pkgver]
-sha3sums = [None]
+source = ['http://www.tcpdump.org/release/libpcap-%s.tar.gz' % pkgver, '../patches/libpcap-libnl32.patch']
+noextract = source[1:]
+sha3sums = [None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    execyte('patch', '-Np1', '-i', '../patches/libpcap-libnl32.patch')
+    execyte('patch', '-Np1', '-i', '../libpcap-libnl32.patch')
     execute('autoreconf', '-f', '-i')
     execute('./configure', '--prefix=/usr', '--enable-ipv6', '--with-libnl')
     make()
