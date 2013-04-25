@@ -18,7 +18,7 @@ noextract = source[1:]
 sha3sums = [None, None]
 
 ARCH = get('ARCH')
-CHOST = get('CHOST')
+HOST = get('HOST')
 
 
 def build(startdir, srcdir, pkgdir, private):
@@ -49,7 +49,7 @@ def build(startdir, srcdir, pkgdir, private):
     execute('sed', '-i', 's|@itemx PLUS_EXPR|@item PLUS_EXPR|g', 'gcc/doc/generic.texi')
     cd('gcc-build')
     make()
-    cd(CHOST + '/libstdc++-v3')
+    cd(HOST + '/libstdc++-v3')
     make('doc-man-doxygen')
 
 
@@ -66,11 +66,11 @@ def package(startdir, srcdir, pkgdir, private):
         elif not e.startswith('-j'):
             _MAKEFLAGS.append(e)
     export('MAKEFLAGS', ' '.join(_MAKEFLAGS))
-    make('-j1', '-C', CHOST + '/libgcc', 'DESTDIR=' + pkgdir, 'install-shared')
+    make('-j1', '-C', HOST + '/libgcc', 'DESTDIR=' + pkgdir, 'install-shared')
     for lib in ['mudflap', 'gomp', 'stdc++-v3/src', 'itm']:
-        make('-j1', '-C', CHOST + '/lib' + lib, 'DESTDIR=' + pkgdir, 'install-toolexeclibLTLIBRARIES')
+        make('-j1', '-C', HOST + '/lib' + lib, 'DESTDIR=' + pkgdir, 'install-toolexeclibLTLIBRARIES')
     for (lib, install) in [('stdc++-v3', ''), ('gomp', '-info'), ('itm', '-info')]:
-        make('-j1', '-C', CHOST + '/lib' + lib, 'DESTDIR=' + pkgdir, 'install' + install)
+        make('-j1', '-C', HOST + '/lib' + lib, 'DESTDIR=' + pkgdir, 'install' + install)
     make(['-j1', 'DESTDIR=' + pkgdir] + ['install-target-lib' + lib for lib in ['quadmath', 'gfortran', 'objc']]
     rm_r(path('%s/usr/lib/{gcc/,libgfortran.spec}') % pkgdir)
     execute('find', pkgdir, '-name', '*.a', '-delete')
