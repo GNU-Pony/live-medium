@@ -28,5 +28,6 @@ def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     make('DIST_ROOT=' + pkgdir, 'install', 'install-lib', 'install-dev')
     rm(pkgdir + '/usr/libexec/libattr.a')
+    rm(pkgdir + '/usr/lib/libattr.a')
     chmod(path('%s/usr/lib/libattr.so.*.*.*' % path_escape(pkgdir)), 0o755)
 
