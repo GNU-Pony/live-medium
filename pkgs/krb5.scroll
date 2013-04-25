@@ -13,8 +13,10 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['custom (permissive free)']
 private = UNSUPPORTED
-source = ['http://web.mit.edu/kerberos/dist/krb5/%s/krb5-%s-signed.tar' % ('.'.join(pkgver.split('.')[:2]), pkgver)]
-sha3sums = [None]
+source = ['http://web.mit.edu/kerberos/dist/krb5/%s/krb5-%s-signed.tar' % ('.'.join(pkgver.split('.')[:2]), pkgver),
+          '../confs/krb5-kdc', '../confs/krb5-kadmind', '../confs/krb5-kpropd']
+noextract = source[1:]
+sha3sums = [None, None, None, None]
 
 
 def build(startdir, srcdir, pkgdir, private):
@@ -31,12 +33,12 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s/src' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'EXAMPLEDIR=/usr/share/doc/krb5/examples', 'install')
+    make('DESTDIR=' + pkgdir, 'EXAMPLEDIR=/usr/share/doc/krb5/examples', 'install')
     mkdir_p(path('%s{/var/lib/krb5kdc,/etc,/etc/rc.d,/usr/share/aclocal}' % path_escape(pkgdir)))
     install(path('plugins/kdb/ldap/libkdb_ldap/kerberos.{ldif,schema}'), pkgdir + '/usr/share/doc/krb5/examples', mode = 0o644)
     install('config-files/kdc.conf', pkgdir + '/var/lib/krb5kdc/kdc.conf', mode = 0o644, )
     install('config-files/krb5.conf', pkgdir + '/etc/krb5.conf', mode = 0o644, )
-    install(path('../../confs/krb5-{kdc,kadmind,kpropd}'), pkgdir + '/etc/rc.d', mode = 0o755)
+    install(path('../../krb5-{kdc,kadmind,kpropd}'), pkgdir + '/etc/rc.d', mode = 0o755)
     install('util/ac_check_krb5.m4', pkgdir + '/usr/share/aclocal', mode = 0o644)
     install('../NOTICE', pkgdir + '/usr/share/licenses/krb5/LICENSE', mode = 0o644, parents = True)
     execute('install', '-p', '-m644', 'config-files/kdc.conf', pkgdir + '/var/lib/krb5kdc/kdc.conf')
