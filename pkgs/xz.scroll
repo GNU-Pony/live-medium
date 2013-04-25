@@ -27,7 +27,7 @@ def package(startdir, srcdir, pkgdir, private):
     make('DESTDIR=' + pkgdir, 'install')
     mkdir_p(pkgdir + '/usr/share/licenses/xz/')
     ln('/usr/share/doc/xz/COPYING', pkgdir + '/usr/share/licenses/xz/COPYING')
-    ln('/usr/share/licenses/common/LGPL2.1/license.txt', pkgdir + '/usr/share/doc/xz/COPYING.LGPLv2')
-    ln('/usr/share/licenses/common/GPL2/license.txt', pkgdir + '/usr/share/doc/xz/COPYING.GPLv2')
-    ln('/usr/share/licenses/common/GPL3/license.txt', pkgdir + '/usr/share/doc/xz/COPYING.GPLv3')
+    ln('/usr/share/licenses/common/LGPL2.1/license.txt', pkgdir + '/usr/share/licenses/xz/COPYING.LGPLv2')
+    ln('/usr/share/licenses/common/GPL2/license.txt', pkgdir + '/usr/share/licenses/xz/COPYING.GPLv2')
+    ln('/usr/share/licenses/common/GPL3/license.txt', pkgdir + '/usr/share/licenses/xz/COPYING.GPLv3')
 
