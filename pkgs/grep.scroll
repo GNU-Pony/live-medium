@@ -11,7 +11,7 @@ pkgdesc = 'String search utility'
 upstream = 'http://www.gnu.org/software/grep/grep.html'
 arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
-license = ['LGPL3']
+license = ['GPL3']
 private = UNSUPPORTED
 source = ['ftp://ftp.gnu.org/gnu/grep/grep-%s.tar.xz' % pkgver]
 sha3sums = [None]
@@ -24,4 +24,4 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    make('DESTDIR=%s' % pkgdir, 'install')
+    make('DESTDIR=' + pkgdir, 'install')
