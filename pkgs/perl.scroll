@@ -40,16 +40,16 @@ def build(startdir, srcdir, pkgdir, private):
     dir = srcdir + '/perl-build'
     mkdir_p(dir)
     make('DESTDIR=' + dir, 'install')
-    execute('sed', '-e', '/^man1ext=/ s/1perl/1p/', '-e', '/^man3ext=/ s/3perl/3pm/', '-e', "/^cf_email=/ s/'.*'/''/", '-e', "/^perladmin=/ s/'.*'/''/", pkgdir + '/usr/lib/perl' + MAJOR + '/core_perl/Config_heavy.pl')
-    execute('sed', '-e', '/(makepl_arg =>/   s/""/"INSTALLDIRS=site"/', '-e', '/(mbuildpl_arg =>/ s/""/"installdirs=site"/', '-i', pkgdir + '/usr/share/perl' + MAJOR + '/core_perl/CPAN/FirstTime.pm')
-    execute('sed', '-e', "/{'makemakerflags'}/ s/'';/'INSTALLDIRS=site';/", '-e', "/{'buildflags'}/     s/'';/'installdirs=site';/", '-i', pkgdir + '/usr/share/perl' + MAJOR + '/core_perl/CPANPLUS/Config.pm')
-    install(startdir + '/perlbin.sh', pkgdir + '/etc/profile.d/perlbin.sh', mode = 0o755, parents = True)
-    install(startdir + '/perlbin.csh', pkgdir + '/etc/profile.d/perlbin.csh', mode = 0o755, parents = True)
-    mv(pkgdir + '/usr/bin/perl' + pkgver, pkgdir + '/usr/bin/perl')
-    ln('c2ph', pkgdir + '/usr/bin/core_perl/pstruct')
-    ln('s2p', pkgdir + '/usr/bin/core_perl/psed')
-    rm(path('%s/usr/share/perl%s/core_perl/*.pod' % path_escape([pkgdir, MAJOR])))
-    for d in path('%s/usr/share/perl%s/core_perl/*' % path_escape([pkgdir, MAJOR])):
+    execute('sed', '-e', '/^man1ext=/ s/1perl/1p/', '-e', '/^man3ext=/ s/3perl/3pm/', '-e', "/^cf_email=/ s/'.*'/''/", '-e', "/^perladmin=/ s/'.*'/''/", dir + '/usr/lib/perl' + MAJOR + '/core_perl/Config_heavy.pl')
+    execute('sed', '-e', '/(makepl_arg =>/   s/""/"INSTALLDIRS=site"/', '-e', '/(mbuildpl_arg =>/ s/""/"installdirs=site"/', '-i', dir + '/usr/share/perl' + MAJOR + '/core_perl/CPAN/FirstTime.pm')
+    execute('sed', '-e', "/{'makemakerflags'}/ s/'';/'INSTALLDIRS=site';/", '-e', "/{'buildflags'}/     s/'';/'installdirs=site';/", '-i', dir + '/usr/share/perl' + MAJOR + '/core_perl/CPANPLUS/Config.pm')
+    install(startdir + '/perlbin.sh', dir + '/etc/profile.d/perlbin.sh', mode = 0o755, parents = True)
+    install(startdir + '/perlbin.csh', dir + '/etc/profile.d/perlbin.csh', mode = 0o755, parents = True)
+    mv(dir + '/usr/bin/perl' + pkgver, dir + '/usr/bin/perl')
+    ln('c2ph', dir + '/usr/bin/core_perl/pstruct')
+    ln('s2p', dir + '/usr/bin/core_perl/psed')
+    rm(path('%s/usr/share/perl%s/core_perl/*.pod' % path_escape([dir, MAJOR])))
+    for d in path('%s/usr/share/perl%s/core_perl/*' % path_escape([dir, MAJOR])):
         if os.path.exists(d) and os.path.isdir(d) and (bashname(d) != 'pod'):
             execute('find', d, '-name', '*.pod', '-delete')
     execute(dir + '/usr/lib', '-name', '*.pod', '-delete')

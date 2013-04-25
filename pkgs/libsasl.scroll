@@ -6,10 +6,9 @@
 from dragonsuite import *
 
 _patches = 'cyrus-sasl-2.1.19-checkpw.c cyrus-sasl-2.1.22-crypt cyrus-sasl-2.1.22-qa cyrus-sasl-2.1.22-automake-1.10 0003_saslauthd_mdoc'
-_patches += ' 0010_maintainer_mode 0011_saslauthd_ac_prog_libtool 0012_xopen_crypt_prototype. 0016_pid_file_lock_creation_mask 0018_auth_rimap_quotes'
-_patches += ' 0019_ldap_deprecated 0022_gcc4.4_preprocessor_syntax 0025_ld_as_needed 0026_drop_krb5support_dependency 0012_xopen_crypt_prototype'
-_patches += ' 0016_pid_file_lock_creation_mask 0018_auth_rimap_quotes 0019_ldap_deprecated 0022_gcc4.4_preprocessor_syntax 0025_ld_as_needed'
-_patches += ' 0026_drop_krb5support_dependency 0027_db5_support 0030-dont_use_la_files_for_opening_plugins'
+_patches += ' 0010_maintainer_mode 0011_saslauthd_ac_prog_libtool 0012_xopen_crypt_prototype 0016_pid_file_lock_creation_mask 0018_auth_rimap_quotes'
+_patches += ' 0019_ldap_deprecated 0022_gcc4.4_preprocessor_syntax 0025_ld_as_needed 0026_drop_krb5support_dependency'
+_patches += ' 0027_db5_support 0030-dont_use_la_files_for_opening_plugins'
 _patches = _patches.split(' ')
 
 pkgname = 'libsasl'
@@ -21,17 +20,17 @@ freedom = SOFTWARE | MEDIA
 license = ['LGPL']
 private = UNSUPPORTED
 source = ['ftp://ftp.andrew.cmu.edu/pub/cyrus-mail/cyrus-sasl-%s.tar.gz' % pkgver, '../confs/saslauthd', '../confs/saslauthd.conf.d',
-          '../patches/cyrus-sasl-2.1.23-authd-fix.patch'] + ['../patch/%s.patch' % p for p in _patches]
+          '../patches/cyrus-sasl-2.1.23-authd-fix.patch'] + ['../patches/%s.patch' % p for p in _patches]
 noextract = source[1:]
 sha3sums = (4 + len(_patches)) * [None]
 
 
 def build(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd('%s/%s-%s' % (srcdir, 'cyrus-sasl', pkgver))
     execute('patch', '-Np0', '-i', startdir + '/cyrus-sasl-2.1.23-authd-fix.patch')
     for patch in _patches:
         execute('patch', '-Np1', '-i', '%s/%s.patch' % (startdir, patch))
-    rm('config/config.guess', 'config/config.sub', 'config/ltconfig', 'config/ltmain.sh', 'config/libtool.m4')
+    rm(['config/config.guess', 'config/config.sub', 'config/ltconfig', 'config/ltmain.sh', 'config/libtool.m4'])
     rm_r('autom4te.cache')
     execute('libtoolize', '-c')
     execute('aclocal', '-I', 'config', '-I', 'cmulocal')
@@ -39,7 +38,7 @@ def build(startdir, srcdir, pkgdir, private):
     execute('autoheader')
     execute('autoconf')
     cd('saslauthd')
-    rm('config/config.guess', 'config/config.sub', 'config/ltconfig', 'config/ltmain.sh', 'config/libtool.m4')
+    rm(['config/config.guess', 'config/config.sub', 'config/ltconfig', 'config/ltmain.sh'])
     rm_r('autom4te.cache')
     execute('libtoolize', '-c')
     execute('aclocal', '-I', 'config', '-I', '../config')
@@ -55,7 +54,7 @@ def build(startdir, srcdir, pkgdir, private):
     make()
 
 def package(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd('%s/%s-%s' % (srcdir, 'cyrus-sasl', pkgver))
     for dir in ['include', 'lib', 'sasldb', 'plugins', 'utils']:
         cd(dir)
         make('DESTDIR=' + pkgdir, 'install')

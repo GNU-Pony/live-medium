@@ -35,8 +35,6 @@ def package(startdir, srcdir, pkgdir, private):
     mkdir_p([pkgdir + d for d in '/usr/bin /usr/sbin /bin /usr/share/man/man8 /etc/xinetd.d'.split(' ')])
     install(['arping', 'clockdiff', 'rarpd', 'rdisc', 'tftpd', 'tracepath', 'tracepath6'], pkgdir + '/usr/sbin/', mode = 0o755)
     install(['ping', 'ping6'], pkgdir + '/usr/bin/', mode = 0o755)
-    ln('/usr/bin/ping', pkgdir + '/bin')
-    ln('/usr/bin/ping6', pkgdir + '/bin')
     install(path('doc/{arping,clockdiff,ping,rarpd,rdisc,tftpd,tracepath}.8'), pkgdir + '/usr/share/man/man8', mode = 0o644)
     ln('ping.8.gz', pkgdir + '/usr/share/man/man8/ping6.8.gz')
     ln('tracepath.8.gz', pkgdir + '/usr/share/man/man8/tracepath6.8.gz')

@@ -4,6 +4,7 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.  [GNUAllPermissive]
 from dragonsuite import *
+import os
 
 pkgname = 'hwids'
 pkgver = '20130228'
@@ -18,7 +19,8 @@ sha3sums = [None]
 
 
 def package(startdir, srcdir, pkgdir, private):
-    cd(path('%s/gentoo-%s*' % (path_escape(srcdir), pkgname)))
+    paths = path('%s/gentoo-hwids-*' % path_escape(srcdir))
+    cd('\0'.join(paths))
     for ids in ['pci.ids', 'usb.ids']:
         install(ids, pkgdir + '/usr/share/hwdata/' + ids, mode = 0o644)
 
