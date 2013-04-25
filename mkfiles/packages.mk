@@ -4,7 +4,7 @@ CLEAN_DIR += $(foreach $(PACKAGES), PACKAGE, pkgs/$(PACKAGE))
 
 packages: $(foreach $(PACKAGES), PACKAGE, $(PACKAGE).pkg.tar.$(PKG_COMPRESS_EXT))
 
-%s.pkg.tar.$(PKG_COMPRESS_EXT): pkgs/%s.scroll
+%.pkg.tar.$(PKG_COMPRESS_EXT): pkgs/%.scroll
 	mkdir -p "pkgs/$*/start" "pkgs/$*/install"
 	ARCH=$(ARCH) HOST=$(HOST) MAKEFLAGS= "$(SPIKE)/spikeless" "$<" "pkgs/$*/start" "pkgs/$*/install"
 	cd "pkgs/$*/install" && tar --create * | $(PKG_COMPRESS) > "$*.pkg.tar.$(PKG_COMPRESS_EXT)"
