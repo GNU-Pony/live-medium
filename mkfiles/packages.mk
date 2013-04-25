@@ -6,6 +6,6 @@ packages: $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE).pkg.tar.$(PKG_COMPRESS
 
 pkgs/%.pkg.tar.$(PKG_COMPRESS_EXT): pkgs/%.scroll
 	mkdir -p "pkgs/$*/start" "pkgs/$*/install"
-	ARCH=$(ARCH) HOST=$(HOST) MAKEFLAGS= "$(SPIKE)/spikeless" "pkgs/$*/scroll" "pkgs/$*/start" "pkgs/$*/install"
+	ARCH=$(ARCH) HOST=$(HOST) MAKEFLAGS= "$(SPIKE)/spikeless" "pkgs/$*.scroll" "pkgs/$*/start" "pkgs/$*/install"
 	cd "pkgs/$*/install" && tar --create * | $(PKG_COMPRESS) > "../../$*.pkg.tar.$(PKG_COMPRESS_EXT)"
 
