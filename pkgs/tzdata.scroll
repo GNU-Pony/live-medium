@@ -22,7 +22,7 @@ sha3sums = [None]
 
 
 def package(startdir, srcdir, pkgdir, private):
-    cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    cd('%s' % srcdir)
     timezones = ['africa', 'antarctica', 'asia', 'australasia', 'europe', 'northamerica', 'southamerica',
                  'pacificnew', 'etcetera', 'backward', 'systemv', 'factory', 'solar87', 'solar88', 'solar89']
     execute(['zic', '-y', './yearistype', '-d', pkgdir + '/usr/share/zoneinfo'] + timezones)
