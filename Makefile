@@ -16,15 +16,12 @@ KERNEL_VERSION = 3.8.3
 MEMTEST_VERSION = 4.20
 
 include mkfiles/auxiliary-config.mk
-include versions.mk
-
 
 all:	validate-non-root			\
 	kernel					\
 	initramfs-linux update-init init-live	\
 	essentials arch-packages packages	\
 	conf-override chown-live create-users
-
 
 include mkfiles/kernel.mk
 include mkfiles/boot.mk
