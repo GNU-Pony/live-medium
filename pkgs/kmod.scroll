@@ -31,5 +31,5 @@ def package(startdir, srcdir, pkgdir, private):
     ln('../usr/bin/kmod', pkgdir + '/sbin/depmod')
     for tool in ['insmod', 'lsmod', 'rmmod', 'modinfo']:
         ln('kmod', pkgdir + '/usr/bin/' + tool)
-    install('../depmod-search.conf', pkgdir + '/usr/lib/depmod.d/search.conf', mode = 0o644, parents = True)
+    install(startdir + '/depmod-search.conf', pkgdir + '/usr/lib/depmod.d/search.conf', mode = 0o644, parents = True)
 

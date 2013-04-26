@@ -39,6 +39,7 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s/glibc-build' % (srcdir, pkgname, pkgver))
+    mkdir_p(pkgdir + '/etc')
     touch(pkgdir + '/etc/ld.so.conf')
     make('install_root=' + pkgdir, 'install')
     cd('..')

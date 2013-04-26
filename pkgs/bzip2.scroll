@@ -27,7 +27,7 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
-    install(['bin', 'lib', 'include', 'share/man/man1'], pkgdir + '/usr', mode = 0o755, directory = True)
+    install(['bin', 'lib', 'include', 'share/man/man1'], pkgdir + '/usr', mode = 0o755, directory = True, parents = True)
     install('bzip2-shared', pkgdir + '/usr/bin/bzip2', mode = 0o755)
     install(['bzip2recover', 'bzdiff', 'bzgrep', 'bzmore'], pkgdir + '/usr/bin')
     ln('bzip2', pkgdir + '/usr/bin/bunzip2')

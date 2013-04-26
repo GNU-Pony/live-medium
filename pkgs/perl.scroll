@@ -28,8 +28,8 @@ def build(startdir, srcdir, pkgdir, private):
     MAJOR = pkgver.split('.')[0]
     params = ['./Configure', '-des', '-Dusethreads', '-Duseshrplib', '-Doptimize=' + CFLAGS, '-Dprefix=/usr', '-Dvendorprefix=/usr']
     for (a, b, c) in [('privlib', 'archlib', 'core'), ('sitelib', 'sitearch', 'site'), ('vendorlib', 'vendorarch', 'vendor')]:
-        params.append('-D%s=/lib/%s/perl%s/%s_perl' % (a, 'share', MAJOR, c))
-        params.append('-D%s=/lib/%s/perl%s/%s_perl' % (b, 'lib', MAJOR, c))
+        params.append('-D%s=/usr/%s/perl%s/%s_perl' % (a, 'share', MAJOR, c))
+        params.append('-D%s=/usr/%s/perl%s/%s_perl' % (b, 'lib', MAJOR, c))
     params += ['-Dscriptdir=/usr/bin/core_perl', '-Dsitescript=/usr/bin/site_perl', '-Dvendorscript=/usr/bin/vendor_perl']
     params += ['-Dinc_version_list=none', '-Dman1ext=1perl', '-Dman3ext=3perl']
     if get('ARCH') == 'x86_64':
@@ -40,7 +40,7 @@ def build(startdir, srcdir, pkgdir, private):
     dir = srcdir + '/perl-build'
     mkdir_p(dir)
     make('DESTDIR=' + dir, 'install')
-    execute('sed', '-e', '/^man1ext=/ s/1perl/1p/', '-e', '/^man3ext=/ s/3perl/3pm/', '-e', "/^cf_email=/ s/'.*'/''/", '-e', "/^perladmin=/ s/'.*'/''/", dir + '/usr/lib/perl' + MAJOR + '/core_perl/Config_heavy.pl')
+    execute('sed', '-e', '/^man1ext=/ s/1perl/1p/', '-e', '/^man3ext=/ s/3perl/3pm/', '-e', "/^cf_email=/ s/'.*'/''/", '-e', "/^perladmin=/ s/'.*'/''/", '-i', dir + '/usr/lib/perl' + MAJOR + '/core_perl/Config_heavy.pl')
     execute('sed', '-e', '/(makepl_arg =>/   s/""/"INSTALLDIRS=site"/', '-e', '/(mbuildpl_arg =>/ s/""/"installdirs=site"/', '-i', dir + '/usr/share/perl' + MAJOR + '/core_perl/CPAN/FirstTime.pm')
     execute('sed', '-e', "/{'makemakerflags'}/ s/'';/'INSTALLDIRS=site';/", '-e', "/{'buildflags'}/     s/'';/'installdirs=site';/", '-i', dir + '/usr/share/perl' + MAJOR + '/core_perl/CPANPLUS/Config.pm')
     install(startdir + '/perlbin.sh', dir + '/etc/profile.d/perlbin.sh', mode = 0o755, parents = True)

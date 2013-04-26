@@ -19,7 +19,7 @@ _/
 /*-*/
 !/*-gen
 !/*-*.mk
-/built
+/finalise
 
 *.tar
 *.gz

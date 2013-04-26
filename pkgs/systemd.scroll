@@ -34,13 +34,8 @@ def package(startdir, srcdir, pkgdir, private):
     make('DESTDIR=' + pkgdir, 'install')
     with open(pkgdir + '/usr/lib/tmpfiles.d/console.conf', 'wb') as file:
         file.write('d /run/console 0755 root root\n"'.encode('utf-8'))
-    mkdir_p(pkgdir + '/bin')
-    mkdir_p(pkgdir + '/sbin')
-    ln('../usr/lib/systemd/systemd', pkgdir + '/bin/systemd')
     rm_r(pkgdir + '/etc/systemd/system/getty.target.wants')
     rm_r(pkgdir + '/etc/rpm')
-    ln('../usr/bin/udevadm', pkgdir + '/sbin/udevadm')
-    ln('../lib/systemd/systemd-udevd', pkgdir + '/usr/bin/udevd')
     install('tmpfiles.d/legacy.conf', pkgdir + '/usr/lib/tmpfiles.d', mode = 0o644)
     execute(['sed', '-i', 's#GROUP="dialout"#GROUP="uucp"#g'] + path('%s/usr/lib/udev/rules.d/*.rules' % path_escape(pkgdir)))
     execute(['sed', '-i', 's#GROUP="tape"#GROUP="storage"#g'] + path('%s/usr/lib/udev/rules.d/*.rules' % path_escape(pkgdir)))

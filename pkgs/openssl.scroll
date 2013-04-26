@@ -22,7 +22,7 @@ def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     execute('patch', '-p0', '-i', startdir + '/no-rpath.patch')
     execute('patch', '-p0', '-i', startdir + '/ca-dir.patch')
-    params = ['./Configure', '--prefix=/usr', '--openssldir=/etc/ssl', '--libdir=lib', 'shared', 'zlib']
+    params = ['perl', './Configure', '--prefix=/usr', '--openssldir=/etc/ssl', '--libdir=lib', 'shared', 'zlib']
     params += execute_pipe('./config', '-h')[-1].split(' ')[2:]
     params.append('-fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2')
     params.append('-Wl,-O1,--sort-common,--as-needed,-z,relro')
