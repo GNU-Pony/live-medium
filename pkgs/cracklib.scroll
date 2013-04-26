@@ -25,7 +25,6 @@ def build(startdir, srcdir, pkgdir, private):
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     make('DESTDIR=%s' % pkgdir, 'install')
-    install('cracklib-small', pkgdir + '/usr/share/dict/cracklib-small', directory = True, parents = True)
-    install('cracklib-small', pkgdir + '/usr/share/dict', mode = 0o644)
-    bash('./util/cracklib-format dicts/cracklib-small | ./util/cracklib-packer /usr/share/cracklib/pw_dict')
+    install('dicts/cracklib-small', pkgdir + '/usr/share/dict/cracklib-small', mode = 0o644, parents = True)
+    bash('./util/cracklib-format dicts/cracklib-small | ./util/cracklib-packer %s/usr/share/cracklib/pw_dict' % bash_escape(pkgdir))
 
