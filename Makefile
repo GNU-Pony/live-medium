@@ -17,11 +17,15 @@ MEMTEST_VERSION = 4.20
 
 include mkfiles/auxiliary-config.mk
 
+
 all:	validate-non-root			\
 	kernel					\
 	initramfs-linux update-init init-live	\
 	essentials arch-packages packages	\
-	conf-override chown-live create-users
+	conf-override 				\
+	chown-live finalise-packages 		\
+	create-users
+
 
 include mkfiles/kernel.mk
 include mkfiles/boot.mk
