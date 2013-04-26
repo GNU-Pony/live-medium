@@ -41,7 +41,7 @@ def package(startdir, srcdir, pkgdir, private):
     install(path('plugins/kdb/ldap/libkdb_ldap/kerberos.{ldif,schema}'), pkgdir + '/usr/share/doc/krb5/examples', mode = 0o644)
     install('config-files/kdc.conf', pkgdir + '/var/lib/krb5kdc/kdc.conf', mode = 0o644, )
     install('config-files/krb5.conf', pkgdir + '/etc/krb5.conf', mode = 0o644, )
-    install(path('../../krb5-{kdc,kadmind,kpropd}'), pkgdir + '/etc/rc.d', mode = 0o755)
+    install(path(path_escape(startdir) + '/krb5-{kdc,kadmind,kpropd}'), pkgdir + '/etc/rc.d', mode = 0o755)
     install('util/ac_check_krb5.m4', pkgdir + '/usr/share/aclocal', mode = 0o644)
     install('../NOTICE', pkgdir + '/usr/share/licenses/krb5/LICENSE', mode = 0o644, parents = True)
     execute('install', '-p', '-m644', 'config-files/kdc.conf', pkgdir + '/var/lib/krb5kdc/kdc.conf')
