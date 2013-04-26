@@ -48,9 +48,9 @@ def build(startdir, srcdir, pkgdir, private):
     execute('sed', '-i', 's|@itemx POINTER_PLUS_EXPR|@item POINTER_PLUS_EXPR|g', 'gcc/doc/generic.texi')
     execute('sed', '-i', 's|@itemx PLUS_EXPR|@item PLUS_EXPR|g', 'gcc/doc/generic.texi')
     cd('gcc-build')
-    make('-j1')
+    make()
     cd(HOST + '/libstdc++-v3')
-    make('-j1', 'doc-man-doxygen')
+    make('doc-man-doxygen')
 
 
 def package(startdir, srcdir, pkgdir, private):
