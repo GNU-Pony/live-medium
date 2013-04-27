@@ -1,14 +1,14 @@
 # Clean up built files
 .PHONY: clean
 clean:
-	-rm -r $(CLEAN_DIR) *.bin
+	-yes | rm -r $(CLEAN_DIR) *.bin
 	-sudo make -C "$(GNU_PONY_INITRAM)" clean
 
 
 # Clean up built packages
 .PHONY: clean-pkg
 clean-pkg:
-	-rm pkg/*.pkg.tar.$(PKG_COMPRESS_EXT) finalise
+	-yes | rm pkg/*.pkg.tar.$(PKG_COMPRESS_EXT) finalise
 
 
 # Clean up built system
