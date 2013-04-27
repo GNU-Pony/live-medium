@@ -1,7 +1,9 @@
+.PHONY: initramfs-linux
 initramfs-linux:
 	sudo make -C "$(GNU_PONY_INITRAM)" KERNEL_SOURCE=$$(cd $(KERNEL) ; pwd)
 	make -B update-init
 
+.PHONY: update-init
 update-init:
 	$(INITCPIO_COMPRESS) < "$(GNU_PONY_INITRAM)"/initramfs-linux > initramfs-linux
 

@@ -17,7 +17,7 @@ include mkfiles/auxiliary-config.mk
 
 all:	validate-non-root				\
 	kernel arch-packages packages			\
-	initramfs-linux update-init init-live		\
+	initramfs-linux init-live			\
 	essentials install-packages conf-override	\
 	chown-live finalise-packages			\
 	create-users
