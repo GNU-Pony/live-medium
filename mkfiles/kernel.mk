@@ -1,5 +1,6 @@
 KERNEL_VERSION_CAT = $(shell echo $(KERNEL_VERSION) | cut -d . -f 1).0
 KERNEL = linux-$(KERNEL_VERSION)
+CLEAN_DIR += $(KERNEL)
 
 kernel: $(KERNEL)/vmlinux
 

@@ -1,7 +1,7 @@
 # Clean up built files
 .PHONY: clean
 clean:
-	-sudo rm -r $(CLEAN_DIR) cpiolist *.bin built
+	-rm -r $(CLEAN_DIR) cpiolist *.bin
 	-sudo make -C "$(GNU_PONY_INITRAM)" clean
 
 

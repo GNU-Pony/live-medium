@@ -13,6 +13,7 @@ update-init:
 	$(INITCPIO_COMPRESS) < "$(GNU_PONY_INITRAM)"/initramfs-linux > initramfs-linux
 
 
+CLEAN_DIR += memtest86+-$(MEMTEST_VERSION)
 memtest: memtest.bin
 memtest.bin:
 	[ -f memtest86+-$(MEMTEST_VERSION).tar.gz ] || \
