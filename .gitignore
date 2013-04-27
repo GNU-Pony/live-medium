@@ -9,7 +9,6 @@ _/
 *.swp
 
 /memtest.bin
-/cpiolist
 /initramfs-linux
 
 /confs/confs
