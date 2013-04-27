@@ -35,6 +35,6 @@ packages: clean-finalise $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE).pkg.tar
 install-packages: $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE).pkg.tar.$(PKG_COMPRESS_EXT))
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)")
 	root=$$(pwd) ; cd "$(MNT)" ; for pkg in $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE).pkg.tar.$(PKG_COMPRESS_EXT)); do \
-	echo "extracting $$pkg" ; tar --get --xz < $$root/$$pkg ; done
+	echo "extracting $$pkg" ; sudo tar --get --xz < $$root/$$pkg ; done
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)")
 
