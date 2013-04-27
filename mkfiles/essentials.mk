@@ -1,5 +1,6 @@
 essentials: gnupony-filesystem gnupony-files essential-logs
 
+
 # /boot is symlinked to / in the live-medium so that /boot and /
 # can be the same partition will still having a /boot directory
 gnupony-filesystem:
@@ -90,12 +91,16 @@ gnupony-filesystem:
 	mkdir -p "$(MNT)"/var/tmp
 	chmod 1777 "$(MNT)"/var/tmp
 
+
+# Install essential logs
 essential-logs:
 	touch "$(MNT)"/var/log/{btmp,wtmp,lastlog}
 	chmod 644 "$(MNT)"/var/log/lastlog
 	chmod 644 "$(MNT)"/var/log/wtmp
 	chmod 600 "$(MNT)"/var/log/btmp
 
+
+# Install GNU/Pony configurations
 gnupony-files:
 	echo 0.0 > "$(MNT)"/etc/pony-release
 	cp confs/os-release "$(MNT)"/etc/os-release
@@ -126,6 +131,8 @@ gnupony-files:
 	chmod 600 "$(MNT)"/etc/shadow
 	cp confs/auth-passwd "$(MNT)"/etc/passwd
 
+
+# chown live medium
 chown-live:
 	sudo find "$(MNT)" | while read file; do \
 	    echo 'chown -h root:root '"$$file"; \
@@ -136,12 +143,16 @@ chown-live:
 	sudo chgrp $(ftp) "$(MNT)"/srv/ftp
 	sudo chgrp $(games) "$(MNT)"/var/games
 
+
+# Override configurations
 conf-override:
 	sudo cp -f confs/rc.conf "$(MNT)"/etc/rc.conf
 	sudo cp -f confs/issue "$(MNT)"/etc/issue
 	sudo cp -f confs/fstab "$(MNT)"/etc/fstab
 	sudo cp -f confs/login "$(MNT)"/etc/pam.d/login
 
+
+# Create users
 create-users:
 	cat confs/create-users | sudo chroot "$(MNT)"
 

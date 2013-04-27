@@ -28,9 +28,11 @@ cpio-usb:
 	sudo find . | sed -e 's_^\./__' | cut -d / -f 1 | uniq | sort | uniq | \
 	    sudo cpio --create > "$(CPIO_FILE)"
 
+# Check that the user is not root
 validate-non-root:
 	[ ! "$$UID" = 0 ]
 
+# Check that the device setup is correct
 validate-device:
 	if ([ "$(DEVICE)" = "" ] && [ "$(DEVICELESS)" = "y" ]); then \
 	    echo -e '\e[01;33mDeviceless installation\e[21;39m'; \

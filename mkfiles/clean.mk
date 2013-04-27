@@ -1,13 +1,17 @@
+# Clean up built files
 .PHONY: clean
 clean:
 	-sudo rm -r $(CLEAN_DIR) cpiolist *.bin built
 	-sudo make -C "$(GNU_PONY_INITRAM)" clean
 
-.PHONY: clean-download
-clean-download:
-	-rm -r *.{tar{,.gz,.bz2,.xz},tgz}
-	-rm -r {bash,readline}??-???
 
+# Clean up built packages
+.PHONY: clean-pkg
+clean-pkg:
+	-rm pkg/*.pkg.tar.$(PKG_COMPRESS_EXT) finalise
+
+
+# Clean up built system
 .PHONY: clean-mnt
 clean-mnt:
 	if [ "$(DEVICELESS)" = "y" ] && [ ! "$(MNT)" = "" ]; then \
@@ -21,9 +25,12 @@ clean-mnt:
 	fi
 
 
+# Clean everything but the built pacakges
 .PHONY: clean-mostly
 clean-mostly: clean clean-mnt
 
+
+# Clean everything 
 .PHONY: clean-all
-clean-all: clean clean-download clean-mnt
+clean-all: clean clean-pkg clean-mnt
 
