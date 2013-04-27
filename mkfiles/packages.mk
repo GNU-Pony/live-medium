@@ -27,8 +27,12 @@ pkgs/%.pkg.tar.$(PKG_COMPRESS_EXT): pkgs/%.scroll
 	cd "pkgs/$*/install" && tar --create * | $(PKG_COMPRESS) > "../../$*.pkg.tar.$(PKG_COMPRESS_EXT)"
 
 
-# Build and install packages
+# Build packages
 packages: clean-finalise $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE).pkg.tar.$(PKG_COMPRESS_EXT))
+
+
+# Install packages
+install-packages: $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE).pkg.tar.$(PKG_COMPRESS_EXT))
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)")
 	root=$$(pwd) ; cd "$(MNT)" ; for pkg in $(foreach PKG, $(PKGS_STAGE_1), pkgs/$(PKG).pkg.tar.$(PKG_COMPRESS_EXT)); do \
 	echo "extracting $$pkg" ; tar --get --xz < $$root/$$pkg ; done
