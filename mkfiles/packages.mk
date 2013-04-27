@@ -28,7 +28,8 @@ pkgs/%.pkg.tar.$(PKG_COMPRESS_EXT): pkgs/%.scroll
 
 
 # Build packages
-packages: clean-finalise $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE).pkg.tar.$(PKG_COMPRESS_EXT))
+packages: clean-finalise
+	make -j$(CPUS) $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE).pkg.tar.$(PKG_COMPRESS_EXT))
 
 
 # Install packages
