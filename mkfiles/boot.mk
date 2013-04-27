@@ -3,10 +3,8 @@ cpiolist:
 	    ln -sf "$(GNU_PONY_INITRAM)"/cpiolist cpiolist; \
 	fi
 
-initramfs: cpiolist
-	sudo make -C "$(GNU_PONY_INITRAM)" KERNEL_SOURCE=$$(cd $(KERNEL) ; pwd)
-
 initramfs-linux: initramfs
+	sudo make -C "$(GNU_PONY_INITRAM)" KERNEL_SOURCE=$$(cd $(KERNEL) ; pwd)
 	make -B update-init
 
 update-init:
