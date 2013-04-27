@@ -3,11 +3,6 @@
 # TODO: use linux-libre
 
 
-# Edit config.mk if you want to change a configuration
-# or use another architecture than x86_64
-include config.mk
-
-
 # This is used to copy files via Arch Linux's pacman,
 # so that package inclusion testing can be done easier
 ARCH_PACKAGES = 
@@ -15,6 +10,8 @@ ARCH_PACKAGES =
 KERNEL_VERSION = 3.8.3
 MEMTEST_VERSION = 4.20
 
+
+include mkfiles/config.mk
 include mkfiles/auxiliary-config.mk
 
 
