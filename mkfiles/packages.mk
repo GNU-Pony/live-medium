@@ -20,7 +20,7 @@ finalise-packages:
 
 
 # Build a package
-pkgs/%.pkg.tar.$(PKG_COMPRESS_EXT): pkgs/%.scroll clean-finalise
+pkgs/%.pkg.tar.$(PKG_COMPRESS_EXT): pkgs/%.scroll
 	mkdir -p "pkgs/$*/start" "pkgs/$*/install"
 	PATH="$$(realpath ./tools):$${PATH}" ARCH=$(ARCH) HOST=$(HOST) MAKEFLAGS= \
 	    "$(SPIKE)/spikeless" "pkgs/$*.scroll" "pkgs/$*/start" "pkgs/$*/install"
@@ -28,7 +28,7 @@ pkgs/%.pkg.tar.$(PKG_COMPRESS_EXT): pkgs/%.scroll clean-finalise
 
 
 # Build and install packages
-packages: $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE).pkg.tar.$(PKG_COMPRESS_EXT))
+packages: clean-finalise $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE).pkg.tar.$(PKG_COMPRESS_EXT))
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)")
 	root=$$(pwd) ; cd "$(MNT)" ; for pkg in $(foreach PKG, $(PKGS_STAGE_1), pkgs/$(PKG).pkg.tar.$(PKG_COMPRESS_EXT)); do \
 	echo "extracting $$pkg" ; tar --get --xz < $$root/$$pkg ; done
