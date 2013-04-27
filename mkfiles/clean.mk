@@ -1,12 +1,12 @@
 .PHONY: clean
 clean:
-	sudo rm -r $(CLEAN_DIR) cpiolist *.bin built || true
-	sudo make -C "$(GNU_PONY_INITRAM)" clean || true
+	-sudo rm -r $(CLEAN_DIR) cpiolist *.bin built
+	-sudo make -C "$(GNU_PONY_INITRAM)" clean
 
 .PHONY: clean-download
 clean-download:
-	rm -r *.{tar{,.gz,.bz2,.xz},tgz} || true
-	rm -r {bash,readline}??-??? || true
+	-rm -r *.{tar{,.gz,.bz2,.xz},tgz}
+	-rm -r {bash,readline}??-???
 
 .PHONY: clean-mnt
 clean-mnt:
