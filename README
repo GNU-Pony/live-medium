@@ -13,3 +13,64 @@ CPUS : The number of CPU:s you want to compile with; do not use `-j` for `make`.
 ARCH : The machine architecture, if not the same as the machine you are using.
 KERNEL_ARCH : The kernel's machine architecture, if not denoted $(ARCH).
 
+
+Dependencies:
+
+acl
+asciidoc
+autoconf
+bc
+binutils>=2.23
+chrpath
+cloog
+cryptsetup
+dbus-core
+docbook2x
+docbook-xml>=4.4
+docbook-xsl
+doxygen
+e2fsprogs
+elfutils
+flex
+gcc>=4.7
+gcc-ada (questionable)
+gettext
+gobject-introspection
+gperf
+gtk-doc
+intltool
+kmod
+krb5
+libcap
+libffi
+libgcrypt
+libldap
+libltdl
+libmariadbclient
+libmicrohttpd
+libmpc
+libpcap
+libsasl
+libx11
+libxslt
+linux-api-headers
+linux-atm (questionable)
+linux-headers
+opensp
+openssl
+pam
+pcre
+perl
+pkg-config
+postgresql-libs
+ppl
+python2
+python3
+quota-tools
+swig
+systemd
+texinfo
+util-linux
+w3m
+xz
+zlib
