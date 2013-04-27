@@ -2,11 +2,13 @@ These are premade configurations you can use for when you compile the kernel:
 
 
 KERNEL_CONFIG = kernelconf/kernel.mini.config
-  A small configuration that should build much quicker than the other configurations and can be used for testing.
+  A small configuration that should build much quicker than the other
+  configurations and can be used for testing.
 
 
 KERNEL_CONFIG = kernelconf/kernel.hpc.config
-  A base configuration for high performance computing, you should however trim it to fit your needs.
+  A base configuration for high performance computing, you should
+  however trim it to fit your needs.
 
 
 KERNEL_CONFIG = kernelconf/kernel.config

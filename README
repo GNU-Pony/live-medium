@@ -1,0 +1,15 @@
+Installation is an interactive process, do not use `-j` when invoking make.
+The entire device you use as the live medium will be overriden.
+
+
+Configurations:
+
+MNT : Mount point of the live medium to create.
+DEVICE : If installing to a device, the device file in `/dev`.
+DEVICELESS : `DEVICELESS=y` if not installing to a device.
+
+CPUS : The number of CPU:s you want to compile with; do not use `-j` for `make`.
+
+ARCH : The machine architecture, if not the same as the machine you are using.
+KERNEL_ARCH : The kernel's machine architecture, if not denoted $(ARCH).
+

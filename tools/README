@@ -1,2 +1,3 @@
-These tools serves two purposes: remove of requirement to be root to build and package a few scrolls,
-and get actions that need to be done after the packages has been installed and chown:ed.
+These tools serves two purposes: remove of requirement to be root to build and
+package a few scrolls, and get actions that need to be done after the packages
+has been installed and chown:ed.
