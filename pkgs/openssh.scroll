@@ -29,7 +29,7 @@ def build(startdir, srcdir, pkgdir, private):
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
     make('DESTDIR=' + pkgdir, 'install')
-    for man in 'scp sftp ssh ssh-add ssh-agent ssh-copy-id ssh-keygen ssh-keyscan'.split(' '):
+    for man in 'scp sftp ssh ssh-add ssh-agent ssh-keygen ssh-keyscan'.split(' '):
         execute('gzip', '-9', pkgdir + ('/usr/share/man/man1/%s.1' % man))
     rm(pkgdir + '/usr/share/man/man1/slogin.1')
     ln('ssh.1.gz', pkgdir + '/usr/share/man/man1/slogin.1.gz')
