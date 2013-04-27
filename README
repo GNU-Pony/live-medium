@@ -68,6 +68,7 @@ python2
 python3
 quota-tools
 swig
+syslinux
 systemd
 texinfo
 util-linux
