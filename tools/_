@@ -2,15 +2,15 @@
 
 out="$(dirname "$(dirname "$(realpath $0)")")/finalise"
 
-echo -n "'$(basename "$0")'" >> "$out"
+data="'$(basename "$0")'"
 
 for arg in "$@"; do
     c="${arg##*/pkgs/*/start/pkg/}"
     if [[ ! "$arg" = "$c" ]]; then
 	arg="$c"
     fi
-    echo -n " '$arg'" >> "$out"
+    data="$data '$arg'"
 done
 
-echo >> "$out"
+echo "$data" >> "$out"
 
