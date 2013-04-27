@@ -2,7 +2,7 @@
 
 out="$(dirname "$(dirname "$(realpath $0)")")/finalise"
 
-echo -n "'$0'" >> "$out"
+echo -n "'$(basename "$0")'" >> "$out"
 
 for arg in "$@"; do
     c="${arg##*/pkgs/*/start/pkg/}"
