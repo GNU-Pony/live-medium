@@ -34,8 +34,8 @@ def build(startdir, srcdir, pkgdir, private):
     export('CFLAGS', ' -O2 -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2')
     export('CXXFLAGS', ' -O2 -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2')
     mkcd('gcc-build')
-    params = ['--prefix=/usr' '--libdir=/usr/lib' '--libexecdir=/usr/libexec', '--mandir=/usr/share/man']
-    params.append('--infodir=/usr/share/info--enable-languages=c,c++,fortran,lto')
+    params = ['--prefix=/usr', '--libdir=/usr/lib', '--libexecdir=/usr/libexec', '--mandir=/usr/share/man']
+    params += ['--infodir=/usr/share/info', '--enable-languages=c,c++,fortran,lto']
     params += ['--with-' + x for x in 'system-zlib -ppl plugin-ld=ld.gold linker-hash-style=gnu'.split(' ')]
     params += ['--enable-' + x for x in 'shared threads=posix __cxa_atexit clocale=gnu libstdcxx-time gnu-unique-object linker-build-id cloog-backend=isl checking=release'.split(' ')]
     params += ['--disable-' + x for x in 'libunwind-exceptions libstdcxx-pch ppl-version-check plugin multilib libssp build-with-cxx build-poststage1-with-cxx'.split(' ')]
