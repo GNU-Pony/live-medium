@@ -28,7 +28,7 @@ def build(startdir, srcdir, pkgdir, private):
     execute('patch', '-Np1', '-i', startdir + '/xstrdup.patch')
     execute('patch', '-Np1', '-i', startdir + '/shadow-strncpy-usage.patch')
     execute('sed', '-i', '/^SUBDIRS/s/pam.d//', 'etc/Makefile.in')
-    execute('./configure', '--prefix=/usr', '--libdir=/lib', '--mandir=/usr/share/man', '--sysconfdir=/etc', '--with-libpam', '--without-selinux', '--with-group-name-max-length=321')
+    execute('./configure', '--prefix=/usr', '--libdir=/lib', '--mandir=/usr/share/man', '--sysconfdir=/etc', '--without-libpam', '--without-cracklib', '--without-selinux', '--with-group-name-max-length=321')
     make()
 
 def package(startdir, srcdir, pkgdir, private):

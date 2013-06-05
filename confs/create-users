@@ -1,3 +1,5 @@
+pwconv
+grpconv
 passwd -d root
 useradd -m celestia
 passwd -d celestia

@@ -26,6 +26,9 @@ PKG_COMPRESS = xz -e9
 # Package archive file compression extension
 PKG_COMPRESS_EXT = xz
 
+# PATH environment variable for the live medium
+PATH = /usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
+
 
 # Directories to remove at clean up
 CLEAN_DIR =
