@@ -23,6 +23,7 @@ sha3sums = len(source) * [None]
 
 def build(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    sed(sed_script('$', ' -lattr', '^user\\(mod\\|add\)_LDADD'), 'src/Makefile.am')
     export('LIBS', '-lcrypt')
     execute('patch', '-Np1', '-i', startdir + '/xstrdup.patch')
     execute('patch', '-Np1', '-i', startdir + '/shadow-strncpy-usage.patch')
