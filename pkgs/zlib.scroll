@@ -13,7 +13,7 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['custom (all permissive free)']
 private = UNSUPPORTED
-source = ['http://zlib.net/current/zlib-%s.tar.gz' % pkgver]
+source = ['https://github.com/madler/zlib/archive/v%s.tar.gz' % pkgver]
 sha3sums = [None]
 
 
