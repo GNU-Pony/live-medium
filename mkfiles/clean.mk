@@ -8,7 +8,7 @@ clean:
 # Clean up built packages
 .PHONY: clean-pkg
 clean-pkg:
-	-yes | rm pkg/*.pkg.tar.$(PKG_COMPRESS_EXT) finalise
+	-yes | rm pkgs/*.pkg.tar.$(PKG_COMPRESS_EXT) finalise
 
 
 # Clean up built system
