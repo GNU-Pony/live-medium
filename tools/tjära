@@ -1,0 +1,25 @@
+#!/bin/bash
+
+uuid="$(uuidgen)"
+mkdir -p ".tjära/${uuid}"
+cd ".tjära/${uuid}"
+tar --extract "$@"
+find | sed -e "s:^\.::g" | sed -e 's:^/::g' |
+  while read file; do
+    if [ "$file" = "" ]; then  continue;  fi
+    if [ -L "../../$file" ] && [ -d "$(realpath "../../$file")" ]; then
+      if [ ! -d "$file" ] && [ ! -L "$file" ]; then
+        echo "tjära: may override directory symlink: $file" 1>&2
+	cd ../..
+        rm -rf ".tjära/${uuid}" ; rmdir ".tjära" 2>/dev/null
+	exit 1
+      fi
+    elif [ ! -L "$file" ] && [ -d "$file" ]; then
+      mkdir -p "../../$file"
+    else
+      mv "$file" "../../$file"
+    fi
+  done
+cd ../..
+rm -rf ".tjära/${uuid}" ; rmdir ".tjära" 2>/dev/null
+
