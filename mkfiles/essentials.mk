@@ -155,5 +155,6 @@ conf-override:
 
 # Create users
 create-users:
+	export PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin ; \
 	cat confs/create-users | sudo chroot "$(MNT)"
 
