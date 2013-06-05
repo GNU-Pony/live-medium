@@ -7,7 +7,7 @@ from dragonsuite import *
 
 pkgname = 'openssl'
 pkgver = '1.0.1e'
-pkgdesc = 'The Open Source toolkit for Secure Sockets Layer and Transport Layer Security'
+pkgdesc = 'Toolkit for Secure Sockets Layer and Transport Layer Security'
 upstream = 'https://www.openssl.org'
 arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
@@ -34,6 +34,31 @@ def build(startdir, srcdir, pkgdir, private):
 
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-%s' % (srcdir, pkgname, pkgver))
+    
+    # Remove pod files that cannot successfully be converted to manpages, … what not just write it in plain nroff…
+    rm('doc/apps/cms.pod')
+    rm('doc/apps/smime.pod')
+    rm('doc/crypto/X509_STORE_CTX_get_error.pod')
+    rm('doc/ssl/d2i_SSL_SESSION.pod')
+    rm('doc/crypto/X509_VERIFY_PARAM_set_flags.pod')
+    rm('doc/ssl/SSL_accept.pod')
+    rm('doc/ssl/SSL_clear.pod')
+    rm('doc/ssl/SSL_COMP_add_compression_method.pod')
+    rm('doc/ssl/SSL_connect.pod')
+    rm('doc/ssl/SSL_CTX_add_session.pod')
+    rm('doc/ssl/SSL_CTX_load_verify_locations.pod')
+    rm('doc/ssl/SSL_CTX_set_client_CA_list.pod')
+    rm('doc/ssl/SSL_CTX_set_session_id_context.pod')
+    rm('doc/ssl/SSL_CTX_set_ssl_version.pod')
+    rm('doc/ssl/SSL_CTX_use_psk_identity_hint.pod')
+    rm('doc/ssl/SSL_do_handshake.pod')
+    rm('doc/ssl/SSL_read.pod')
+    rm('doc/ssl/SSL_session_reused.pod')
+    rm('doc/ssl/SSL_set_fd.pod')
+    rm('doc/ssl/SSL_set_session.pod')
+    rm('doc/ssl/SSL_shutdown.pod')
+    rm('doc/ssl/SSL_write.pod')
+    
     make('INSTALL_PREFIX=' + pkgdir, 'MANDIR=/usr/share/man', 'MANSUFFIX=ssl', 'install')
     install('LICENSE', pkgdir + '/usr/share/licenses/openssl/LICENSE', mode = 0o644, parents = True)
 
