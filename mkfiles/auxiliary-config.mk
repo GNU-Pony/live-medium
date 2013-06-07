@@ -23,8 +23,11 @@ INITCPIO_COMPRESS = gzip -9
 # Package archive file compression command
 PKG_COMPRESS = xz -e9
 
-# Package archive file compression extension
+# Package archive file compression extension, e.g. gz
 PKG_COMPRESS_EXT = xz
+
+# Package archive file compression name, e.g. gzip
+PKG_DECOMPRESS_EXT = xz
 
 # PATH environment variable for the live medium
 PATH = /usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin

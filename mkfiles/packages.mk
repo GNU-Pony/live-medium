@@ -36,6 +36,6 @@ packages: clean-finalise
 install-packages: $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE).pkg.tar.$(PKG_COMPRESS_EXT))
 	([ "$(DEVICE)" = "" ] || sudo mount "/dev/$(DEVICE)1" "$(MNT)")
 	root="$$(pwd)" ; cd "$(MNT)" ; for pkg in $(foreach PACKAGE, $(PACKAGES), pkgs/$(PACKAGE).pkg.tar.$(PKG_COMPRESS_EXT)); do \
-	echo "extracting $$pkg" ; PATH="$${root}/tools:$${PATH}" sudo tjära --xz < "$$root/$$pkg" ; done
+	echo "extracting $$pkg" ; PATH="$${root}/tools:$${PATH}" sudo tjära --same-permissions --$(PKG_DECOMPRESS_EXT) < "$$root/$$pkg" ; done
 	([ "$(DEVICE)" = "" ] || sudo umount "$(MNT)")
 
