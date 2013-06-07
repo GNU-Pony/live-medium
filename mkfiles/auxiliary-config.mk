@@ -30,7 +30,7 @@ PKG_COMPRESS_EXT = xz
 PKG_DECOMPRESS_EXT = xz
 
 # PATH environment variable for the live medium
-PATH = /usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
+PATH = /usr/local/bin:/usr/local/sbin:/usr/local/libexec:/usr/bin:/usr/sbin:/usr/libexec:/bin:/sbin:/libexec
 
 
 # Directories to remove at clean up
