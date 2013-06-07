@@ -54,7 +54,6 @@ conf-override:
 	sudo cp -f confs/issue "$(MNT)"/etc/issue
 	sudo cp -f confs/fstab "$(MNT)"/etc/fstab
 	sudo mkdir -p "$(MNT)"/etc/pam.d
-	sudo cp -f confs/login "$(MNT)"/etc/pam.d/login
 
 
 # Create users
