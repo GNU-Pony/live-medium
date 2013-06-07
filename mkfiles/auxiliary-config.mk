@@ -18,7 +18,7 @@ MBR = $(SYSLINUX_DIR)/mbr.bin
 
 
 # Initcpio compression command
-INITCPIO_COMPRESS = xz -e9
+INITCPIO_COMPRESS = gzip -9
 
 # Package archive file compression command
 PKG_COMPRESS = xz -e9
