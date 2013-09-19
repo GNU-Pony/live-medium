@@ -5,7 +5,7 @@ CLEAN_DIR += $(KERNEL)
 kernel: $(KERNEL)/vmlinux
 
 $(KERNEL).tar.xz:
-	wget '$(KERNEL_MIRROR)/kernel/v$(KERNEL_VERSION_CAT)/$(KERNEL).tar.xz' --no-check-certificate
+	wget '$(KERNEL_MIRROR)/kernel/v$(KERNEL_VERSION_CAT)/$(KERNEL).tar.xz' $(KERNEL_CERT)
 
 $(KERNEL): $(KERNEL).tar.xz
 	tar --get --xz < "$(KERNEL).tar.xz"

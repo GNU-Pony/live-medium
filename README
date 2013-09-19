@@ -13,6 +13,8 @@ CPUS : The number of CPU:s you want to compile with; do not use `-j` for `make`.
 ARCH : The machine architecture, if not the same as the machine you are using.
 KERNEL_ARCH : The kernel's machine architecture, if not denoted $(ARCH).
 
+KERNEL_CERT : use KERNEL_CERT= if want to check the certificate when downloading the kernel.
+
 
 Dependencies:
 

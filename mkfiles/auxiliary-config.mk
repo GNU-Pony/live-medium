@@ -10,6 +10,9 @@ HOST = $(ARCH)-unknown-linux-gnu
 # Kernel mirror
 KERNEL_MIRROR = https://ftp.kernel.org/pub/linux
 
+# Additional option to wget when downloading the kernel, set to empty, to check certificate
+KERNEL_CERT = --no-check-certificate
+
 # SYSLINUX directory
 SYSLINUX_DIR = /usr/lib/syslinux
 
