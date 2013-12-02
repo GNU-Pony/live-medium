@@ -9,27 +9,6 @@ gnupony-filesystem:
 
 # Install GNU/Pony configurations
 gnupony-files:
-	echo 0.0 > "$(MNT)"/etc/pony-release
-	cp confs/os-release "$(MNT)"/etc/os-release
-	echo 'include /etc/ld.so.conf.d/*.conf' > "$(MNT)"/etc/ld.so.conf
-	cp confs/issue "$(MNT)"/etc/issue
-	touch "$(MNT)"/etc/crypttab
-	touch "$(MNT)"/etc/fstab
-	ln -sf /proc/self/mounts "$(MNT)"/etc/mtab
-	echo 'order hosts,bind' > "$(MNT)"/etc/host.conf
-	echo 'multi on' >> "$(MNT)"/etc/host.conf
-	echo '127.0.0.1 localhost.localdomain localhost canterlot' > "$(MNT)"/etc/hosts
-	echo '::1 localhost.localdomain localhost canterlot' >> "$(MNT)"/etc/hosts
-	touch "$(MNT)"/etc/motd
-	echo 'hosts: files dns' > "$(MNT)"/etc/nsswitch.conf
-	for x in network passwd group shadow publickey protocols services ethers rpc netgroup; \
-	    do echo $$x': files dns' >> "$(MNT)"/etc/nsswitch.conf; done
-	touch "$(MNT)"/etc/resolv.conf
-	cp confs/securetty "$(MNT)"/etc/securetty
-	echo '/bin/sh' > "$(MNT)"/etc/shells
-	echo '/bin/bash' >> "$(MNT)"/etc/shells
-	cp confs/locale.sh "$(MNT)"/etc/profile.d/locale.sh
-	chmod a+x "$(MNT)"/etc/profile.d/locale.sh
 	cp confs/profile "$(MNT)"/etc/profile
 	cp confs/auth-group "$(MNT)"/etc/group
 	cp confs/auth-gshadow "$(MNT)"/etc/gshadow
