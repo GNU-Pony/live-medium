@@ -9,7 +9,6 @@ gnupony-filesystem:
 
 # Install GNU/Pony configurations
 gnupony-files:
-	cp confs/profile "$(MNT)"/etc/profile
 	cp confs/auth-group "$(MNT)"/etc/group
 	cp confs/auth-gshadow "$(MNT)"/etc/gshadow
 	chmod 600 "$(MNT)"/etc/gshadow
@@ -32,10 +31,6 @@ chown-live:
 # Override configurations
 conf-override:
 	sudo cp -f confs/rc.conf "$(MNT)"/etc/rc.conf
-	sudo cp -f confs/issue "$(MNT)"/etc/issue
-	sudo cp -f confs/fstab "$(MNT)"/etc/fstab
-	sudo mkdir -p "$(MNT)"/etc/pam.d
-
 
 # Create users
 create-users:
