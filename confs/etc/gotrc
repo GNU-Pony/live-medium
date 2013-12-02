@@ -1,0 +1,44 @@
+# -*- shell-script -*-
+
+. /etc/gotrc.examples/allow-uppercase
+. /etc/gotrc.examples/cerberus
+. /etc/gotrc.examples/commands
+. /etc/gotrc.examples/no-empty-user
+
+_display_ ()
+{
+    echo
+    echo -e "   \e[01;34mGNU/\e[35mPony\e[32m $(uname -r) \e[36m(${tty})\e[00m"
+    echo
+    echo -e "   \e[01;34mLog in as \e[36mroot\e[34m or \e[36mdiscord\e[34m for full control to install to your machine,"
+    echo -e          "             \e[36mcelestia\e[34m for sudo rights, or as"
+    echo -e          "             \e[36mtwilight\e[34m for unprivileged access.\e[00m"
+    echo
+    echo
+    echo -n 'Login: '
+}
+
+PALETTE="$(echo -e '\e]P0020840\e]P1CD656C\e]P232A679\e]P3CCAD47\e]P42495BE\e]P5A46EB0\e]P600A09F\e]P7D3D7CF\e]P8555753\e]P9EB5E6A\e]PA0EC287\e]PBF2CA38\e]PC00ACE0\e]PDC473D1\e]PE00C3C7\e]PFEEEEEE')"
+
+if [ "${tty}" = tty1 ]; then
+    _display ()
+    {
+	echo -n "${PALETTE}"
+	echo -en '\e[H\e[2J\e[?0c'
+	pony="$(PONYSAY_SHELL_LINES=12 PONYSAY_KMS_PALETTE="${PALETTE}" ponysay -o <&2)"
+	lines=$(echo "${pony}" | wc -l)
+	height=$(stty size | cut -d ' ' -f 1)
+	echo -en '\e['"$(( $height - $lines + 1 ));1H"
+	echo -n "$(echo "${pony}" | sed -e 's:\x1b\[H\x1b\[2J::')${PALETTE}"
+	echo -en '\e[H'
+	_display_
+    }
+else
+    _display ()
+    {
+	echo -n "${PALETTE}"
+	echo -en '\e[H\e[2J\e[?0c'
+	_display_
+    }
+fi
+
