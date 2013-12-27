@@ -13,7 +13,7 @@ arch = ['x86_64']
 freedom = SOFTWARE | MEDIA
 license = ['GPL', 'BSD']
 private = UNSUPPORTED
-source = ['http://www.skbuff.net/iputils/iputils-s%s.tar.bz2' % pkgver, '../confs/tftp.xinetd']
+source = ['http://www.skbuff.net/iputils/iputils-s%s.tar.bz2' % pkgver]
 noextract = source[1:]
 sha3sums = [None, None]
 
@@ -34,10 +34,9 @@ def build(startdir, srcdir, pkgdir, private):
 def package(startdir, srcdir, pkgdir, private):
     cd('%s/%s-s%s' % (srcdir, pkgname, pkgver))
     mkdir_p([pkgdir + d for d in '/usr/bin /usr/sbin /bin /usr/share/man/man8'.split(' ')])
-    install(['arping', 'clockdiff', 'rarpd', 'rdisc', 'tftpd', 'tracepath', 'tracepath6'], pkgdir + '/usr/sbin/', mode = 0o755)
+    install(['arping', 'clockdiff', 'rarpd', 'rdisc', 'tracepath', 'tracepath6'], pkgdir + '/usr/sbin/', mode = 0o755)
     install(['ping', 'ping6'], pkgdir + '/usr/bin/', mode = 0o755)
-    install(path('doc/{arping,clockdiff,ping,rarpd,rdisc,tftpd,tracepath}.8'), pkgdir + '/usr/share/man/man8', mode = 0o644)
+    install(path('doc/{arping,clockdiff,ping,rarpd,rdisc,tracepath}.8'), pkgdir + '/usr/share/man/man8', mode = 0o644)
     ln('ping.8.gz', pkgdir + '/usr/share/man/man8/ping6.8.gz')
     ln('tracepath.8.gz', pkgdir + '/usr/share/man/man8/tracepath6.8.gz')
-    install(startdir + '/tftp.xinetd', pkgdir + '/etc/xinetd.d/tftp', mode = 0o644, parents = True)
 
